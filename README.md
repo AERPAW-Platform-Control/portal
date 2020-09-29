@@ -53,7 +53,7 @@ Verify that the containers are running as expected. You should observe two runni
 $ docker-compose ps
     Name                  Command               State                      Ports
 ---------------------------------------------------------------------------------------------------
-;      docker-entrypoint.sh postgres    Up      0.0.0.0:5432->5432/tcp
+aerpaw-db      docker-entrypoint.sh postgres    Up      0.0.0.0:5432->5432/tcp
 aerpaw-nginx   /docker-entrypoint.sh ngin ...   Up      0.0.0.0:8443->443/tcp, 0.0.0.0:8080->80/tcp
 ```
 
