@@ -1,0 +1,5 @@
+Django
+mozilla-django-oidc
+psycopg2-binary
+python-dotenv
+uWSGI

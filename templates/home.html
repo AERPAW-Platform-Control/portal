@@ -1,0 +1,65 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+  <b>default user attributes</b><br>
+  username: {{user.username}} <br>
+  first_name: {{user.first_name}} <br>
+  last_name: {{user.last_name}} <br>
+  email: {{user.email}} <br>
+  password: {{user.password}} <br>
+  groups: {{user.groups.all.0}} <br>
+  user_permissions: {{user.user_permissions.all.0}} <br>
+  is_staff: {{user.is_staff}} <br>
+  is_active: {{user.is_active}} <br>
+  is_superuser: {{user.is_superuser}} <br>
+  last_login: {{user.last_login}} <br>
+  date_joined: {{user.date_joined}} <br>
+  <br>
+
+  <b>universally unique identifier for user within infrastructure</b><br>
+  uuid: {{user.uuid}} <br>
+  <br>
+
+  <b>oidc scope openid</b><br>
+  oidc_claim_sub: {{user.oidc_claim_sub}} <br>
+  oidc_claim_iss: {{user.oidc_claim_iss}} <br>
+  oidc_claim_aud: {{user.oidc_claim_aud}} <br>
+  oidc_claim_token_id: {{user.oidc_claim_token_id}} <br>
+  <br>
+
+  <b>oidc scope email</b><br>
+  oidc_claim_email: {{user.oidc_claim_email}} <br>
+  <br>
+
+  <b>oidc scope profile</b><br>
+  oidc_claim_given_name: {{user.oidc_claim_given_name}} <br>
+  oidc_claim_family_name: {{user.oidc_claim_family_name}} <br>
+  oidc_claim_name: {{user.oidc_claim_name}} <br>
+  <br>
+
+  <b>oidc scope org.cilogon.userinfo</b><br>
+  oidc_claim_idp: {{user.oidc_claim_idp}} <br>
+  oidc_claim_idp_name: {{user.oidc_claim_idp_name}} <br>
+  oidc_claim_eppn: {{user.oidc_claim_eppn}} <br>
+  oidc_claim_eptid: {{user.oidc_claim_eptid}} <br>
+  oidc_claim_affiliation: {{user.oidc_claim_affiliation}} <br>
+  oidc_claim_ou: {{user.oidc_claim_ou}} <br>
+  oidc_claim_oidc: {{user.oidc_claim_oidc}} <br>
+  oidc_claim_cert_subject_dn: {{user.oidc_claim_cert_subject_dn}} <br>
+  <br>
+
+  <b>oidc other values</b><br>
+  oidc_claim_acr: {{user.oidc_claim_acr}} <br>
+  oidc_claim_entitlement: {{user.oidc_claim_entitlement}} <br>
+  <br>
+
+  <p><a href="{% url 'logout' %}">Log Out</a></p>
+{% else %}
+  <p>You are not logged in</p>
+  <a href="{% url 'login' %}">Log In</a>
+{% endif %}
+{% endblock %}
