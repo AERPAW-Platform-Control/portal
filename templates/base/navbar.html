@@ -1,0 +1,86 @@
+{% load static %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}" type="text/css">
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark px-sm-4">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
+            aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand mr-4" href="{% url 'home' %}">
+        <img src="{% static 'images/logo/aerpaw-web-2-logo.png' %}" height="40">
+    </a>
+
+    <ul class="navbar-nav ns-navbar">
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-fw fa-info-circle"></i>About
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{% url 'home' %}"><i class="fa fa-fw fa-info-circle"></i>Overview</a>
+                <a class="dropdown-item" href="{% url 'home' %}"><i class="fa fa-fw fa-question-circle"></i>FAQ</a>
+            </div>
+        </li>
+        <li class="nav-item {{ contact_page }}">
+            <a class="nav-link" href="{% url 'home' %}">
+                <i class="fa fa-fw fa-envelope"></i> Contact</a>
+        </li>
+    </ul>
+
+    {% if user.is_authenticated %}
+    <ul class="navbar-nav ns-navbar">
+        <li class="nav-item {{ projects_page }}">
+            <a class="nav-link" href="{% url 'home' %}">
+                <i class="fa fa-fw fa-folder-open"></i> Projects</a>
+        </li>
+        <li class="nav-item {{ data_page }}">
+            <a class="nav-link" href="{% url 'home' %}">
+                <i class="fa fa-fw fa-database"></i> Data</a>
+        </li>
+        <li class="nav-item {{ code_page }}">
+            <a class="nav-link" href="{% url 'home' %}">
+                <i class="fa fa-fw fa-code"></i> Code</a>
+        </li>
+        <li class="nav-item {{ cicd_page }}">
+            <a class="nav-link" href="{% url 'home' %}">
+                <i class="fa fa-fw fa-gears"></i> CI/CD</a>
+        </li>
+        <li class="nav-item {{ emulab_page }}">
+            <a class="nav-link" href="{% url 'home' %}">
+                <i class="fa fa-fw fa-gears"></i> Emulab</a>
+        </li>
+    </ul>
+    <ul class="navbar-nav ml-auto ns-navbar">
+        <button id="profileBtn" class="btn btn-light ml-sm-0 my-sm-2 d-none d-lg-block">
+            <i class="fa fa-fw fa-user"></i>
+        </button>
+    </ul>
+    <div id="profileCard" class="card text-center">
+        <div class="card-header">
+            <b>{{ user.oidc_claim_name }}</b>
+        </div>
+        <div class="card-body">
+            <p class="card-subtitle mb-2 pb-0">
+                Your username is <em><b>{{ user.username }}</b></em>
+            </p>
+            <a class="btn btn-light mr-2 my-0 nav-profile-card-btn" href="{% url 'home' %}">
+                <i class="fa fa-fw fa-user"></i>Profile</a>
+            <a class="btn btn-light my-0 mr-0 nav-profile-card-btn" href="{% url 'logout' %}">
+                <i class="fa fa-fw fa-sign-out"></i>Logout</a>
+        </div>
+    </div>
+    {% else %}
+    <ul class="navbar-nav ml-auto ns-navbar">
+        <li class="nav-item {{ login_page }}">
+            <a class="nav-link" href="{% url 'login' %}">
+                <i class="fa fa-fw fa-sign-in"></i> Login</a>
+        </li>
+    </ul>
+    {% endif %}
+</nav>
+<script type="text/javascript">
+    $('#profileBtn').click(function () {
+        $('#profileCard').toggle();
+    });
+</script>

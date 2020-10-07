@@ -40,11 +40,11 @@ Some configuration is required prior to running the development environment.
 
 ### Docker containers
 
-The `docker-compose.yml` file at the top level of the repository is meant for development use. Other compose definitions can be found in the `compose` directory.
+The `docker-compose.yml` file at the top level of the repository is meant for **development** use. Other compose definitions can be found in the `compose` directory. The development compose file will not start the main Django application as it's meant to be run directly from the host for development.
 
 ```
 docker-compose pull
-docker-compuse up -d
+docker-compose up -d
 ```
 
 Verify that the containers are running as expected. You should observe two running containers.

@@ -1,5 +1,5 @@
 <!-- templates/home.html -->
-{% extends 'base.html' %}
+{% extends 'base/base.html' %}
 
 {% block title %}Home{% endblock %}
 
@@ -56,10 +56,7 @@
   oidc_claim_acr: {{user.oidc_claim_acr}} <br>
   oidc_claim_entitlement: {{user.oidc_claim_entitlement}} <br>
   <br>
-
-  <p><a href="{% url 'logout' %}">Log Out</a></p>
 {% else %}
   <p>You are not logged in</p>
-  <a href="{% url 'login' %}">Log In</a>
 {% endif %}
 {% endblock %}

@@ -43,12 +43,14 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'mozilla_django_oidc',  # mozilla-django-oidc
+    'mozilla_django_oidc',  # mozilla-django-oidc: https://mozilla-django-oidc.readthedocs.io/en/stable/
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',  # custom user accounts
+    'crispy_forms',  # django-crispy-forms: https://django-crispy-forms.readthedocs.io/en/latest/dj
+    'bootstrap4',  # django-bootstrap4: https://django-bootstrap4.readthedocs.io/en/latest/quickstart.html
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -167,9 +169,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # placeholder for future static imports
-# STATICFILES_DIRS = (
-#     os.path.join(BASE_DIR, ''),
-# )
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'base/static'),
+)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -1,4 +1,6 @@
 Django
+django-bootstrap4
+django-crispy-forms
 mozilla-django-oidc
 psycopg2-binary
 python-dotenv
