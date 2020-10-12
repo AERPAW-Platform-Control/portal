@@ -39,4 +39,4 @@ class AerpawUser(AbstractUser):
     oidc_claim_entitlement = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.username
+        return self.oidc_claim_name + ' (' + self.username + ')'
