@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    AERPAW Projects
+{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h2>AERPAW Projects</h2>
+            <a href="{% url 'project_create' %}" class="btn btn-success">Create New Project</a><br/><br/>
+            <table border="2" style="border-color: #19865C">
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Principal Investigator</th>
+                    <th>Created By</th>
+                    <th>Created Date</th>
+                </tr>
+                {% for project in projects %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'project_detail' project_uuid=project.uuid %}">
+                                {{ project.name }}
+                            </a>
+                        </td>
+                        <td>{{ project.description }}</td>
+                        <td>{{ project.principal_investigator }}</td>
+                        <td>{{ project.created_by }}</td>
+                        <td>{{ project.created_date }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in or not authorized to view this page</p>
+        </div>
+    {% endif %}
+{% endblock %}
