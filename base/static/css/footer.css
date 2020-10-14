@@ -1,0 +1,22 @@
+/* Site footer styling */
+.footer {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /*background-color: #326bb3;*/
+  color: #fff;
+  height: 8em;
+  margin-top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.link {
+  color: #fff;
+  font-weight: 600;
+}

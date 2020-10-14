@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Project: {{ project.name }}
+{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container"></div>
+        <h2>{{ project.name }}</h2>
+        <p>
+            <b>Description: </b>{{ project.description }}<br/>
+            <b>Principal Investigator: </b>{{ project.principal_investigator }}<br/>
+            <b>Project Members: </b>
+            {% for member in project_members %}
+                {{ member }},
+            {% endfor %}
+            <br/>
+            <b>Created By: </b>{{ project.created_by }}<br/>
+            <b>Created Date: </b>{{ project.created_date }}<br/>
+            <b>Modified By: </b>{{ project.modified_by }}<br/>
+            <b>Modified Date: </b>{{ project.modified_date }}<br/>
+        </p>
+        <br/>
+        <a href="{% url 'project_update' project_uuid=project.uuid %}" class="btn btn-success">Update</a>
+        <a href="{% url 'projects' %}" class="btn btn-secondary">Back</a>
+        <a href="{% url 'project_delete' project_uuid=project.uuid %}" class="btn btn-danger">Delete</a>
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in or not authorized to view this page</p>
+        </div>
+    {% endif %}
+{% endblock %}
