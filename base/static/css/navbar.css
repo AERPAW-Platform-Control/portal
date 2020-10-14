@@ -4,11 +4,11 @@
 }
 
 .navbar-dark .navbar-nav .nav-link {
-  color: rgba(255,255,255,.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .navbar a {
-  padding: .5rem;
+  padding: 0.5rem;
 }
 
 .navbar-brand {
@@ -21,10 +21,11 @@
 }
 
 .dropdown-item {
-  color: rgba(255,255,255,.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.dropdown-item:focus, .dropdown-item:hover {
+.dropdown-item:focus,
+.dropdown-item:hover {
   color: #fff;
   background-color: #326bb3;
 }
@@ -37,19 +38,19 @@
   width: 15rem;
   z-index: 999;
   background-color: #326bb3;
-  color: rgba(255,255,255,.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .nav-profile-card-btn {
-  font-size: .75rem;
+  font-size: 0.75rem;
   height: 2.25rem;
 }
 
 .card-body {
-  padding: .75rem;
+  padding: 0.75rem;
 }
 
 #profileBtn {
-  padding: .375rem .5rem;
+  padding: 0.375rem 0.5rem;
   border-radius: 50%;
 }
