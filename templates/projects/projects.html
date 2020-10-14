@@ -8,15 +8,19 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
+          <div class="d-flex flex-row align-items-center justify-content-between">
             <h2>AERPAW Projects</h2>
-            <a href="{% url 'project_create' %}" class="btn btn-success">Create New Project</a><br/><br/>
-            <table border="2" style="border-color: #19865C">
+            <button class="btn btn-success mr-2">
+              <i class="fa fa-plus mr-2"></i>
+              <a href="{% url 'project_create' %}" class="unlink">Create New Project</a>
+            </button></div>
+            <table class="table table-striped table-bordered mt-4">
                 <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Principal Investigator</th>
-                    <th>Created By</th>
-                    <th>Created Date</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Principal Investigator</th>
+                  <th>Created By</th>
+                  <th>Created Date</th>
                 </tr>
                 {% for project in projects %}
                     <tr>
