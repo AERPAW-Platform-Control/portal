@@ -9,11 +9,13 @@
     {% if user.is_authenticated %}
         <div class="container">
             <h2>Update Project</h2>
-            <form method="POST" class="post-form">
+            <form method="POST" class="form-group">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input class="btn btn-success" type="submit" value="Save"/>
-                <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="btn btn-secondary">Cancel</a>
+                <input class="btn btn-success mr-2" type="submit" value="Save"/>
+                <button class="btn btn-secondary mr-2">
+                  <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="unlink">Cancel</a>
+                </button>
             </form>
         </div>
     {% else %}
