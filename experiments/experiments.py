@@ -1,0 +1,100 @@
+import uuid
+
+from django.utils import timezone
+
+from .models import Experiment, Reservation, AerpawUser
+
+
+def create_new_experiment(request, form):
+    """
+
+    :param request:
+    :param form:
+    :return:
+    """
+    experiment = Experiment()
+    experiment.uuid = uuid.uuid4()
+    experiment.name = form.data.getlist('name')[0]
+    try:
+        experiment.description = form.data.getlist('description')[0]
+    except ValueError as e:
+        print(e)
+        experiment.description = None
+    experiment.principal_investigator = AerpawUser.objects.get(
+        id=int(form.data.getlist('principal_investigator')[0])
+    )
+
+    experiment.created_by = request.user
+    experiment.created_date = timezone.now()
+    experiment.modified_by = experiment.created_by
+    experiment.modified_date = experiment.created_date
+    experiment.save()
+    experiment_reservation_id_list = form.data.getlist('experiment_reservations')
+    update_experiment_reservations(experiment, experiment_reservation_id_list)
+    experiment.save()
+    return str(experiment.uuid)
+
+
+def update_experiment_reservations(experiment, experiment_reservation_id_list):
+    """
+
+    :param experiment:
+    :param experiment_reservation_id_list:
+    :return:
+    """
+    # clear current experiment reservation
+    experiment.experiment_reservations.clear()
+    # add members from experiment_member_id_update_list
+    for reservation_id in experiment_reservation_id_list:
+        experiment_reservation = AerpawUser.objects.get(id=int(reservation_id))
+        experiment.experiment_reservations.add(experiment_reservation)
+    experiment.save()
+    # add principal_investigator to experiment_members if not already there
+    if experiment.principal_investigator not in experiment.experiment_members.all():
+        experiment.experiment_members.add(experiment.principal_investigator)
+        experiment.save()
+
+
+def update_existing_experiment(request, experiment, form):
+    """
+    Create new AERPAW Experiment
+
+    :param request:
+    :param form:
+    :return:
+    """
+    experiment.modified_by = request.user
+    experiment.modified_date = timezone.now()
+    experiment.save()
+    experiment_member_id_list = form.data.getlist('experiment_members')
+    update_experiment_members(experiment, experiment_member_id_list)
+    experiment.save()
+    return str(experiment.uuid)
+
+
+def delete_existing_experiment(request, experiment):
+    """
+
+    :param request:
+    :param experiment:
+    :return:
+    """
+    try:
+        experiment.delete()
+        return True
+    except Exception as e:
+        print(e)
+    return False
+
+
+def get_experiment_list(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.user.is_superuser:
+        experiments = Experiment.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    else:
+        experiments = request.user.experiments.order_by('name')
+    return experiments
