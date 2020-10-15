@@ -4,10 +4,12 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-<div>
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<div class="homepage">
     <img class="rounded my-4 img-fluid" width="25%" src="{% static 'images/logo/aerpaw-logo.png' %}">
     <p>
-        AERPAW is a $24 million grant, awarded by the
+        <span class="h2"><a href="https://aerpaw.org/" target="_blank">AERPAW</a>
+        </span> <strong>(Aerial Experimentation and Research Platform for Advanced Wireless)</strong> is a $24 million grant, awarded by the
         <a href="http://advancedwireless.org" target="_blank">PAWR Project Office</a>
         on behalf of the
         <a href="http://nsf.gov" target="_blank">National Science Foundation</a>,
