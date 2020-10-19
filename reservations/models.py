@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from resources.models import Inventory
+from resources.models import Resources
 
 # Create your models here.
 class Reservation(models.Model):
@@ -9,7 +9,7 @@ class Reservation(models.Model):
     name=models.CharField(max_length=32)
 
     resource = models.ForeignKey(
-        Inventory, related_name='inventory', on_delete=models.CASCADE
+        Resources, related_name='resource', on_delete=models.CASCADE
     )
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(default=timezone.now)
