@@ -50,8 +50,8 @@ def update_experiment_reservations(experiment, experiment_reservation_id_list):
         experiment.experiment_reservations.add(experiment_reservation)
     experiment.save()
     # add principal_investigator to experiment_members if not already there
-    if experiment.principal_investigator not in experiment.experiment_members.all():
-        experiment.experiment_members.add(experiment.principal_investigator)
+    if experiment.reservation not in experiment.experiment_reservations.all():
+        experiment.experiment_reservations.add(experiment.reservation)
         experiment.save()
 
 
@@ -66,8 +66,8 @@ def update_existing_experiment(request, experiment, form):
     experiment.modified_by = request.user
     experiment.modified_date = timezone.now()
     experiment.save()
-    experiment_member_id_list = form.data.getlist('experiment_members')
-    update_experiment_members(experiment, experiment_member_id_list)
+    experiment_member_id_list = form.data.getlist('experiment_reservations')
+    update_experiment_reservationreservations(experiment, experiment_reservation_id_list)
     experiment.save()
     return str(experiment.uuid)
 
