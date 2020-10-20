@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from accounts.models import AerpawUser
 from projects.models import Project
-from reservations.models import Reservation
+#from reservations.models import Reservation
 
 # Create your models here.
 
@@ -23,9 +23,16 @@ class Experiment(models.Model):
         Project, related_name='experiment_project', on_delete=models.CASCADE
     )
     profile = models.TextField()
-    reservations = models.ForeignKey(
-        Reservation, related_name='experiment_reservations', on_delete=models.CASCADE, null=True, blank=True
-    )
+
+    #created_by = experiment_project.created_by
+    created_date = models.DateTimeField(default=timezone.now)
+    
+    #modified_by = experiment_project.modified_by
+    modified_date = models.DateTimeField(blank=True, null=True)
+
+    #reservations = models.ForeignKey(
+    #    Reservation, related_name='experiment_reservations', on_delete=models.CASCADE, null=True, blank=True
+    #)
 
     class Meta:
         verbose_name = 'AERPAW Experiment'

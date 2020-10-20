@@ -3,9 +3,9 @@ from django import forms
 from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
-from .models import Resources
+from .models import Resource
 
-class ResourcesCreateForm(forms.ModelForm):
+class ResourceCreateForm(forms.ModelForm):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60}),
         required=True,
@@ -39,7 +39,7 @@ class ResourcesCreateForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Resources
+        model = Resource
         fields = (
             'name',
             'description',
@@ -48,7 +48,7 @@ class ResourcesCreateForm(forms.ModelForm):
         )
 
 
-class ResourcesChangeForm(forms.ModelForm):
+class ResourceChangeForm(forms.ModelForm):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60}),
         required=True,
@@ -75,7 +75,7 @@ class ResourcesChangeForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Resources
+        model = Resource
         fields = (
             'name',
             'description',

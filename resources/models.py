@@ -3,7 +3,7 @@ from django.db import models
 from projects.models import Project
 
 # Create your models here.
-class Resources(models.Model):
+class Resource(models.Model):
     #_id = models.CharField(max_length=64)
     name=models.CharField(max_length=32)
     description = models.TextField()

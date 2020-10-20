@@ -7,7 +7,7 @@ from uuid import UUID
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import ExperimentCreateForm, ExperimentUpdateForm
-from .models import Experiment, Reservation
+from .models import Experiment
 from .experiments import create_new_experiment, get_experiment_list, update_existing_experiment, delete_existing_experiment
 
 
@@ -78,7 +78,7 @@ def experiment_delete(request, experiment_uuid):
     :param experiment_uuid:
     :return:
     """
-    experiment = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
+    experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     experiment_members = experiment.experiment_reservations.order_by('name')
     if request.method == "POST":
         is_removed = delete_existing_experiment(request, experiment)
