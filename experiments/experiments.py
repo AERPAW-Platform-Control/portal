@@ -2,7 +2,10 @@ import uuid
 
 from django.utils import timezone
 
-from .models import Experiment, Reservation, AerpawUser
+from .models import Experiment
+from reservations.models import Reservation
+from accounts.models import AerpawUser
+from projects.models import Project
 
 
 def create_new_experiment(request, form):
@@ -20,8 +23,9 @@ def create_new_experiment(request, form):
     except ValueError as e:
         print(e)
         experiment.description = None
-    experiment.principal_investigator = AerpawUser.objects.get(
-        id=int(form.data.getlist('principal_investigator')[0])
+
+    experiment.experimenter = Project.objects.get(
+        id=int(form.data.getlist('project_members')[0])
     )
 
     experiment.created_by = request.user
@@ -67,7 +71,7 @@ def update_existing_experiment(request, experiment, form):
     experiment.modified_date = timezone.now()
     experiment.save()
     experiment_member_id_list = form.data.getlist('experiment_reservations')
-    update_experiment_reservationreservations(experiment, experiment_reservation_id_list)
+    update_experiment_reservations(experiment, experiment_reservation_id_list)
     experiment.save()
     return str(experiment.uuid)
 

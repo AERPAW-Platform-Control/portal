@@ -21,7 +21,7 @@ class ResourcesCreateForm(forms.ModelForm):
     resourceType = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
-        label='resourceType',
+        label='Resource Type',
     )
 
     units = forms.IntegerField(

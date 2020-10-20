@@ -16,16 +16,19 @@ class Experiment(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     stage = models.CharField(max_length=255)
-    experimenter = models.ForeignKey(
-        AerpawUser, related_name='experiment_experimenter', on_delete=models.CASCADE, null=True, blank=True
+    experimenter = models.ManyToManyField(
+        AerpawUser, related_name='experiments'
     )
     project = models.ForeignKey(
-        Project, related_name='project_project', on_delete=models.CASCADE
+        Project, related_name='experiment_project', on_delete=models.CASCADE
     )
     profile = models.TextField()
     reservations = models.ForeignKey(
-        Reservation, related_name='reservations', on_delete=models.CASCADE, null=True, blank=True
+        Reservation, related_name='experiment_reservations', on_delete=models.CASCADE, null=True, blank=True
     )
+
+    class Meta:
+        verbose_name = 'AERPAW Experiment'
 
     def __str__(self):
         return self.name

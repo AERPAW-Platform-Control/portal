@@ -50,9 +50,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',  # custom user accounts
     'projects',  # aerpaw projects
-    #'experiments',  # aerpaw experiments
-    #'resources',  # aerpaw experiments
-    #'reservations',  # aerpaw experiments
+    'experiments',  # aerpaw experiments
+    'resources',  # aerpaw experiments
+    'reservations',  # aerpaw experiments
     'crispy_forms',  # django-crispy-forms: https://django-crispy-forms.readthedocs.io/en/latest/dj
     'bootstrap4',  # django-bootstrap4: https://django-bootstrap4.readthedocs.io/en/latest/quickstart.html
 ]
@@ -84,6 +84,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/base'),
             os.path.join(BASE_DIR, 'templates/projects'),
             os.path.join(BASE_DIR, 'templates/users'),
+            os.path.join(BASE_DIR, 'templates/experiments'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

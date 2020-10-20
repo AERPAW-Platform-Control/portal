@@ -25,4 +25,6 @@ urlpatterns = [
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('projects/', include('projects.urls')),
     path('experiments/', include('experiments.urls')),
+    path('reservations/', include('reservations.urls')),
+    path('resources/', include('resources.urls')),
 ]

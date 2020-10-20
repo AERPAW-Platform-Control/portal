@@ -1,4 +1,3 @@
-from django.contrib import admin
 
 # Register your models here.
 
@@ -10,7 +9,7 @@ from .forms import ResourcesCreateForm, ResourcesChangeForm
 from .models import Resources
 
 
-class AerpawResourceAdmin():
+class AerpawResourceAdmin(admin.ModelAdmin):
     add_form = ResourcesCreateForm
     form = ResourcesChangeForm
     model = Resources
