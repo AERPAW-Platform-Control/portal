@@ -49,8 +49,8 @@ def reservation_detail(request, reservation_uuid):
     :return:
     """
     reservation = get_object_or_404(reservation, uuid=UUID(str(reservation_uuid)))
-    reservation_reservations = reservation.reservation_reservations.order_by('name')
-    return render(request, 'reservation_detail.html', {'reservation': reservation, 'reservation_members': reservation_members})
+    reservation_resource = reservation.resource.order_by('name')
+    return render(request, 'reservation_detail.html', {'reservation': reservation, 'reservation_resource': reservation_resource})
 
 
 def reservation_update(request, reservation_uuid):

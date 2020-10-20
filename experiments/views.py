@@ -46,7 +46,7 @@ def experiment_detail(request, experiment_uuid):
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     experiment_reservations = experiment.experiment_reservations.order_by('name')
-    return render(request, 'experiment_detail.html', {'experiment': experiment, 'experiment_members': experiment_members})
+    return render(request, 'experiment_detail.html', {'experiment': experiment, 'experiment_reservations': experiment_reservations})
 
 
 def experiment_update(request, experiment_uuid):

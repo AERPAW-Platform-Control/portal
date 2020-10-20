@@ -8,7 +8,6 @@ from experiments.models import Experiment
 
 # Create your models here.
 class Reservation(models.Model):
-    #_id = models.CharField(max_length=64)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     name=models.CharField(max_length=32)
     description = models.TextField()

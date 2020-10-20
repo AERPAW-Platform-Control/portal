@@ -17,12 +17,11 @@ class Experiment(models.Model):
     description = models.TextField()
     stage = models.CharField(max_length=255)
     experimenter = models.ManyToManyField(
-        AerpawUser, related_name='experiments'
+        AerpawUser, related_name='experiment_experimenter'
     )
     project = models.ForeignKey(
         Project, related_name='experiment_project', on_delete=models.CASCADE
     )
-    profile = models.TextField()
 
     #created_by = experiment_project.created_by
     created_date = models.DateTimeField(default=timezone.now)

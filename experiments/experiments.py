@@ -98,7 +98,7 @@ def get_experiment_list(request):
     :return:
     """
     if request.user.is_superuser:
-        experiments = Experiment.objects.filter(created_date__lte=timezone.now()).order_by('name')
+        experiments = Experiment.objects.order_by('name')
     else:
-        experiments = request.user.experiments.order_by('name')
+        experiments = Experiment.objects.order_by('name')
     return experiments
