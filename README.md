@@ -237,6 +237,11 @@ $ ps -a
 # terminate it along with the uswgi processes it spawned
 $ kill -9 41712 41725 41727
 ```
+#or kill it more conviniently
+$ kill -INT `cat /tmp/project-master.pid`
+# or for convenience...
+$ uwsgi --stop /tmp/project-master.pid
+
 
 ### Directories
 
