@@ -32,12 +32,12 @@ def reservation_create(request):
     :return:
     """
     if request.method == "POST":
-        form = reservationCreateForm(request.POST)
+        form = ReservationCreateForm(request.POST)
         if form.is_valid():
             reservation_uuid = create_new_reservation(request, form)
             return redirect('reservation_detail', reservation_uuid=reservation_uuid)
     else:
-        form = reservationCreateForm()
+        form = ReservationCreateForm()
     return render(request, 'reservation_create.html', {'form': form})
 
 

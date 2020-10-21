@@ -35,7 +35,7 @@ def resource_create(request):
             resource_uuid = create_new_resource(request, form)
             return redirect('resource_detail', resource_uuid=resource_uuid)
     else:
-        form = resourceCreateForm()
+        form = ResourceCreateForm()
     return render(request, 'resource_create.html', {'form': form})
 
 
