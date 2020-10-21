@@ -13,7 +13,7 @@ def create_new_resource(request, form):
     :param form:
     :return:
     """
-    resource = resource()
+    resource = Resource()
     resource.uuid = uuid.uuid4()
     resource.name = form.data.getlist('name')[0]
     try:
@@ -91,7 +91,7 @@ def get_resource_list(request):
     :return:
     """
     if request.user.is_superuser:
-        resources = resource.objects.order_by('name')
+        resources = Resource.objects.order_by('name')
     else:
-        resources = resource.objects.order_by('name')
+        resources = Resource.objects.order_by('name')
     return resources

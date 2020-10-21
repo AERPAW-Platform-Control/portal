@@ -2,11 +2,10 @@ import uuid
 
 from django.utils import timezone
 
-from reservations.models import reservation
+from experiments.models import Experiment
+from resources.models import Resource
 from .models import Reservation
 from accounts.models import AerpawUser
-from projects.models import Project
-
 
 def create_new_reservation(request, form):
     """
@@ -98,7 +97,7 @@ def get_reservation_list(request):
     :return:
     """
     if request.user.is_superuser:
-        reservations = reservation.objects.order_by('name')
+        reservations = Reservation.objects.order_by('name')
     else:
-        reservations = reservation.objects.order_by('name')
+        reservations = Reservation.objects.order_by('name')
     return reservations

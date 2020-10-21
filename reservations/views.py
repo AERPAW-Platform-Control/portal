@@ -10,7 +10,7 @@ from uuid import UUID
 
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import ReservationCreateForm, ReservationUpdateForm
+from .forms import ReservationCreateForm, ReservationChangeForm
 from .models import Reservation
 from .reservations import create_new_reservation, get_reservation_list, update_existing_reservation, delete_existing_reservation
 
@@ -62,13 +62,13 @@ def reservation_update(request, reservation_uuid):
     """
     reservation = get_object_or_404(reservation, uuid=UUID(str(reservation_uuid)))
     if request.method == "POST":
-        form = reservationUpdateForm(request.POST, instance=reservation)
+        form = reservationChangeForm(request.POST, instance=reservation)
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation_uuid = update_existing_reservation(request, reservation, form)
             return redirect('reservation_detail', reservation_uuid=str(reservation.uuid))
     else:
-        form = reservationUpdateForm(instance=reservation)
+        form = reservationChangeForm(instance=reservation)
     return render(request, 'reservation_update.html',
                   {
                       'form': form, 'project_uuid': str(reservation_uuid), 'reservation_name': reservation.name}
