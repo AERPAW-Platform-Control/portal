@@ -270,6 +270,10 @@ Base User objects have the following fields:
 - **last\_login** - A datetime of the user’s last login
 - **date\_joined** - A datetime designating when the account was created
 
+#Create super user
+$python manage.py createsuperuser
+
+
 Ref: [https://docs.djangoproject.com/en/3.1/ref/contrib/auth/](https://docs.djangoproject.com/en/3.1/ref/contrib/auth/)
 
      

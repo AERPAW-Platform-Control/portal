@@ -3,7 +3,7 @@ from django import forms
 from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
-from .models import Resource
+from .models import Resource,ResourceStageChoice,ResourceTypeChoice
 
 class ResourceCreateForm(forms.ModelForm):
     name = forms.CharField(
@@ -36,6 +36,12 @@ class ResourceCreateForm(forms.ModelForm):
         required=False,
         widget=forms.SelectMultiple(),
         label='Resource Location',
+    )
+
+    stage = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='Resource Stage',
     )
 
     class Meta:

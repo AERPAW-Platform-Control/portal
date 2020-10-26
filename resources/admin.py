@@ -6,14 +6,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
 from .forms import ResourceCreateForm, ResourceChangeForm
-from .models import Resource
+from .models import Resource,ResourceTypeChoice,ResourceStageChoice
 
 
 class AerpawResourceAdmin(admin.ModelAdmin):
     add_form = ResourceCreateForm
     form = ResourceChangeForm
     model = Resource
-    list_display = ['name', 'description', 'resourceType', 'units', 'location', 'admin']
+    list_display = ['name', 'description', 'resourceType', 'units', 'location', 'stage','admin']
 
 
 admin.site.register(Resource, AerpawResourceAdmin)
