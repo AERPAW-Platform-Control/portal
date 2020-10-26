@@ -6,7 +6,7 @@
 {% if user.is_authenticated %}
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <div class="homepage">
-    <img class="rounded my-4 img-fluid" width="25%" src="{% static 'images/logo/aerpaw-logo.png' %}">
+    <img class="rounded my-2 img-fluid" width="25%" src="{% static 'images/logo/aerpaw-logo.png' %}">
     <p>
         <span class="h2"><a href="https://aerpaw.org/" target="_blank">AERPAW</a>
         </span> <strong>(Aerial Experimentation and Research Platform for Advanced Wireless)</strong> is a $24 million grant, awarded by the
@@ -42,7 +42,53 @@
             NC State Named a Hotspot for 5G Innovation
         </a>.
     </p>
-
+    <div id="carouselIndicators" class="carousel slide my-4" data-ride="carousel">
+      <ol class="carousel-indicators">
+        <li data-target="#carouselIndicators" data-slide-to="0" class="active"></li>
+        <li data-target="#carouselIndicators" data-slide-to="1"></li>
+        <li data-target="#carouselIndicators" data-slide-to="2"></li>
+      </ol>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="card news-card">
+            <div class="card-body">
+              <h2 class="card-title">News title</h2>
+              <h5 class="card-subtitle mb-2 text-muted">News subtitle</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+              <a href="#" class="card-link btn btn-primary">View More</a>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="card news-card">
+            <div class="card-body">
+              <h2 class="card-title">News title</h2>
+              <h5 class="card-subtitle mb-2 text-muted">News subtitle</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+              <a href="#" class="card-link btn btn-primary">View More</a>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="card news-card">
+            <div class="card-body">
+              <h2 class="card-title">News title</h2>
+              <h5 class="card-subtitle mb-2 text-muted">News subtitle</h5>
+              <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+              <a href="#" class="card-link btn btn-primary">View More</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a class="carousel-control-prev" href="#carouselIndicators" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="carousel-control-next" href="#carouselIndicators" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div>
 </div>
 {% else %}
 <h3 class="text-center mt-4">Please log in to gain full access of AERPAW testbed.</h3>

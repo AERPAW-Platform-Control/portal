@@ -72,3 +72,46 @@ p {
   color: #fff;
   text-decoration: none;
 }
+
+.news-card {
+  width: 100%;
+  height: 20rem;
+  padding: 2rem 7.5rem;
+  background-color: #f7f7f7;
+}
+
+.carousel-indicators,
+.carousel-control-prev,
+.carousel-control-prev-icon {
+  color: #000;
+}
+
+.carousel-indicators li {
+  background-color: #292b2c;
+}
+
+.carousel-indicators .active {
+  background-color: #292b2c;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  height: 50px;
+  width: 50px;
+  outline: black;
+  background-size: 100%, 100%;
+  border-radius: 50%;
+  background-image: none;
+}
+
+.carousel-control-next-icon:after {
+  content: ">";
+  font-size: 20px;
+  color: #292b2c;
+}
+
+.carousel-control-prev-icon:after {
+  content: "<";
+  font-size: 20px;
+  color: #292b2c;
+}
