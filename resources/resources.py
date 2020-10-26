@@ -24,33 +24,12 @@ def create_new_resource(request, form):
 
     resource.resourceType = form.data.getlist('resourceType')[0]
 
-    resource.resourceType = form.data.getlist('units')[0]
+    resource.units = form.data.getlist('units')[0]
 
     resource.location = form.data.getlist('location')[0]
 
     resource.save()
     return str(resource.uuid)
-
-
-def update_resource_resources(resource, resource_resource_id_list):
-    """
-
-    :param resource:
-    :param resource_resource_id_list:
-    :return:
-    """
-    # clear current resource resource
-    resource.resource_resources.clear()
-    # add members from resource_member_id_update_list
-    for resource_id in resource_resource_id_list:
-        resource_resource = AerpawUser.objects.get(id=int(resource_id))
-        resource.resource_resources.add(resource_resource)
-    resource.save()
-    # add principal_investigator to resource_members if not already there
-    if resource.resource not in resource.resource_resources.all():
-        resource.resource_resources.add(resource.resource)
-        resource.save()
-
 
 def update_existing_resource(request, resource, form):
     """
@@ -60,11 +39,20 @@ def update_existing_resource(request, resource, form):
     :param form:
     :return:
     """
+    resource.name = form.data.getlist('name')[0]
+    try:
+        resource.description = form.data.getlist('description')[0]
+    except ValueError as e:
+        print(e)
+        resource.description = None
+
+    resource.resourceType = form.data.getlist('resourceType')[0]
+
+    resource.units = form.data.getlist('units')[0]
+
+    resource.location = form.data.getlist('location')[0]
     resource.modified_by = request.user
     resource.modified_date = timezone.now()
-    resource.save()
-    resource_member_id_list = form.data.getlist('resource_resources')
-    update_resource_resources(resource, resource_resource_id_list)
     resource.save()
     return str(resource.uuid)
 

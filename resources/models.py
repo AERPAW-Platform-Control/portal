@@ -4,7 +4,6 @@ from django.utils import timezone
 from enum import Enum
 import uuid
 
-from projects.models import Project
 from accounts.models import AerpawUser
 
 User = get_user_model()

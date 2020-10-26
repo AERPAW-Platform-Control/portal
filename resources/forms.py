@@ -56,7 +56,7 @@ class ResourceChangeForm(forms.ModelForm):
         required=True,
     )
 
-    description = forms.ChoiceField(
+    description = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
         label='Resource Description',

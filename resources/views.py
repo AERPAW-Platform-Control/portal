@@ -57,15 +57,15 @@ def resource_update(request, resource_uuid):
     :param resource_uuid:
     :return:
     """
-    resource = get_object_or_404(resource, uuid=UUID(str(resource_uuid)))
+    resource = get_object_or_404(Resource, uuid=UUID(str(resource_uuid)))
     if request.method == "POST":
-        form = ResourceUpdateForm(request.POST, instance=resource)
+        form = ResourceChangeForm(request.POST, instance=resource)
         if form.is_valid():
             resource = form.save(commit=False)
             resource_uuid = update_existing_resource(request, resource, form)
             return redirect('resource_detail', resource_uuid=str(resource.uuid))
     else:
-        form = resourceUpdateForm(instance=resource)
+        form = ResourceChangeForm(instance=resource)
     return render(request, 'resource_update.html',
                   {
                       'form': form, 'resource_uuid': str(resource_uuid), 'resource_name': resource.name}
@@ -79,7 +79,7 @@ def resource_delete(request, resource_uuid):
     :param resource_uuid:
     :return:
     """
-    resource = get_object_or_404(REsource, uuid=UUID(str(resource_uuid)))
+    resource = get_object_or_404(Resource, uuid=UUID(str(resource_uuid)))
     if request.method == "POST":
         is_removed = delete_existing_resource(request, resource)
         if is_removed:
