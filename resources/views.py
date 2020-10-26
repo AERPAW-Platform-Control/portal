@@ -43,12 +43,11 @@ def resource_detail(request, resource_uuid):
     """
 
     :param request:
-    :param project_uuid:
+    :param resource_uuid:
     :return:
     """
-    resource = get_object_or_404(resource, uuid=UUID(str(resource_uuid)))
-    resource_resources = resource.resource_resources.order_by('name')
-    return render(request, 'resource_detail.html', {'resource': resource, 'resource_members': resource_members})
+    resource = get_object_or_404(Resource, uuid=UUID(str(resource_uuid)))
+    return render(request, 'resource_detail.html', {'resource': resource})
 
 
 def resource_update(request, resource_uuid):
@@ -69,7 +68,7 @@ def resource_update(request, resource_uuid):
         form = resourceUpdateForm(instance=resource)
     return render(request, 'resource_update.html',
                   {
-                      'form': form, 'project_uuid': str(resource_uuid), 'resource_name': resource.name}
+                      'form': form, 'resource_uuid': str(resource_uuid), 'resource_name': resource.name}
                   )
 
 
@@ -80,10 +79,9 @@ def resource_delete(request, resource_uuid):
     :param resource_uuid:
     :return:
     """
-    resource = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
-    resource_members = resource.resource_resources.order_by('name')
+    resource = get_object_or_404(REsource, uuid=UUID(str(resource_uuid)))
     if request.method == "POST":
         is_removed = delete_existing_resource(request, resource)
         if is_removed:
             return redirect('resources')
-    return render(request, 'resource_delete.html', {'resource': resource, 'resource_resources': resource_resources})
+    return render(request, 'resource_delete.html', {'resource': resource})
