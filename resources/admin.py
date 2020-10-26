@@ -11,7 +11,7 @@ from .models import Resource,ResourceTypeChoice,ResourceStageChoice
 
 class AerpawResourceAdmin(admin.ModelAdmin):
     add_form = ResourceCreateForm
-    form = ResourceChangeForm
+    form = ResourceCreateForm
     model = Resource
     list_display = ['name', 'description', 'resourceType', 'units', 'location', 'stage','admin']
 

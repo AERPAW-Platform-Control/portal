@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from enum import Enum
+import uuid
 
 from projects.models import Project
 from accounts.models import AerpawUser
@@ -8,11 +10,15 @@ from accounts.models import AerpawUser
 User = get_user_model()
 
 class ResourceStageChoice(Enum):   # A subclass of Enum
-    IDEL = 'Idel'
+    IDLE = 'Idle'
     DEVELOPMENT = 'Development'
     SANDBOX = 'Sandbox'
     EMULATION = 'Emulation'
     TESTBED = 'Testbed'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
 
 class ResourceTypeChoice(Enum):   # A subclass of Enum
     CLOUD= 'Cloud'
@@ -20,6 +26,9 @@ class ResourceTypeChoice(Enum):   # A subclass of Enum
     FIXEDNODE = 'FixedNode'
     PORTABLENODE = 'PortableNode'
     OTHERS = 'Others'
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
 
 class ResourceLocationChoice(Enum):   # A subclass of Enum
     DCS = 'DCS'
@@ -27,26 +36,35 @@ class ResourceLocationChoice(Enum):   # A subclass of Enum
     CENTENNIAL = 'Centennial'
     CARY = 'Cary'
     OTHERS = 'Others'
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
 
 # Create your models here.
 class Resource(models.Model):
     admin=models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
 
     name=models.CharField(max_length=32)
     description = models.TextField()
     resourceType=models.CharField(
-      max_length=5,
-      choices=[(tag, tag.value) for tag in ResourceTypeChoice]  # Choices is a list of Tuple
+      max_length=64,
+      choices=ResourceTypeChoice.choices(),
     )
 
     units=models.PositiveSmallIntegerField(default=1)
     availableUnits=models.PositiveSmallIntegerField(default=1)
-    location=models.CharField(max_length=32)
+    location=models.CharField(
+      max_length=64,
+      choices=ResourceLocationChoice.choices(),
+    )
     
     stage=models.CharField(
-      max_length=5,
-      choices=[(tag, tag.value) for tag in ResourceStageChoice]  # Choices is a list of Tuple
+      max_length=64,
+      choices=ResourceStageChoice.choices(),
     )
+
+    created_date=models.DateTimeField(default=timezone.now)
 
     def has_inventory(self):
         return self.units > 0

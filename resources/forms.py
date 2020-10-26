@@ -3,7 +3,7 @@ from django import forms
 from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
-from .models import Resource,ResourceStageChoice,ResourceTypeChoice
+from .models import Resource,ResourceStageChoice,ResourceTypeChoice,ResourceLocationChoice
 
 class ResourceCreateForm(forms.ModelForm):
     name = forms.CharField(
@@ -18,8 +18,9 @@ class ResourceCreateForm(forms.ModelForm):
         label='Resource Description',
     )
 
-    resourceType = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+    resourceType = forms.ChoiceField(
+        choices=ResourceTypeChoice.choices(),
+        widget=forms.Select(),
         required=False,
         label='Resource Type',
     )
@@ -31,27 +32,22 @@ class ResourceCreateForm(forms.ModelForm):
         label='Resource Units',
     )
 
-    location = forms.ModelMultipleChoiceField(
-        queryset=Reservation.objects.order_by('name'),
+    location = forms.ChoiceField(
+        choices=ResourceLocationChoice.choices(),
+        widget=forms.Select(),
         required=False,
-        widget=forms.SelectMultiple(),
         label='Resource Location',
     )
 
-    stage = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+    stage = forms.ChoiceField(
+        choices=ResourceStageChoice.choices(),
+        widget=forms.Select(),
         required=False,
         label='Resource Stage',
     )
-
     class Meta:
         model = Resource
-        fields = (
-            'name',
-            'description',
-            'units',
-            'location',
-        )
+        fields = '__all__'
 
 
 class ResourceChangeForm(forms.ModelForm):
@@ -60,31 +56,40 @@ class ResourceChangeForm(forms.ModelForm):
         required=True,
     )
 
-    description = forms.CharField(
+    description = forms.ChoiceField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
         label='Resource Description',
     )
 
-    resoureceType = forms.CharField(
-        required=True,
-        initial=0,
+    resourceType = forms.ChoiceField(
+        choices=ResourceTypeChoice.choices(),
         widget=forms.Select(),
-        label='resourceType',
+        required=True,
+        label='Resource Type',
     )
 
-    location = forms.ModelMultipleChoiceField(
-        queryset=Reservation.objects.order_by('name'),
-        required=False,
-        widget=forms.SelectMultiple(),
-        label='Experiment Location',
+    units = forms.IntegerField(
+        required=True,
+        initial=0,
+        widget=forms.NumberInput(),
+        label='Resource Units',
+    )
+
+    location = forms.ChoiceField(
+        choices=ResourceLocationChoice.choices(),
+        widget=forms.Select(),
+        required=True,
+        label='Resource Location',
+    )
+
+    stage = forms.ChoiceField(
+        choices=ResourceStageChoice.choices(),
+        widget=forms.Select(),
+        required=True,
+        label='Resource Stage',
     )
 
     class Meta:
         model = Resource
-        fields = (
-            'name',
-            'description',
-            'resourceType',
-            'location',
-        )
+        fields = '__all__'

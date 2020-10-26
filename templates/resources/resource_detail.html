@@ -2,45 +2,45 @@
 {% load static %}
 
 {% block title %}
-    Project: {{ project.name }}
+    Resource: {{ resource.name }}
 {% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-          <h2>{{ project.name }}</h2>
+          <h2>{{ resource.name }}</h2>
           <table class="table table-striped table-bordered my-4">
             <tr>
               <td>Description</td>
-              <td>{{ project.description }}</td>
+              <td>{{ resource.description }}</td>
             </tr>
             <tr>
-              <td>Principal Investigator</td>
-              <td>{{ project.principal_investigator }}</td>
+              <td>Resource Type</td>
+              <td>{{ resource.resourceType }}</td>
             </tr>
             <tr>
-              <td>Project Members</td>
-              <td>
-                {% for member in project_members %}
-                  {{ member }},
-                {% endfor %}
-              </td>
-            </tr>
-            <tr>
-              <td>Created By</td>
-              <td>{{ project.created_by }}</td>
+              <td>Managed By</td>
+              <td>{{ resource.admin }}</td>
             </tr>
             <tr>
               <td>Created Date</td>
-              <td>{{ project.created_date }}</td>
+              <td>{{ resource.created_date }}</td>
             </tr>
             <tr>
-              <td>Modified By</td>
-              <td>{{ project.modified_by }}</td>
+              <td>Total units</td>
+              <td>{{ resource.units }}</td>
             </tr>
             <tr>
-              <td>Modified Date</td>
-              <td>{{ project.modified_date }}</td>
+              <td>Available units/td>
+              <td>{{ resource.availableUnits}}</td>
+            </tr>
+            <tr>
+              <td>Location/td>
+              <td>{{ resource.location}}</td>
+            </tr>
+            <tr>
+              <td>Resource Stage</td>
+              <td>{{ resource.stage}}</td>
             </tr>
           </table>
           <button class="btn btn-success mr-2">
