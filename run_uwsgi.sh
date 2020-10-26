@@ -3,6 +3,9 @@
 APPS_LIST=(
   "accounts"
   "projects"
+  "experiments"
+  "reservations"
+  "resources"
 )
 
 FIXTURES_LIST=()

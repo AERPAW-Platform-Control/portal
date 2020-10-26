@@ -237,6 +237,11 @@ $ ps -a
 # terminate it along with the uswgi processes it spawned
 $ kill -9 41712 41725 41727
 ```
+# or kill it more conviniently
+$ kill -INT `cat /tmp/project-master.pid`
+# or 
+$ uwsgi --stop /tmp/project-master.pid
+
 
 ### Directories
 
@@ -264,6 +269,10 @@ Base User objects have the following fields:
 - **is\_superuser** - Boolean. Designates that this user has all permissions without explicitly assigning them
 - **last\_login** - A datetime of the user’s last login
 - **date\_joined** - A datetime designating when the account was created
+
+#Create super user
+$python manage.py createsuperuser
+
 
 Ref: [https://docs.djangoproject.com/en/3.1/ref/contrib/auth/](https://docs.djangoproject.com/en/3.1/ref/contrib/auth/)
 
