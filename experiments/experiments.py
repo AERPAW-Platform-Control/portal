@@ -24,39 +24,33 @@ def create_new_experiment(request, form):
         print(e)
         experiment.description = None
 
-    experiment.experimenter = Project.objects.get(
-        id=int(form.data.getlist('project_members')[0])
-    )
-
     experiment.created_by = request.user
     experiment.created_date = timezone.now()
-    experiment.modified_by = experiment.created_by
-    experiment.modified_date = experiment.created_date
     experiment.save()
+
+    experimenter_id_list = form.data.getlist('experimenter')
+    update_experimenter(experiment, experimenter_id_list)
+    experiment.save()
+
     experiment_reservation_id_list = form.data.getlist('experiment_reservations')
     update_experiment_reservations(experiment, experiment_reservation_id_list)
     experiment.save()
     return str(experiment.uuid)
 
 
-def update_experiment_reservations(experiment, experiment_reservation_id_list):
+def update_experimenter(experiment, experimenter_id_list):
     """
 
     :param experiment:
     :param experiment_reservation_id_list:
     :return:
     """
-    # clear current experiment reservation
-    experiment.experiment_reservations.clear()
-    # add members from experiment_member_id_update_list
-    for reservation_id in experiment_reservation_id_list:
-        experiment_reservation = AerpawUser.objects.get(id=int(reservation_id))
-        experiment.experiment_reservations.add(experiment_reservation)
-    experiment.save()
-    # add principal_investigator to experiment_members if not already there
-    if experiment.reservation not in experiment.experiment_reservations.all():
-        experiment.experiment_reservations.add(experiment.reservation)
-        experiment.save()
+    # clear current experimenter
+    experiment.experimenter.clear()
+    # add members from experimenter_id_update_list
+    for experimenter_id in experimenter_id_update_list:
+        experiment_experimenter = AerpawUser.objects.get(id=int(experimenter_id))
+        experiment.experimenter.add(experiment_experimenter)
 
 
 def update_existing_experiment(request, experiment, form):

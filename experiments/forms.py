@@ -7,29 +7,12 @@ from .models import Experiment
 
 
 class ExperimentCreateForm(forms.ModelForm):
-    name = forms.CharField(
-        widget=forms.TextInput(attrs={'size': 60}),
-        required=True,
-        label='Experiment Name',
-    )
 
-    description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
-        required=False,
-        label='Experiment Description',
-    )
 
-    state = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
-        required=False,
-        label='Experiment State',
-    )
-
-    experimenter = forms.ModelChoiceField(
+    experimenter = forms.ModelMultipleChoiceField(
         queryset=AerpawUser.objects.order_by('oidc_claim_name'),
-        required=True,
-        initial=0,
-        widget=forms.Select(),
+        required=False,
+        widget=forms.SelectMultiple(),
         label='Experimenter',
     )
 
@@ -41,14 +24,15 @@ class ExperimentCreateForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Project
+        model = Experiment
         fields = (
             'name',
             'description',
             'experimenter',
-            'experiment_reservations',
+            'created_by',
+            'created_date',
+            'stage',
         )
-
 
 class ExperimentUpdateForm(forms.ModelForm):
     name = forms.CharField(
@@ -78,10 +62,12 @@ class ExperimentUpdateForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Project
+        model = Experiment
         fields = (
             'name',
             'description',
             'experimenter',
-            'experiment_reservations',
+            'modified_by',
+            'modified_date',
+            'stage',
         )
