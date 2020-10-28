@@ -15,10 +15,10 @@ class ExperimentCreateForm(forms.ModelForm):
         label='Experimenter',
     )
 
-    project = forms.ModelChoiceField(
+    project = forms.ModelMultipleChoiceField(
         queryset=Project.objects.order_by('name'),
         required=True,
-        widget=forms.Select(),
+        widget=forms.SelectMultiple(),
         label='Project',
     )
 

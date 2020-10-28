@@ -47,7 +47,7 @@ def experiment_detail(request, experiment_uuid):
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     experiment_reservations = experiment.reservation_of_experiment
     return render(request, 'experiment_detail.html', 
-    {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'project': experiment.project, 'reservations': experiment_reservations})
+    {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'project': experiment.project.all(), 'reservations': experiment_reservations})
 
 
 def experiment_update(request, experiment_uuid):
