@@ -2,19 +2,19 @@
 {% load static %}
 
 {% block title %}
-    Update: {{ project_name }}
+    Update: {{ reservation_name }}
 {% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>Update Project</h2>
+            <h2>Update Reservation</h2>
             <form method="POST" class="form-group">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input class="btn btn-success mr-2" type="submit" value="Save"/>
                 <button class="btn btn-secondary mr-2">
-                  <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="unlink">Cancel</a>
+                  <a href="{% url 'reservation_detail' reservation_uuid=reservation_uuid %}" class="unlink">Cancel</a>
                 </button>
             </form>
         </div>

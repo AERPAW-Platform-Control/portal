@@ -7,33 +7,22 @@ from .models import Experiment
 
 
 class ExperimentCreateForm(forms.ModelForm):
-    name = forms.CharField(
-        widget=forms.TextInput(attrs={'size': 60}),
-        required=True,
-        label='Experiment Name',
-    )
 
-    description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
-        required=False,
-        label='Experiment Description',
-    )
-
-    state = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
-        required=False,
-        label='Experiment State',
-    )
-
-    experimenter = forms.ModelChoiceField(
+    experimenter = forms.ModelMultipleChoiceField(
         queryset=AerpawUser.objects.order_by('oidc_claim_name'),
         required=True,
-        initial=0,
-        widget=forms.Select(),
+        widget=forms.SelectMultiple(),
         label='Experimenter',
     )
 
-    experiment_reservations = forms.ModelMultipleChoiceField(
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.order_by('name'),
+        required=True,
+        widget=forms.Select(),
+        label='Project',
+    )
+
+    reservation = forms.ModelMultipleChoiceField(
         queryset=Reservation.objects.order_by('name'),
         required=False,
         widget=forms.SelectMultiple(),
@@ -41,14 +30,15 @@ class ExperimentCreateForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Project
+        model = Experiment
         fields = (
             'name',
             'description',
             'experimenter',
-            'experiment_reservations',
+            'project',
+            'reservation',
+            'stage',
         )
-
 
 class ExperimentUpdateForm(forms.ModelForm):
     name = forms.CharField(
@@ -78,10 +68,12 @@ class ExperimentUpdateForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Project
+        model = Experiment
         fields = (
             'name',
             'description',
             'experimenter',
-            'experiment_reservations',
+            'modified_by',
+            'modified_date',
+            'stage',
         )
