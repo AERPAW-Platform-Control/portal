@@ -45,7 +45,7 @@ def experiment_detail(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    experiment_reservations = experiment.reservations
+    experiment_reservations = experiment.reservation_of_experiment
     return render(request, 'experiment_detail.html', 
     {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'project': experiment.project, 'reservations': experiment_reservations})
 
