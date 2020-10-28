@@ -41,12 +41,14 @@ def create_new_experiment(request, form):
         experiment.project = None
     experiment.save()
 
-    try:
-        reservation_id = form.data.getlist('reservation')[0]
-        experiment.reservations = Reservation.objects.get(id=int(reservation_id))
-    except ValueError as e:
-        print(e)
-        experiment.reservations= None
+    #try:
+    #    reservation_id_list=form.data.getlist('reservation')
+    #    if not reservation_id_list:
+    #        reservation_id = reservation_id_list[0]
+    #        experiment.reservations = Reservation.objects.get(id=int(reservation_id))
+    #except ValueError as e:
+    #    print(e)
+    #    experiment.reservations= None
     experiment.save()
 
     return str(experiment.uuid)
@@ -76,8 +78,8 @@ def update_existing_experiment(request, experiment, form):
     experiment.modified_by = request.user
     experiment.modified_date = timezone.now()
     experiment.save()
-    experiment_reservation_id_list = form.data.getlist('experiment_reservations')
-    update_experiment_reservations(experiment, experiment_reservation_id_list)
+    #experiment_reservation_id_list = form.data.getlist('experiment_reservations')
+    #update_experiment_reservations(experiment, experiment_reservation_id_list)
     experiment.save()
     return str(experiment.uuid)
 
