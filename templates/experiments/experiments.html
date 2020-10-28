@@ -18,21 +18,21 @@
               <tr>
                 <th>Name</th>
                 <th>Description</th>
-                <th>Experimenter</th>
                 <th>Project</th>
+                <th>Created By</th>
                 <th>Created Date</th>
               </tr>
-              {% for project in projects %}
+              {% for experiment in experiments %}
                   <tr>
                       <td>
                           <a href="{% url 'experiment_detail' experiment_uuid=experiment.uuid %}">
-                              {{ project.name }}
+                              {{ experiment.name }}
                           </a>
                       </td>
-                      <td>{{ project.description }}</td>
-                      <td>{{ project.experimenter }}</td>
-                      <td>{{ project.Project }}</td>
-                      <td>{{ project.created_date }}</td>
+                      <td>{{ experiment.description }}</td>
+                      <td>{{ experiment.project }}</td>
+                      <td>{{ experiment.created_by }}</td>
+                      <td>{{ experiment.created_date }}</td>
                   </tr>
               {% endfor %}
           </table>

@@ -12,18 +12,18 @@ class Reservation(models.Model):
     description = models.TextField()
 
     experiment = models.ForeignKey(
-        Experiment, related_name='reservation_experiment', on_delete=models.CASCADE
+        Experiment, related_name='reservation_of_experiment', on_delete=models.CASCADE
     )
 
     resource = models.ForeignKey(
-        Resource, related_name='reservation_resource', on_delete=models.CASCADE
+        Resource, related_name='reservation_of_resource', on_delete=models.CASCADE
     )
     units = models.IntegerField()
     
     start_date = models.DateTimeField(default=timezone.now) #should come frome experiment time
     end_date = models.DateTimeField(default=timezone.now)
     virtualization=models.CharField(max_length=32)
-    management_ip=models.GenericIPAddressField()
+    management_ip=models.GenericIPAddressField(null=True)
 
     state=models.CharField(
       max_length=64,

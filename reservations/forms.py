@@ -17,18 +17,11 @@ class ReservationCreateForm(forms.ModelForm):
         required=False,
         label='Resource Description',
     )
-
-    experiment = forms.ModelMultipleChoiceField(
-        queryset=Experiment.objects.order_by('name'),
-        required=False,
-        widget=forms.SelectMultiple(),
-        label='Experiment',
-    )
     
-    resource = forms.ModelMultipleChoiceField(
+    resource = forms.ModelChoiceField(
         queryset=Resource.objects.order_by('name'),
-        required=False,
-        widget=forms.SelectMultiple(),
+        required=True,
+        widget=forms.Select(),
         label='Resource',
     )
 
@@ -44,7 +37,6 @@ class ReservationCreateForm(forms.ModelForm):
         fields = (
             'name',
             'description',
-            'experiment',
             'resource',
             'units',
         )
@@ -62,10 +54,10 @@ class ReservationChangeForm(forms.ModelForm):
         label='Resource Description',
     )
 
-    resource = forms.ModelMultipleChoiceField(
+    resource = forms.ModelChoiceField(
         queryset=Resource.objects.order_by('name'),
         required=False,
-        widget=forms.SelectMultiple(),
+        widget=forms.Select(),
         label='Resource',
     )
 

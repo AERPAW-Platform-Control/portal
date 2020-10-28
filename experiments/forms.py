@@ -8,15 +8,21 @@ from .models import Experiment
 
 class ExperimentCreateForm(forms.ModelForm):
 
-
     experimenter = forms.ModelMultipleChoiceField(
         queryset=AerpawUser.objects.order_by('oidc_claim_name'),
-        required=False,
+        required=True,
         widget=forms.SelectMultiple(),
         label='Experimenter',
     )
 
-    experiment_reservations = forms.ModelMultipleChoiceField(
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.order_by('name'),
+        required=True,
+        widget=forms.Select(),
+        label='Project',
+    )
+
+    reservation = forms.ModelMultipleChoiceField(
         queryset=Reservation.objects.order_by('name'),
         required=False,
         widget=forms.SelectMultiple(),
@@ -29,8 +35,8 @@ class ExperimentCreateForm(forms.ModelForm):
             'name',
             'description',
             'experimenter',
-            'created_by',
-            'created_date',
+            'project',
+            'reservation',
             'stage',
         )
 

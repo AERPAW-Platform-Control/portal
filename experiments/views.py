@@ -41,12 +41,13 @@ def experiment_detail(request, experiment_uuid):
     """
 
     :param request:
-    :param project_uuid:
+    :param experiment_uuid:
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    experiment_reservations = experiment.experiment_reservations.order_by('name')
-    return render(request, 'experiment_detail.html', {'experiment': experiment, 'experiment_reservations': experiment_reservations})
+    experiment_reservations = experiment.reservations
+    return render(request, 'experiment_detail.html', 
+    {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'project': experiment.project, 'reservations': experiment_reservations})
 
 
 def experiment_update(request, experiment_uuid):
@@ -67,7 +68,7 @@ def experiment_update(request, experiment_uuid):
         form = ExperimentUpdateForm(instance=experiment)
     return render(request, 'experiment_update.html',
                   {
-                      'form': form, 'project_uuid': str(experiment_uuid), 'experiment_name': experiment.name}
+                      'form': form, 'experiment_uuid': str(experiment_uuid), 'experiment_name': experiment.name}
                   )
 
 
@@ -79,9 +80,9 @@ def experiment_delete(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    experiment_members = experiment.experiment_reservations.order_by('name')
+    experiment_reservations = experiment.reservations
     if request.method == "POST":
         is_removed = delete_existing_experiment(request, experiment)
         if is_removed:
             return redirect('experiments')
-    return render(request, 'experiment_delete.html', {'experiment': experiment, 'experiment_reservations': experiment_reservations})
+    return render(request, 'experiment_delete.html', {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'experiment_reservations': experiment_reservations})

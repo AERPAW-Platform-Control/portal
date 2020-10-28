@@ -2,53 +2,53 @@
 {% load static %}
 
 {% block title %}
-    Delete: {{ project.name }}
+    Delete: {{ reservation.name }}
 {% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
             <div class="post">
-                <h1 class="text-danger">Are you sure you want to delete "{{ project.name }}"?</h1>
+                <h1 class="text-danger">Are you sure you want to delete "{{ reservation.name }}"?</h1>
                 <table class="table table-striped table-bordered my-4">
                   <tr>
                     <td>Description</td>
-                    <td>{{ project.description }}</td>
+                    <td>{{ reservation.description }}</td>
                   </tr>
-                  <tr>
-                    <td>Principal Investigator</td>
-                    <td>{{ project.principal_investigator }}</td>
-                  </tr>
-                  <tr>
-                    <td>Project Members</td>
-                    <td>
-                      {% for member in project_members %}
-                        {{ member }},
-                      {% endfor %}
-                    </td>
-                  </tr>
+                <tr>
+                  <td>Experiment</td>
+                  <td>{{ reservation.experiment }}</td>
+                </tr>
+                <tr>
+                  <td>Reservation Resource</td>
+                  <td>
+                    {% for rs in reservation_resources %}
+                      {{ rs }},
+                    {% endfor %}
+                  </td>
+                </tr>
                   <tr>
                     <td>Created By</td>
-                    <td>{{ project.created_by }}</td>
+                    <td>{{ reservation.created_by }}</td>
                   </tr>
                   <tr>
                     <td>Created Date</td>
-                    <td>{{ project.created_date }}</td>
+                    <td>{{ reservation.created_date }}</td>
                   </tr>
                   <tr>
                     <td>Modified By</td>
-                    <td>{{ project.modified_by }}</td>
+                    <td>{{ reservation.modified_by }}</td>
                   </tr>
                   <tr>
                     <td>Modified Date</td>
-                    <td>{{ project.modified_date }}</td>
+                    <td>{{ reservation.modified_date }}</td>
                   </tr>
                 </table>
             </div>
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 <input class="btn btn-danger mr-2" type="submit" value="Delete"/>
-                <a href="{% url 'project_detail' project_uuid=project.uuid %}" class="btn btn-secondary">Back</a>
+                <a href="{% url 'reservation_detail' reservation_uuid=reservation.uuid %}" class="btn btn-secondary">Back</a>
             </form>
 
         </div>
