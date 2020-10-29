@@ -56,7 +56,7 @@ def reservation_detail(request, reservation_uuid, experiment_uuid):
     reservation_resource = reservation.resource
     return render(request, 'reservation_detail.html', {'reservation': reservation, 'experiment':experiment, 'reservation_resource': reservation_resource})
 
-def reservation_detail(request, reservation_uuid):
+def reservation_detail_own(request, reservation_uuid):
     """
 
     :param request:
