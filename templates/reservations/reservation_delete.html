@@ -48,7 +48,7 @@
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 <input class="btn btn-danger mr-2" type="submit" value="Delete"/>
-                <a href="{% url 'reservation_detail' reservation_uuid=reservation.uuid %}" class="btn btn-secondary">Back</a>
+                <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}" class="btn btn-secondary">Back</a>
             </form>
 
         </div>

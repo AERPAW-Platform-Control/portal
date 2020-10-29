@@ -10,7 +10,7 @@ from accounts.models import AerpawUser
 from projects.models import Project
 from resources.models import ResourceStageChoice
 
-class ReservationStateChoice(Enum):   # A subclass of Enum
+class ReservationStatusChoice(Enum):   # A subclass of Enum
     IDLE = 'Idle'
     SUCCESS = 'Success'
     FAILURE = 'Failure'

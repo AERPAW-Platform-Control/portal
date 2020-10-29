@@ -80,7 +80,7 @@ def reservation_update(request, reservation_uuid):
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation_uuid = update_existing_reservation(request, reservation, form)
-            return redirect('reservation_detail', reservation_uuid=str(reservation.uuid))
+            return redirect('reservation_detail_own', reservation_uuid=str(reservation.uuid))
     else:
         form = ReservationChangeForm(instance=reservation)
     return render(request, 'reservation_update.html',

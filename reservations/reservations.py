@@ -29,12 +29,9 @@ def create_new_reservation(request, form, experiment_uuid):
 
     resource_id = form.data.getlist('resource')[0]
     reservation.resource = Resource.objects.get(id=int(resource_id))
-
     reservation.units = form.data.getlist('units')[0]
-    reservation.created_by = request.user
-    reservation.created_date = timezone.now()
-    reservation.modified_by = reservation.created_by
-    reservation.modified_date = reservation.created_date
+    reservation.start_date = timezone.now()
+    reservation.end_date = reservation.created_date
     reservation.save()
 
     return str(reservation.uuid)

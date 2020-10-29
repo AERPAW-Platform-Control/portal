@@ -30,7 +30,9 @@
               <td>Reservations</td>
               <td>
                 {% for reservation in reservations %}
-                  {{ reservation }},
+                  <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">
+                  {{ reservation.name }}
+                </a>
                 {% endfor %}
               </td>
               <td>
