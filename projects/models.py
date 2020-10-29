@@ -28,8 +28,15 @@ class Project(models.Model):
     )
     modified_date = models.DateTimeField(blank=True, null=True)
 
+    #experiments = models.ForeignKey(
+    #    'experiments.Experiment', related_name='project_of_experiment', null=True, on_delete=models.SET_NULL
+    #)
+
     class Meta:
         verbose_name = 'AERPAW Project'
 
     def __str__(self):
         return self.name
+
+
+

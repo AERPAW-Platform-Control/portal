@@ -13,11 +13,30 @@ Initial development framework for AERPAW Portal
 
 ## Table of Contents
 
+- [How to Contribute](#contrib)
 - [Setting up your Development Environment](#setup)
 - [Running the Development Environment](#run-dev)
 - [Running everything in Docker](#run-in-docker)
 - [Cleaning it all up](#cleanup)
 - [User model](#user-model)
+
+## <a name="contrib"></a>How to Contribute
+
+If you wish to contribute to the AERPAW Portal please follow a few basic guidelines.
+
+1. Ensure you're able to run the existing code in your own [development environment](#setup).
+2. Create a descriptive [GitHub issue](https://github.com/AERPAW-Platform-Control/aerpaw-portal/issues) that outlines what feature you plan to contribute.
+3. Clone the repository, and start from the most recent version of the [develop branch](https://github.com/AERPAW-Platform-Control/aerpaw-portal/tree/develop).
+4. Name your branch using the Github issue number as a prefix along with a brief name that corresponds to your feature (e.g., `8-how-to-contribute`).
+5. Once satisfied with your completed and tested work, submit a [pull request](https://github.com/AERPAW-Platform-Control/aerpaw-portal/pulls) against the **develop** branch so that your code can be reviewed by the team.
+
+Notes:
+
+- Do not create a pull request against the **master** branch. The **master** branch is considered the production branch and must always remain stable. The **master** branch is periodically updated from the contents of the **develop** branch at the conclusion of a development cycle.
+- Do not put any content (css, js, images, etc.) in the main `static` directory, instead create a directory named `static` in your app that can be imported into the main `static` directory using the `manage.py collectstatic` call.
+- Use clear and concise naming conventions for apps, classes, functions, variables, etc. Ideally others will be able to reuse your work, and the more clear and concise your code is, the easier it is to reuse it.
+- Include easy to understand documentation and complete unit/functional tests for each new feature being introduced to the project. ([pytest](https://docs.pytest.org/en/latest/) is the recommended framework to use for testing).
+
 
 ## <a name="setup"></a>Setting up your Development Environment
 
@@ -27,20 +46,39 @@ Requirements
 - Docker
 - Docker Compose
 
-The AERPAW Portal is a Django based application, and the code itself should be run on your local machine for development. My preferred Python virtual environment is [virtualenv](https://virtualenv.pypa.io/en/latest/), so the documentation herein will make use of it.
+The AERPAW Portal is a Django based application, and the portal code itself should be run from your local machine for development. Other aspects of the project are expected to run in Docker (Nginx, database, etc.) and the included configuration files may need to be updated to suit your particular setup. My preferred Python virtual environment is [virtualenv](https://virtualenv.pypa.io/en/latest/), so the documentation herein will make use of it.
 
 ## <a name="run-dev"></a>Running the Development Environment
 
 ### Configuration
 
-Some configuration is required prior to running the development environment.
+Copy the `env.template` as `.env` and update settings `CILOGON_CLIENT_ID` and `CILOGON_CLIENT_SECRET` with the information as provided by CILogon during client registration.
 
-- copy the `en.template` file as `.env`
-    - populate the `.env` file with values for `OIDC_RP_CLIENT_ID` and `OIDC_RP_CLIENT_SECRET` (all other values should have sane defaults, but may need to be adjusted based on your local setup)
+**Client Registration** 
+
+- To get started, register your client at [https://cilogon.org/oauth2/register](https://cilogon.org/oauth2/register) and wait for notice of approval. Please register your callback URLs on that page with care. They are the only callback URLs that may be used by your client unless you later contact help@cilogon.org and request a change to your registration.
+- Upon completion the user will be issued a `CILOGON_CLIENT_ID` and `CILOGON_CLIENT_SECRET`.
+
+
+```sh
+# Environment settings for both Django and docker-compose
+...
+# OIDC CILogon (django)
+# callback url
+export OIDC_RP_CALLBACK='https://127.0.0.1:8443/oidc/callback/'
+# client id and client secret
+export OIDC_RP_CLIENT_ID=''         # <-- replace with your client id
+export OIDC_RP_CLIENT_SECRET=''     # <-- replace with your client secret
+# oidc scopes
+export OIDC_RP_SCOPES="openid email profile org.cilogon.userinfo"
+...
+```
+
+- The rest of the values in the `.env` file should have sane defaults for running locally at [https://127.0.0.1:8443](). If you prefer to run your application at a different domain you will need to update the `.env` accordingly.
 
 ### Docker containers
 
-The `docker-compose.yml` file at the top level of the repository is meant for **development** use. Other compose definitions can be found in the `compose` directory. The development compose file will not start the main Django application as it's meant to be run directly from the host for development.
+The `docker-compose.yml` file at the top level of the repository is meant for **development** use. Other compose definitions can be found in the `compose` directory. The development compose file will not start the main Django application as it's meant to be run directly from the host, and only runs the database and nginx containers.
 
 ```
 docker-compose pull
@@ -57,7 +95,7 @@ aerpaw-db      docker-entrypoint.sh postgres    Up      0.0.0.0:5432->5432/tcp
 aerpaw-nginx   /docker-entrypoint.sh ngin ...   Up      0.0.0.0:8443->443/tcp, 0.0.0.0:8080->80/tcp
 ```
 
-And the database should be ready to accept connections.
+Verify that the database is ready to accept connections.
 
 ```
 $ docker-compose logs database
@@ -83,13 +121,19 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Once completed you should now be ready to run the script that launches the Django applicaiton using uWSGI
+Once completed you should be ready to run the script that launches the Django application using uWSGI
 
 ```console
 UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) ./run_uwsgi.sh
 ```
 
-Navigate to [https://127.0.0.1:8443/](https://127.0.0.1:8443/) in your browser (may encounter a security warning due to using a self signed certificate) and you should observe the following:
+- NOTE: parameters for the User's UID and GID are passed to uWSGI for it to be able to run it's workers as that user.
+
+Navigate to [https://127.0.0.1:8443/](https://127.0.0.1:8443/) in your browser (may encounter a security warning due to using a self signed certificate) 
+
+![](docs/images/certificate-warning.png)
+
+Once on the main page you should observe the following:
 
 ![](docs/images/home.png)
 
@@ -193,6 +237,11 @@ $ ps -a
 # terminate it along with the uswgi processes it spawned
 $ kill -9 41712 41725 41727
 ```
+# or kill it more conviniently
+$ kill -INT `cat /tmp/project-master.pid`
+# or 
+$ uwsgi --stop /tmp/project-master.pid
+
 
 ### Directories
 
@@ -220,6 +269,10 @@ Base User objects have the following fields:
 - **is\_superuser** - Boolean. Designates that this user has all permissions without explicitly assigning them
 - **last\_login** - A datetime of the user’s last login
 - **date\_joined** - A datetime designating when the account was created
+
+#Create super user
+$python manage.py createsuperuser
+
 
 Ref: [https://docs.djangoproject.com/en/3.1/ref/contrib/auth/](https://docs.djangoproject.com/en/3.1/ref/contrib/auth/)
 

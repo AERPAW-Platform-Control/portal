@@ -1,4 +1,8 @@
 # accounts/urls.py
 from django.urls import path
 
-urlpatterns = []
+from . import views
+
+urlpatterns = [
+    path('profile', views.profile, name='profile'),
+]

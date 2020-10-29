@@ -47,11 +47,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'accounts',  # custom user accounts
-    'projects',  # aerpaw projects
+    'django.contrib.staticfiles',    
     'crispy_forms',  # django-crispy-forms: https://django-crispy-forms.readthedocs.io/en/latest/dj
     'bootstrap4',  # django-bootstrap4: https://django-bootstrap4.readthedocs.io/en/latest/quickstart.html
+
+    'accounts',  # custom user accounts
+    'projects',  # aerpaw projects
+    'resources',  # aerpaw experiments
+    'reservations',  # aerpaw reservations
+    'experiments',  # aerpaw experiments
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -81,6 +85,9 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/base'),
             os.path.join(BASE_DIR, 'templates/projects'),
             os.path.join(BASE_DIR, 'templates/users'),
+            os.path.join(BASE_DIR, 'templates/experiments'),
+            os.path.join(BASE_DIR, 'templates/reservations'),
+            os.path.join(BASE_DIR, 'templates/resources'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
