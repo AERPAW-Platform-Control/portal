@@ -1,4 +1,6 @@
 import uuid
+from json import JSONEncoder
+from uuid import UUID
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -6,8 +8,13 @@ from django.utils import timezone
 
 from accounts.models import AerpawUser
 
-User = get_user_model()
+JSONEncoder_olddefault = JSONEncoder.default
+def JSONEncoder_newdefault(self, o):
+    if isinstance(o, UUID): return str(o)
+    return JSONEncoder_olddefault(self, o)
+JSONEncoder.default = JSONEncoder_newdefault
 
+User = get_user_model()
 
 class Project(models.Model):
     name = models.CharField(max_length=255)
@@ -35,8 +42,11 @@ class Project(models.Model):
     class Meta:
         verbose_name = 'AERPAW Project'
 
+    # def __str__(self):
+    #     return self.name
+
     def __str__(self):
-        return self.name
+        return u'{0}'.format(self.name)
 
 
 

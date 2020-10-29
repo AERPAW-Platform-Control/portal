@@ -15,19 +15,19 @@ class ExperimentCreateForm(forms.ModelForm):
         label='Experimenter',
     )
 
-    project = forms.ModelMultipleChoiceField(
-        queryset=Project.objects.order_by('name'),
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
         required=True,
-        widget=forms.SelectMultiple(),
+        widget=forms.Select(),
         label='Project',
     )
 
-    reservation = forms.ModelMultipleChoiceField(
-        queryset=Reservation.objects.order_by('name'),
-        required=False,
-        widget=forms.SelectMultiple(),
-        label='Experiment Reservations',
-    )
+    # reservation = forms.ModelChoiceField(
+    #     queryset=Reservation.objects.order_by('name'),
+    #     required=False,
+    #     widget=forms.Select(),
+    #     label='Experiment Reservations',
+    # )
 
     class Meta:
         model = Experiment
@@ -36,7 +36,6 @@ class ExperimentCreateForm(forms.ModelForm):
             'description',
             'experimenter',
             'project',
-            'reservation',
             'stage',
         )
 

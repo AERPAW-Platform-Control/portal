@@ -33,13 +33,15 @@ def create_new_experiment(request, form):
     update_experimenter(experiment, experimenter_id_list)
     experiment.save()
 
-    try:
-        project_id_list = form.data.getlist('project')
-        update_project(experiment,project_id_list)
-    except ValueError as e:
-        print(e)
-        experiment.project = None
-    experiment.save()
+    # try:
+    #     experiment.project = form.data.getlist('project')[0]
+    #     #project_id = get_object_or_404(Experiment, uuid=UUID(str(project_uuid)))      
+    #     #project_id_list = form.data.getlist('project')
+    #     #update_project(experiment,project_id_list)
+    # except ValueError as e:
+    #     print(e)
+    #     experiment.project = None
+    # experiment.save()
 
     #try:
     #    reservation_id_list=form.data.getlist('reservation')
@@ -53,19 +55,19 @@ def create_new_experiment(request, form):
 
     return str(experiment.uuid)
 
-def update_project(experiment, project_id_list):
-    """
+# def update_project(experiment, project_id_list):
+#     """
 
-    :param experiment:
-    :param project_id_list:
-    :return:
-    """
-    # clear current experimenter
-    experiment.project.clear()
-    # add members from experimenter_id_update_list
-    for project_id in project_id_list:
-        experiment_project = Project.objects.get(id=int(project_id))
-        experiment.project.add(experiment_project)
+#     :param experiment:
+#     :param project_id_list:
+#     :return:
+#     """
+#     # clear current experimenter
+#     experiment.project.clear()
+#     # add members from experimenter_id_update_list
+#     for project_id in project_id_list:
+#         experiment_project = Project.objects.get(id=int(project_id))
+#         experiment.project.add(experiment_project)
 
 def update_experimenter(experiment, experimenter_id_list):
     """
