@@ -45,9 +45,9 @@ class Experiment(models.Model):
     )
     modified_date = models.DateTimeField(blank=True, null=True)
 
-    reservations = models.ForeignKey(
-        'reservations.Reservation', related_name='experiment_of_reservation', null=True, on_delete=models.SET_NULL
-    )
+    #reservations = models.ForeignKey(
+    #    'reservations.Reservation', related_name='experiment_of_reservation', null=True, on_delete=models.SET_NULL
+    #)
 
     stage=models.CharField(
       max_length=64,

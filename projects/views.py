@@ -42,7 +42,8 @@ def project_detail(request, project_uuid):
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
     project_members = project.project_members.order_by('oidc_claim_name')
-    return render(request, 'project_detail.html', {'project': project, 'project_members': project_members})
+    project_experiments = project.experiment_of_project
+    return render(request, 'project_detail.html', {'project': project, 'project_members': project_members, 'experiments': project_experiments.all()})
 
 
 def project_update(request, project_uuid):
