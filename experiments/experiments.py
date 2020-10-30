@@ -34,12 +34,12 @@ def create_new_experiment(request, form):
     experiment.save()
 
     try:
-        project_id = form.data.getlist('project')[0]
-        experiment.project = Project.objects.get(id=int(project_id))
+        experiment.project = Project.objects.get(id=int(form.data.getlist('project')[0]))  
+        experiment.project.experiment_of_project.add(experiment)
+        experiment.save()
     except ValueError as e:
         print(e)
         experiment.project = None
-    experiment.save()
 
     #try:
     #    reservation_id_list=form.data.getlist('reservation')
@@ -49,7 +49,7 @@ def create_new_experiment(request, form):
     #except ValueError as e:
     #    print(e)
     #    experiment.reservations= None
-    experiment.save()
+    #experiment.save()
 
     return str(experiment.uuid)
 

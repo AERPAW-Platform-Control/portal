@@ -33,12 +33,14 @@ class ReservationCreateForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Resource
+        model = Reservation
         fields = (
             'name',
             'description',
             'resource',
             'units',
+            'start_date',
+            'end_date',
         )
 
 
@@ -69,10 +71,12 @@ class ReservationChangeForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Resource
+        model = Reservation
         fields = (
             'name',
             'description',
             'resource',
             'units',
+            'start_date',
+            'end_date',
         )

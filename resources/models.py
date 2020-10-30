@@ -65,6 +65,9 @@ class Resource(models.Model):
 
     created_date=models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        return self.name
+
     def has_inventory(self):
         return self.units > 0
 

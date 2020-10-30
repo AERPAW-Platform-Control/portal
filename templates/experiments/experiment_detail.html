@@ -16,7 +16,7 @@
             </tr>
             <tr>
               <td>Project</td>
-              <td>{{ experiment.project}}</td>
+              <td>{{ experiment.project }}</td>
             </tr>
             <tr>
               <td>Experimenters</td>
@@ -30,7 +30,9 @@
               <td>Reservations</td>
               <td>
                 {% for reservation in reservations %}
-                  {{ reservation }},
+                  <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">
+                  {{ reservation.name }}
+                </a>
                 {% endfor %}
               </td>
               <td>

@@ -3,7 +3,7 @@ from django.utils import timezone
 import uuid
 
 from resources.models import Resource
-from experiments.models import Experiment, ReservationStateChoice
+from experiments.models import Experiment, ReservationStatusChoice
 
 # Create your models here.
 class Reservation(models.Model):
@@ -27,7 +27,7 @@ class Reservation(models.Model):
 
     state=models.CharField(
       max_length=64,
-      choices=ReservationStateChoice.choices(),
+      choices=ReservationStatusChoice.choices(),
     )
 
     def __str__(self):

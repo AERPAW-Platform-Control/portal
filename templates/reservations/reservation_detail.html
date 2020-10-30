@@ -19,28 +19,20 @@
               <td>{{ reservation.experiment }}</td>
             </tr>
             <tr>
-              <td>Reservation Resource</td>
-              <td>
-                {% for rs in reservation_resources %}
-                  {{ rs }},
-                {% endfor %}
-              </td>
+              <td>Resource</td>
+              <td>{{ reservation.resource }}</td>
             </tr>
             <tr>
-              <td>Created By</td>
-              <td>{{ reservation.created_by }}</td>
+              <td>Units</td>
+              <td>{{ reservation.units }}</td>
             </tr>
             <tr>
-              <td>Created Date</td>
-              <td>{{ reservation.created_date }}</td>
+              <td>Start Date</td>
+              <td>{{ reservation.start_date }}</td>
             </tr>
             <tr>
-              <td>Modified By</td>
-              <td>{{ reservation.modified_by }}</td>
-            </tr>
-            <tr>
-              <td>Modified Date</td>
-              <td>{{ reservation.modified_date }}</td>
+              <td>End Date</td>
+              <td>{{ reservation.end_date }}</td>
             </tr>
           </table>
           <button class="btn btn-success mr-2">

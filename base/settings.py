@@ -52,10 +52,10 @@ INSTALLED_APPS = [
     'bootstrap4',  # django-bootstrap4: https://django-bootstrap4.readthedocs.io/en/latest/quickstart.html
 
     'accounts',  # custom user accounts
-    'projects',  # aerpaw projects
     'resources',  # aerpaw experiments
     'reservations',  # aerpaw reservations
     'experiments',  # aerpaw experiments
+    'projects',  # aerpaw projects
 ]
 
 AUTHENTICATION_BACKENDS = (

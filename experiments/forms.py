@@ -1,5 +1,7 @@
 from django import forms
 
+
+
 from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
@@ -16,18 +18,18 @@ class ExperimentCreateForm(forms.ModelForm):
     )
 
     project = forms.ModelChoiceField(
-        queryset=Project.objects.order_by('name'),
+        queryset=Project.objects.all(),
         required=True,
         widget=forms.Select(),
         label='Project',
     )
 
-    reservation = forms.ModelMultipleChoiceField(
-        queryset=Reservation.objects.order_by('name'),
-        required=False,
-        widget=forms.SelectMultiple(),
-        label='Experiment Reservations',
-    )
+    # reservation = forms.ModelChoiceField(
+    #     queryset=Reservation.objects.order_by('name'),
+    #     required=False,
+    #     widget=forms.Select(),
+    #     label='Experiment Reservations',
+    # )
 
     class Meta:
         model = Experiment
@@ -36,7 +38,6 @@ class ExperimentCreateForm(forms.ModelForm):
             'description',
             'experimenter',
             'project',
-            'reservation',
             'stage',
         )
 

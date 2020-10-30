@@ -20,7 +20,7 @@ $ uwsgi --stop /tmp/project-master.pid
 
 ```how to create superuser
 #Create super user
-$python manage.py createsuperuse
+$python manage.py createsuperuser
 
 ```how to reset model migrations
 $find . -path "*/migrations/*.py" -not -name "__init__.py" -delete

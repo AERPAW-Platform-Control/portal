@@ -56,7 +56,7 @@ def reservation_detail(request, reservation_uuid, experiment_uuid):
     reservation_resource = reservation.resource
     return render(request, 'reservation_detail.html', {'reservation': reservation, 'experiment':experiment, 'reservation_resource': reservation_resource})
 
-def reservation_detail(request, reservation_uuid):
+def reservation_detail_own(request, reservation_uuid):
     """
 
     :param request:
@@ -80,7 +80,7 @@ def reservation_update(request, reservation_uuid):
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation_uuid = update_existing_reservation(request, reservation, form)
-            return redirect('reservation_detail', reservation_uuid=str(reservation.uuid))
+            return redirect('reservation_detail_own', reservation_uuid=str(reservation.uuid))
     else:
         form = ReservationChangeForm(instance=reservation)
     return render(request, 'reservation_update.html',
