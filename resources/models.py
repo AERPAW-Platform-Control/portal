@@ -66,9 +66,17 @@ class Resource(models.Model):
     created_date=models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return self.name
+      return self.name
 
-    def has_inventory(self):
-        return self.units > 0
+    def is_available(self):
+      return self.units > 0
 
+    def remove_units(self, count=1, save=True):
+      current_availableUnits = self.availableUnits
+      current_availableUnits -= count
+      if current_availableUnits >= 0
+        self.availableUnits = current_availableUnits
+        if save == True:
+          self.save()
+      return self.availableUnits
     

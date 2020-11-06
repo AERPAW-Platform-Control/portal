@@ -41,6 +41,12 @@ class ExperimentCreateForm(forms.ModelForm):
             'stage',
         )
 
+    def clean_title(self):
+        data = self.cleaned_data.get('name')
+        if len(data) <4:
+            raise forms.ValidationError("The name is not long enough!")
+        return data
+
 class ExperimentUpdateForm(forms.ModelForm):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60}),
