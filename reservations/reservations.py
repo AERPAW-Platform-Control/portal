@@ -39,10 +39,10 @@ def create_new_reservation(request, form, experiment_uuid):
 
     is_available = reservation.resource.remove_units(int(reservation.units))
     if not is_available:
-        reservation.state=ReservationStatusChoice.FAILURE
+        reservation.state=ReservationStatusChoice.FAILURE.value
         print("The resource is not available at this time")
     else:
-        reservation.state=ReservationStatusChoice.SUCCESS
+        reservation.state=ReservationStatusChoice.SUCCESS.value
 
     reservation.save()
 
