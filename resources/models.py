@@ -79,6 +79,9 @@ class Resource(models.Model):
     def is_units_available(self):
       return (self.availableUnits > 0) 
 
+    def is_units_available_reservation(self, count):
+      return (self.availableUnits - count > 0) 
+
     def is_correct_stage(self,stage):
       return (stage == self.stage) 
 

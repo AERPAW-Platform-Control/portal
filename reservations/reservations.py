@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from experiments.models import Experiment
 from resources.models import Resource
-from .models import Reservation
+from .models import Reservation,ReservationStatusChoice
 from accounts.models import AerpawUser
 
 def create_new_reservation(request, form, experiment_uuid):
@@ -39,7 +39,13 @@ def create_new_reservation(request, form, experiment_uuid):
 
     is_available = reservation.resource.remove_units(int(reservation.units))
     if not is_available:
-        reservation.uuid=None
+        reservation.state=ReservationStatusChoice.FAILURE
+        print("The resource is not available at this time")
+    else:
+        reservation.state=ReservationStatusChoice.SUCCESS
+
+    reservation.save()
+
     return str(reservation.uuid)
 
 

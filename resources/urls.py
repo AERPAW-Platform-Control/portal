@@ -17,5 +17,4 @@ urlpatterns = [
     path('<uuid:resource_uuid>', resource_detail, name='resource_detail'),
     path('<uuid:resource_uuid>/update', resource_update, name='resource_update'),
     path('<uuid:resource_uuid>/delete', resource_delete, name='resource_delete'),
-    #path('', include(('reservations.urls', 'reservations'), namespace='resource reservations')),
 ]

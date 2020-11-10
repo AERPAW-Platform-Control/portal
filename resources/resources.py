@@ -2,6 +2,8 @@ import uuid
 
 from django.utils import timezone
 from datetime import datetime,timedelta
+from django.db.models import Q
+
 from .models import Resource
 from accounts.models import AerpawUser
 from reservations.models import Reservation
@@ -85,30 +87,35 @@ def get_resource_list(request):
         resources = Resource.objects.order_by('name')
     return resources
 
+def get_reserved_resource(start_time,end_time):
+    resources = Resource.objects.order_by('name')
+    reserved_units={}
+    for resource in resources:
+        units=get_reserved_units(resource,start_time,end_time)
+        reserved_units[resource.name] = units
+    return reserved_units
 
-def get_reserved_units(resource, start,end):
-    qs1 = Reservation.objects.filter(start_date__gte=start)
-    qs2 = qs1.filter(end_date__lte=end)
+def get_all_reserved_units(term,delta):
+    start_time = datetime.today()
+    all_units={}
+    for i in range(term):
+        end_time = start_time + timedelta(hours=delta)
+        reserved_units = get_reserved_resource(start_time,end_time)
+        start_time=end_time
+        all_units[i] = reserved_units
+    return all_units
+
+def is_resource_available_time(resource, start_time,end_time):
+    if not resource.is_units_available():
+        return False
+    reserved_units = get_reserved_units(resource,start_time,end_time)
+    return resource.is_units_available_reservation(reserved_units)
+
+def get_reserved_units(resource,start,end):
+    qs1 = Reservation.objects.filter(start_date__lte=end)
+    qs2 = qs1.filter(end_date__gte=end)
     qs3= qs2.filter(resource = resource)
     units=0
     for rs in qs3:
         units+=rs.units
     return units
-
-def get_reserved_resource(start_time,end_time):
-    resources = Resource.objects.order_by('name')
-    reserved_units={}
-    for resource in resources:
-        units=get_reserved_units(resource, start_time,end_time)
-        reserved_units[resource.name] = units
-    return reserved_units
-
-def get_all_reserved_units():
-    start_time = datetime.today()
-    all_units={}
-    for i in range(240):
-        end_time = start_time + timedelta(hours=1)
-        reserved_units = get_reserved_resource(start_time,end_time)
-        start_time=end_time
-        all_units[i] = reserved_units
-    return all_units

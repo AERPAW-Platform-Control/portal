@@ -20,7 +20,7 @@ def resources(request):
     :return:
     """
     resources = get_resource_list(request)
-    reserved_resource = get_all_reserved_units()
+    reserved_resource = get_all_reserved_units(24,2)
     return render(request, 'resources.html', {'resources': resources, 'reservations': reserved_resource})
 
 @user_passes_test(lambda u: u.is_superuser)

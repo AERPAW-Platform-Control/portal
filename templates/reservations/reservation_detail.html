@@ -34,6 +34,10 @@
               <td>End Date</td>
               <td>{{ reservation.end_date }}</td>
             </tr>
+            <tr>
+              <td>Reservation Status</td>
+              <td>{{ reservation.state }}</td>
+            </tr>
           </table>
           <button class="btn btn-success mr-2">
             <a href="{% url 'reservation_update' reservation_uuid=reservation.uuid %}" class="unlink">Update</a>

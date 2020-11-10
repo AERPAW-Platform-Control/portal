@@ -4,6 +4,7 @@ from accounts.models import AerpawUser
 from experiments.models import Experiment
 from .models import Reservation
 from resources.models import Resource
+from resources.resources import is_resource_available_time
 
 class ReservationCreateForm(forms.ModelForm):
     def __init__(self,*args,**kwargs):
@@ -63,12 +64,14 @@ class ReservationCreateForm(forms.ModelForm):
 
         if not resource.is_correct_stage(stage):
             raise forms.ValidationError("This resource is not in yourexperiment's stage!")
-        if not resource.is_units_available():
+
+        start_date=cleaned_data.get("start_date")
+        end_date=cleaned_data.get("end_date")
+        is_available = is_resource_available_time(resource,start_date, end_date)
+        if not is_available:
             raise forms.ValidationError("This resource has no units avaialble for reservation at this time!")
 
         return cleaned_data
-    
-
 
 class ReservationChangeForm(forms.ModelForm):
     name = forms.CharField(
