@@ -77,10 +77,10 @@ class Resource(models.Model):
       return self.name
 
     def is_units_available(self):
-      return (self.availableUnits > 0) 
+      return (self.units > 0) 
 
     def is_units_available_reservation(self, count):
-      return (self.availableUnits - count > 0) 
+      return (self.units - count > 0) 
 
     def is_correct_stage(self,stage):
       return (stage == self.stage) 
