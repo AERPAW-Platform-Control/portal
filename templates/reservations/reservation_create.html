@@ -10,8 +10,10 @@
         <div class="container">
             <table class="table table-striped table-bordered my-4">
                 <tr>
-                  <td>Experiment</td>
+                  <td>Experiment:</td>
                   <td>{{ experiment.name }}</td>
+                  <td>Stage:</td>
+                  <td>{{ experiment.stage }}</td>
                   <td>
                     {% for member in experimenter %}
                         {{ member }},

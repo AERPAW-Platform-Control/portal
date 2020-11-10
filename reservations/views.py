@@ -35,12 +35,12 @@ def reservation_create(request,experiment_uuid):
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     if request.method == "POST":
-        form = ReservationCreateForm(request.POST)
+        form = ReservationCreateForm(request.POST,experiment_id=experiment.id)
         if form.is_valid():
             reservation_uuid = create_new_reservation(request, form, experiment_uuid)
             return redirect('reservation_detail', reservation_uuid=reservation_uuid, experiment_uuid=experiment_uuid)
     else:
-        form = ReservationCreateForm()
+        form = ReservationCreateForm(experiment_id=experiment.id)
     return render(request, 'reservation_create.html', {'form': form, 'experiment': experiment, 'experimenter':experiment.experimenter.all()})
 
 

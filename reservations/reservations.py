@@ -30,12 +30,16 @@ def create_new_reservation(request, form, experiment_uuid):
     resource_id = form.data.getlist('resource')[0]
     reservation.resource = Resource.objects.get(id=int(resource_id))
     reservation.units = form.data.getlist('units')[0]
+
     reservation.start_date = timezone.now()
     reservation.end_date = reservation.end_date
     reservation.save()
     reservation.experiment.reservation_of_experiment.add(reservation)
     reservation.save()
 
+    is_available = reservation.resource.remove_units(int(reservation.units))
+    if not is_available:
+        reservation.uuid=None
     return str(reservation.uuid)
 
 
