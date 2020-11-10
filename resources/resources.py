@@ -89,11 +89,15 @@ def get_resource_list(request):
 
 def get_reserved_resource(start_time,end_time):
     resources = Resource.objects.order_by('name')
-    reserved_units={}
+    resource_units={}
     for resource in resources:
-        units=get_reserved_units(resource,start_time,end_time)
-        reserved_units[resource.name] = units
-    return reserved_units
+        reserved_units=get_reserved_units(resource,start_time,end_time)
+        available_units=resource.units-reserved_units
+        units=[]
+        units.append(reserved_units)
+        units.append(available_units)
+        resource_units[resource.uuid] = units
+    return resource_units
 
 def get_all_reserved_units(term,delta):
     start_time = datetime.today()

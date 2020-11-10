@@ -20,7 +20,9 @@
                     {% for resource, units in resource_reservations.items %}
                         <td>{{ term }}</td>
                         <td>{{ resource }}</td>
-                        <td>{{ units }}</td>
+                        {% for unit in units %}
+                            <td>{{ unit }}</td>
+                        {% endfor %}    
                     {% endfor %}
                 </tr>
             {% endfor %}
