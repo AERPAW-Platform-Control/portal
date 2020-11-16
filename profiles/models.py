@@ -13,7 +13,7 @@ from resources.models import ResourceStageChoice
 
 # Create your models here.
 
-class Experiment(models.Model):
+class Profile(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     description = models.TextField()

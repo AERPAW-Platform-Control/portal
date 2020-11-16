@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'reservations',  # aerpaw reservations
     'experiments',  # aerpaw experiments
     'projects',  # aerpaw projects
+    'profiles',  # aerpaw profiles
 ]
 
 AUTHENTICATION_BACKENDS = (
