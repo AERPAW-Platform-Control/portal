@@ -19,7 +19,7 @@ class Profile(models.Model):
     description = models.TextField()
 
     project = models.ForeignKey(
-        Project, related_name='experiment_of_project',null=True, on_delete=models.SET_NULL
+        Project, related_name='profile_of_project',null=True, on_delete=models.SET_NULL
     )
 
     profile = models.TextField()
