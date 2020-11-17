@@ -30,6 +30,10 @@
               <td>Experiment Stage</td>
               <td>{{ profile.stage}}</td>
             </tr>
+            <tr>
+              <td>Profile</td>
+              <td>{{ profile.profile }}</td>
+            </tr>
           </table>
           <button class="btn btn-success mr-2">
             <a href="{% url 'profile_update' profile_uuid=profile.uuid %}" class="unlink">Update</a>

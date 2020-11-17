@@ -88,5 +88,6 @@ def get_reservation_list(request):
     if request.user.is_superuser:
         reservations = Reservation.objects.order_by('name')
     else:
-        reservations = Reservation.objects.order_by('name')
+        experiment_id=request.session['experiment_id']
+        reservations = Reservation.objects.filter(expriment.id==experiment_id).order_by('name')
     return reservations

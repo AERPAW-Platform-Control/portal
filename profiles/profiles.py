@@ -34,10 +34,6 @@ def create_new_profile(request, form):
     profile.created_date = timezone.now()
     profile.save()
 
-    profileer_id_list = form.data.getlist('profileer')
-    update_profileer(profile, profileer_id_list)
-    profile.save()
-
     try:
         profile.project = Project.objects.get(id=int(form.data.getlist('project')[0]))  
         profile.project.profile_of_project.add(profile)

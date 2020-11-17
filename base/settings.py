@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'bootstrap4',  # django-bootstrap4: https://django-bootstrap4.readthedocs.io/en/latest/quickstart.html
 
     'accounts',  # custom user accounts
-    'resources',  # aerpaw experiments
+    'resources',  # aerpaw resources
     'reservations',  # aerpaw reservations
     'experiments',  # aerpaw experiments
     'projects',  # aerpaw projects
@@ -89,6 +89,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/experiments'),
             os.path.join(BASE_DIR, 'templates/reservations'),
             os.path.join(BASE_DIR, 'templates/resources'),
+            os.path.join(BASE_DIR, 'templates/profiles'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
