@@ -23,3 +23,10 @@ $ python manage.py showmigrations
 $ django-admin startproject mysite
 $ python manage.py runserver
 $ python manage.py startapp polls
+
+```how to start aerpaw-portal
+UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) ./run_uwsgi.sh
+```
+
+```Create super user
+$python manage.py createsuperuser
