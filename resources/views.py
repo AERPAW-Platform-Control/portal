@@ -7,10 +7,41 @@ from django.contrib.auth.decorators import user_passes_test
 from uuid import UUID
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.forms.models import model_to_dict
 
 from .forms import ResourceCreateForm, ResourceChangeForm
 from .models import Resource
 from .resources import create_new_resource, get_resource_list, update_existing_resource, delete_existing_resource, get_all_reserved_units
+
+import json
+
+
+def get_resources_json(resources):
+    refactored_rescources_dict = {}
+
+    for res in resources:
+        res_dict = model_to_dict(res)
+        res_dict["created_date"] = str(res_dict["created_date"])
+        refactored_rescources_dict[str(res.uuid)] = res_dict
+
+    return json.dumps(refactored_rescources_dict)
+
+
+def get_reservations_json(reservations):
+    # OUTPUT:
+    # json format
+    # uuid (string) as keys
+    # available units in array as values
+    result = {}
+
+    for res in reservations.values():
+        for key, units in res.items():
+            if str(key) not in result.keys():
+                result[str(key)] = []
+            available_units = units[1]
+            result[str(key)].append(available_units)
+
+    return json.dumps(result)
 
 
 def resources(request):
@@ -20,8 +51,18 @@ def resources(request):
     :return:
     """
     resources = get_resource_list(request)
-    reserved_resource = get_all_reserved_units(24,2)
-    return render(request, 'resources.html', {'resources': resources, 'reservations': reserved_resource})
+    resources_json = get_resources_json(resources)
+    reserved_resource = get_all_reserved_units(24, 2)
+    reservations_json = get_reservations_json(reserved_resource)
+
+    return render(request, 'resources.html',
+                  {
+                      'resources': resources,
+                      'resources_json': resources_json,
+                      'reservations': reserved_resource,
+                      'reservations_json': reservations_json
+                  })
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def resource_create(request):

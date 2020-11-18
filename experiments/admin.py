@@ -14,7 +14,7 @@ class AerpawExperimentAdmin(admin.ModelAdmin):
     add_form = ExperimentCreateForm
     form = ExperimentCreateForm
     model = Experiment
-    list_display = ['name', 'description', 'stage', 'created_by', 'created_date','project', 'experimenter']
+    # list_display = ['name', 'description', 'stage', 'created_by', 'created_date','project', 'experimenter']
 
 
 admin.site.register(Experiment, AerpawExperimentAdmin)
