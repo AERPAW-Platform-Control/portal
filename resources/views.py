@@ -1,8 +1,8 @@
 # Create your views here.
 
-from django.shortcuts import render
-
 # Create your views here.
+
+from django.contrib.auth.decorators import user_passes_test
 
 from uuid import UUID
 
@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import ResourceCreateForm, ResourceChangeForm
 from .models import Resource
-from .resources import create_new_resource, get_resource_list, update_existing_resource, delete_existing_resource
+from .resources import create_new_resource, get_resource_list, update_existing_resource, delete_existing_resource, get_all_reserved_units
 
 
 def resources(request):
@@ -20,9 +20,10 @@ def resources(request):
     :return:
     """
     resources = get_resource_list(request)
-    return render(request, 'resources.html', {'resources': resources})
+    reserved_resource = get_all_reserved_units(24,2)
+    return render(request, 'resources.html', {'resources': resources, 'reservations': reserved_resource})
 
-
+@user_passes_test(lambda u: u.is_superuser)
 def resource_create(request):
     """
 
@@ -47,7 +48,8 @@ def resource_detail(request, resource_uuid):
     :return:
     """
     resource = get_object_or_404(Resource, uuid=UUID(str(resource_uuid)))
-    return render(request, 'resource_detail.html', {'resource': resource})
+    resource_reservations = resource.reservation_of_resource
+    return render(request, 'resource_detail.html', {'resource': resource}, {'reservations': resource_reservations.all()})
 
 
 def resource_update(request, resource_uuid):

@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from experiments.models import Experiment
 from resources.models import Resource
-from .models import Reservation
+from .models import Reservation,ReservationStatusChoice
 from accounts.models import AerpawUser
 
 def create_new_reservation(request, form, experiment_uuid):
@@ -30,10 +30,20 @@ def create_new_reservation(request, form, experiment_uuid):
     resource_id = form.data.getlist('resource')[0]
     reservation.resource = Resource.objects.get(id=int(resource_id))
     reservation.units = form.data.getlist('units')[0]
+
     reservation.start_date = timezone.now()
     reservation.end_date = reservation.end_date
     reservation.save()
     reservation.experiment.reservation_of_experiment.add(reservation)
+    reservation.save()
+
+    is_available = reservation.resource.remove_units(int(reservation.units))
+    if not is_available:
+        reservation.state=ReservationStatusChoice.FAILURE.value
+        print("The resource is not available at this time")
+    else:
+        reservation.state=ReservationStatusChoice.SUCCESS.value
+
     reservation.save()
 
     return str(reservation.uuid)
@@ -78,5 +88,6 @@ def get_reservation_list(request):
     if request.user.is_superuser:
         reservations = Reservation.objects.order_by('name')
     else:
-        reservations = Reservation.objects.order_by('name')
+        experiment_id=request.session['experiment_id']
+        reservations = Reservation.objects.filter(expriment.id==experiment_id).order_by('name')
     return reservations

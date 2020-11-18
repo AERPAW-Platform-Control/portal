@@ -46,6 +46,7 @@ def experiment_detail(request, experiment_uuid):
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     experiment_reservations = experiment.reservation_of_experiment
+    request.session['experiment_id'] = experiment.id
     return render(request, 'experiment_detail.html', 
     {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'reservations': experiment_reservations.all()})
 

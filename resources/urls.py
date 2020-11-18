@@ -1,4 +1,5 @@
 from django.urls import path
+from django.conf.urls import include
 
 from .views import(
     resources,
@@ -7,6 +8,8 @@ from .views import(
     resource_update,
     resource_delete
 )
+
+from reservations import views
 
 urlpatterns = [
     path('', resources, name='resources'),

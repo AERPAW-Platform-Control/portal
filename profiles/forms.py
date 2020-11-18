@@ -1,21 +1,11 @@
 from django import forms
 
-
-
 from accounts.models import AerpawUser
 from projects.models import Project
-from reservations.models import Reservation
-from .models import Experiment
+from .models import Profile
 
 
-class ExperimentCreateForm(forms.ModelForm):
-
-    experimenter = forms.ModelMultipleChoiceField(
-        queryset=AerpawUser.objects.order_by('oidc_claim_name'),
-        required=True,
-        widget=forms.SelectMultiple(),
-        label='Experimenter',
-    )
+class ProfileCreateForm(forms.ModelForm):
 
     project = forms.ModelChoiceField(
         queryset=Project.objects.all(),
@@ -24,20 +14,15 @@ class ExperimentCreateForm(forms.ModelForm):
         label='Project',
     )
 
-    # reservation = forms.ModelChoiceField(
-    #     queryset=Reservation.objects.order_by('name'),
-    #     required=False,
-    #     widget=forms.Select(),
-    #     label='Experiment Reservations',
-    # )
-
     class Meta:
-        model = Experiment
+        model = Profile
         fields = (
             'name',
             'description',
-            'experimenter',
             'project',
+            'profile',
+            'created_by',
+            'created_date',
             'stage',
         )
 
@@ -47,7 +32,7 @@ class ExperimentCreateForm(forms.ModelForm):
             raise forms.ValidationError("The name is not long enough!")
         return data
 
-class ExperimentUpdateForm(forms.ModelForm):
+class ProfileUpdateForm(forms.ModelForm):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60}),
         required=True,
@@ -56,30 +41,30 @@ class ExperimentUpdateForm(forms.ModelForm):
     description = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
-        label='Experiment Description',
+        label='Profile Description',
     )
 
-    experimenter = forms.ModelChoiceField(
-        queryset=AerpawUser.objects.order_by('oidc_claim_name'),
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.order_by('name'),
         required=True,
         initial=0,
         widget=forms.Select(),
-        label='Experimenter',
+        label='Project',
     )
 
-    experiment_reservations = forms.ModelMultipleChoiceField(
-        queryset=Reservation.objects.order_by('name'),
+    profile = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
-        widget=forms.SelectMultiple(),
-        label='Experiment Reservations',
+        label='Profile Script',
     )
 
     class Meta:
-        model = Experiment
+        model = Profile
         fields = (
             'name',
             'description',
-            'experimenter',
+            'project',
+            'profile',
             'modified_by',
             'modified_date',
             'stage',

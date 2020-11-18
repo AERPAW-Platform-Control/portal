@@ -14,7 +14,7 @@ class Reservation(models.Model):
     experiment = models.ForeignKey(
         Experiment, related_name='reservation_of_experiment', on_delete=models.CASCADE
     )
-
+    
     resource = models.ForeignKey(
         Resource, related_name='reservation_of_resource', on_delete=models.CASCADE
     )

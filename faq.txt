@@ -1,18 +1,5 @@
 ```how to kill the server process
-# find the process associated with the bash ./run_uwsgi.sh call
-$ ps -a
-  PID TTY           TIME CMD
-...
-41712 ttys000    0:00.01 bash ./run_uwsgi.sh
-41725 ttys000    0:00.28 uwsgi --uid 503 --gid 20 --virtualenv ./venv --ini uwsgi.ini
-41727 ttys000    0:00.33 uwsgi --uid 503 --gid 20 --virtualenv ./venv --ini uwsgi.ini
-...
-41841 ttys001    0:00.00 ps -a
-
-# terminate it along with the uswgi processes it spawned
-$ kill -9 41712 41725 41727
-```
-# or kill it more conviniently
+# kill it more conviniently
 $ kill -INT `cat /tmp/project-master.pid`
 # or 
 $ uwsgi --stop /tmp/project-master.pid
@@ -32,3 +19,14 @@ $ python manage.py showmigrations
 $ python manage.py migrate --fake app zero
 $ python manage.py showmigrations
 
+```how to start
+$ django-admin startproject mysite
+$ python manage.py runserver
+$ python manage.py startapp polls
+
+```how to start aerpaw-portal
+UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) ./run_uwsgi.sh
+```
+
+```Create super user
+$python manage.py createsuperuser

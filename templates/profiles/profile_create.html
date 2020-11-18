@@ -2,26 +2,13 @@
 {% load static %}
 
 {% block title %}
-    Create Reservation
+    Create Profile
 {% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <table class="table table-striped table-bordered my-4">
-                <tr>
-                  <td>Experiment:</td>
-                  <td>{{ experiment.name }}</td>
-                  <td>Stage:</td>
-                  <td>{{ experiment.stage }}</td>
-                  <td>
-                    {% for member in experimenter %}
-                        {{ member }},
-                    {% endfor %}
-                  </td>
-                </tr>
-            </table>
-            <h2>Create Reservation</h2>
+            <h2>Create Profile</h2>
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}

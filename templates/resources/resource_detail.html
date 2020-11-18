@@ -42,6 +42,16 @@
               <td>Resource Stage</td>
               <td>{{ resource.stage}}</td>
             </tr>
+            <tr>
+              <td>Reservations</td>
+              <td>
+                {% for reservation in reservations %}
+                  <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">
+                  {{ reservation.name }}
+                </a>
+                {% endfor %}
+              </td>
+            </tr>
           </table>
           <button class="btn btn-success mr-2">
             <a href="{% url 'resource_update' resource_uuid=resource.uuid %}" class="unlink">Update</a>

@@ -65,10 +65,35 @@ class Resource(models.Model):
 
     created_date=models.DateTimeField(default=timezone.now)
 
+    @property
+    def reservation_btn_title(self):
+      if self.is_available():
+        return "Reserve"
+      else:
+        return "Can not reserve"
+
+
     def __str__(self):
-        return self.name
+      return self.name
 
-    def has_inventory(self):
-        return self.units > 0
+    def is_units_available(self):
+      return (self.units > 0) 
 
-    
+    def is_units_available_reservation(self, count):
+      return (self.units - count > 0) 
+
+    def is_correct_stage(self,stage):
+      return (stage == self.stage) 
+
+    def remove_units(self, count=1, save=True):
+      current_availableUnits = self.availableUnits
+      current_availableUnits -= count
+      if current_availableUnits >= 0:
+        self.availableUnits = current_availableUnits
+        if save == True:
+          self.save()
+        return True
+      return False
+
+    def get_resource_stage(self):
+      return self.stage
