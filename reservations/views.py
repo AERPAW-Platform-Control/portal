@@ -75,11 +75,12 @@ def reservation_update(request, reservation_uuid):
     :return:
     """
     reservation = get_object_or_404(Reservation, uuid=UUID(str(reservation_uuid)))
+    original_units=reservation.units
     if request.method == "POST":
         form = ReservationChangeForm(request.POST, instance=reservation)
         if form.is_valid():
             reservation = form.save(commit=False)
-            reservation_uuid = update_existing_reservation(request, reservation, form)
+            reservation_uuid = update_existing_reservation(request, original_units, reservation, form)
             return redirect('reservation_detail_own', reservation_uuid=str(reservation.uuid))
     else:
         form = ReservationChangeForm(instance=reservation)

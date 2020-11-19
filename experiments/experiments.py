@@ -27,6 +27,7 @@ def create_new_experiment(request, form):
 
     experiment.created_by = request.user
     experiment.created_date = timezone.now()
+    experiment.stage = form.data.getlist('stage')[0]
     experiment.save()
 
     experimenter_id_list = form.data.getlist('experimenter')
@@ -40,8 +41,6 @@ def create_new_experiment(request, form):
     except ValueError as e:
         print(e)
         experiment.project = None
-    
-    experiment.stage = form.data.getlist('stage')[0]
 
     #try:
     #    reservation_id_list=form.data.getlist('reservation')
