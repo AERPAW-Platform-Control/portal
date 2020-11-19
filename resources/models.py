@@ -86,10 +86,8 @@ class Resource(models.Model):
       return (stage == self.stage) 
 
     def remove_units(self, count=1, save=True):
-      current_availableUnits = self.availableUnits
-      current_availableUnits -= count
-      if current_availableUnits >= 0:
-        self.availableUnits = current_availableUnits
+      if self.availableUnits - count >= 0:
+        self.availableUnits -= count
         if save == True:
           self.save()
         return True

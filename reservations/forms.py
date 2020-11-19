@@ -82,7 +82,7 @@ class ReservationChangeForm(forms.ModelForm):
     description = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
-        label='Resource Description',
+        label='Reservation Description',
     )
 
     resource = forms.ModelChoiceField(

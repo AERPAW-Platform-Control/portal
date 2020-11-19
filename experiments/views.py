@@ -81,7 +81,7 @@ def experiment_delete(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    experiment_reservations = experiment.reservations
+    experiment_reservations = experiment.reservation_of_experiment
     if request.method == "POST":
         is_removed = delete_existing_experiment(request, experiment)
         if is_removed:

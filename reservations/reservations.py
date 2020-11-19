@@ -57,6 +57,13 @@ def update_existing_reservation(request, reservation, form):
     :param form:
     :return:
     """
+    is_available = reservation.resource.remove_units(int(reservation.units))
+    if not is_available:
+        reservation.state=ReservationStatusChoice.FAILURE.value
+        print("The resource is not available at this time")
+    else:
+        reservation.state=ReservationStatusChoice.SUCCESS.value
+
     reservation.modified_by = request.user
     reservation.modified_date = timezone.now()
 
@@ -89,5 +96,6 @@ def get_reservation_list(request):
         reservations = Reservation.objects.order_by('name')
     else:
         experiment_id=request.session['experiment_id']
-        reservations = Reservation.objects.filter(expriment.id==experiment_id).order_by('name')
+        ex=Experiment.objects.get(id=experiment_id)
+        reservations = Reservation.objects.filter(experiment=ex).order_by('name')
     return reservations

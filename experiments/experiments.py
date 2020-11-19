@@ -40,6 +40,8 @@ def create_new_experiment(request, form):
     except ValueError as e:
         print(e)
         experiment.project = None
+    
+    experiment.stage = form.data.getlist('stage')[0]
 
     #try:
     #    reservation_id_list=form.data.getlist('reservation')

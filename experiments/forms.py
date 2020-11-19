@@ -1,7 +1,5 @@
 from django import forms
 
-
-
 from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
