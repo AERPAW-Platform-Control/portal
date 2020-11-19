@@ -95,7 +95,7 @@ class Resource(models.Model):
     
     def update_units(self, updated_units, original_units, save=True):
       count = updated_units - original_units
-      return remove_units(count)
+      return self.remove_units(count)
 
     def get_resource_stage(self):
       return self.stage
