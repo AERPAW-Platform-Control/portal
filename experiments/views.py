@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import ExperimentCreateForm, ExperimentUpdateForm
 from .models import Experiment
-from .experiments import create_new_experiment, get_experiment_list, update_existing_experiment, delete_existing_experiment
+from .experiments import *
 from experiments.models import Project
 
 
@@ -18,8 +18,13 @@ def experiments(request):
     :param request:
     :return:
     """
+
+    # aerpaw nodes:
     experiments = get_experiment_list(request)
-    return render(request, 'experiments.html', {'experiments': experiments})
+
+    # emulab cloud:
+    emulab_experiments = get_emulab_instances(request)
+    return render(request, 'experiments.html', {'experiments': emulab_experiments})
 
 
 def experiment_create(request):
@@ -56,7 +61,7 @@ def experiment_detail(request, experiment_uuid):
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     experiment_reservations = experiment.reservation_of_experiment
     request.session['experiment_id'] = experiment.id
-    return render(request, 'experiment_detail.html', 
+    return render(request, 'experiment_detail.html',
     {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'reservations': experiment_reservations.all()})
 
 
