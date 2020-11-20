@@ -94,6 +94,7 @@
               {% endfor %}
           </table>
           <input type="hidden" id="hidden-element" name="variable" value="{{ reservations_json }}">
+          <input type="hidden" id="hidden-element-2" name="variable" value="{{ resources_json }}">
         </div>
     {% else %}
         <div class="container">
@@ -104,21 +105,23 @@
       // based on prepared DOM, initialize echarts instance
       let myChart = echarts.init(document.getElementById('main'));
       let reservations_json = JSON.parse(document.getElementById("hidden-element").value);
-      
+      let resources_json = JSON.parse(document.getElementById("hidden-element-2").value);
+
       // dynamically generate diagram config options.
       const x_axis_data = [];
       const legend = [];
       const series = [];
       let step = 1;
       for (const key in reservations_json) {
+        const res_name = resources_json[key].name
         let series_obj = { 
-          name: key,
+          name: res_name,
           type: "line",
           step: step,
           data: reservations_json[key]
         };
         step += 1;
-        legend.push(key);
+        legend.push(res_name);
         series.push(series_obj);
       }
 
