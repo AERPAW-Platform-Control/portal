@@ -1,8 +1,4 @@
-from django.shortcuts import render
-
-# Create your views here.
-
-from django.shortcuts import render
+from django.utils import timezone
 
 # Create your views here.
 
@@ -34,13 +30,11 @@ def reservation_create(request,experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    if request.method == "POST":
-        form = ReservationCreateForm(request.POST,experiment_id=experiment.id)
-        if form.is_valid():
-            reservation_uuid = create_new_reservation(request, form, experiment_uuid)
-            return redirect('reservation_detail', reservation_uuid=reservation_uuid, experiment_uuid=experiment_uuid)
-    else:
-        form = ReservationCreateForm(experiment_id=experiment.id)
+    form = ReservationCreateForm(request.POST,experiment_id=experiment.id)
+    if form.is_valid():
+        reservation_uuid = create_new_reservation(request, form, experiment_uuid)
+        return redirect('reservation_detail', reservation_uuid=reservation_uuid, experiment_uuid=experiment_uuid)
+
     return render(request, 'reservation_create.html', {'form': form, 'experiment': experiment, 'experimenter':experiment.experimenter.all()})
 
 

@@ -112,6 +112,9 @@ def get_all_reserved_units(term,delta):
 def is_resource_available_time(resource, start_time,end_time):
     if not resource.is_units_available():
         return False
+    print("oookkkk")
+    print(start_time)
+    print(end_time)
     reserved_units = get_reserved_units(resource,start_time,end_time)
     return resource.is_units_available_reservation(reserved_units)
 
