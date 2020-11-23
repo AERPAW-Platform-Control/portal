@@ -1,15 +1,27 @@
 from django import forms
+from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
 
 from accounts.models import AerpawUser
 from experiments.models import Experiment
-from .models import Reservation
+from .models import Reservation, one_day_hence
 from resources.models import Resource
 from resources.resources import is_resource_available_time
 
 class ReservationCreateForm(forms.ModelForm):
     def __init__(self,*args,**kwargs):
-        self.experiment_id = kwargs.pop('experiment_id')
+        experiment_id = kwargs.pop('experiment_id',None)
+        qs=Experiment.objects.filter(id=experiment_id)
+        if not qs.exists():
+            raise forms.ValidationError("There is no active experiment!")
+            return redirect("/")
+        self.experiment=qs.first()
+        self.stage=self.experiment.stage
         super(ReservationCreateForm,self).__init__(*args,**kwargs)
+        qs = Resource.objects.filter(stage=self.stage)
+        if qs:
+            self.fields['resource'].queryset = qs
+
 
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60}),
@@ -24,7 +36,7 @@ class ReservationCreateForm(forms.ModelForm):
     )
     
     resource = forms.ModelChoiceField(
-        queryset=Resource.objects.order_by('name'),
+        queryset=Resource.objects.none(),
         required=True,
         widget=forms.Select(),
         label='Resource',
@@ -35,6 +47,18 @@ class ReservationCreateForm(forms.ModelForm):
         initial=0,
         widget=forms.NumberInput(),
         label='Resource Units',
+    )
+
+    start_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'class':'datepicker', 'value': timezone.now()}),
+        initial=timezone.now, 
+        required=True,
+    )
+
+    end_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'class':'datepicker', 'value': one_day_hence()}),
+        initial=one_day_hence, 
+        required=True,
     )
 
     class Meta:
@@ -50,11 +74,6 @@ class ReservationCreateForm(forms.ModelForm):
     
     def clean(self, *args, **kwargs):
         cleaned_data = super().clean(*args, **kwargs)
-        qs=Experiment.objects.filter(id=self.experiment_id)
-        if not qs.exists():
-            return redirect("/")
-        experiment=qs.first()
-        stage=experiment.stage
 
         rs=cleaned_data.get("resource")
         qs=Resource.objects.filter(name=rs)
@@ -62,7 +81,7 @@ class ReservationCreateForm(forms.ModelForm):
             return redirect("/")
         resource=qs.first()
 
-        if not resource.is_correct_stage(stage):
+        if not resource.is_correct_stage(self.stage):
             raise forms.ValidationError("This resource is not in yourexperiment's stage!")
 
         start_date=cleaned_data.get("start_date")
@@ -82,7 +101,7 @@ class ReservationChangeForm(forms.ModelForm):
     description = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
-        label='Resource Description',
+        label='Reservation Description',
     )
 
     resource = forms.ModelChoiceField(

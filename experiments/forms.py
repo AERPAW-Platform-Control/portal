@@ -1,7 +1,5 @@
 from django import forms
 
-
-
 from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
@@ -9,7 +7,6 @@ from .models import Experiment
 
 
 class ExperimentCreateForm(forms.ModelForm):
-
     experimenter = forms.ModelMultipleChoiceField(
         queryset=AerpawUser.objects.order_by('oidc_claim_name'),
         required=True,
@@ -18,18 +15,11 @@ class ExperimentCreateForm(forms.ModelForm):
     )
 
     project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+        queryset=Project.objects.none(),
         required=True,
         widget=forms.Select(),
         label='Project',
     )
-
-    # reservation = forms.ModelChoiceField(
-    #     queryset=Reservation.objects.order_by('name'),
-    #     required=False,
-    #     widget=forms.Select(),
-    #     label='Experiment Reservations',
-    # )
 
     class Meta:
         model = Experiment
@@ -40,6 +30,20 @@ class ExperimentCreateForm(forms.ModelForm):
             'project',
             'stage',
         )
+
+    def __init__(self, *args, **kwargs):
+        project = kwargs.pop('project', None)
+        experimenter = kwargs.pop('experimenter', None)
+        super().__init__(*args, **kwargs)
+        if project and experimenter:
+            qs = Project.objects.filter(project_members__id=experimenter.id)
+            if qs:
+                self.fields['project'].queryset = qs
+
+            qs = AerpawUser.objects.filter(projects__id=project.id)
+            print(qs)
+            if qs:
+                self.fields['experimenter'].queryset = qs
 
     def clean_title(self):
         data = self.cleaned_data.get('name')

@@ -1,12 +1,12 @@
 import uuid
 
 from django.utils import timezone
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from django.db.models import Q
 
 from .models import Resource
 from accounts.models import AerpawUser
-from reservations.models import Reservation
+from reservations.models import Reservation,ReservationStatusChoice
 
 
 def create_new_resource(request, form):
@@ -33,6 +33,7 @@ def create_new_resource(request, form):
 
     resource.save()
     return str(resource.uuid)
+
 
 def update_existing_resource(request, resource, form):
     """
@@ -87,39 +88,46 @@ def get_resource_list(request):
         resources = Resource.objects.order_by('name')
     return resources
 
-def get_reserved_resource(start_time,end_time):
+
+def get_reserved_resource(start_time, end_time):
     resources = Resource.objects.order_by('name')
-    resource_units={}
+    resource_units = {}
     for resource in resources:
-        reserved_units=get_reserved_units(resource,start_time,end_time)
-        available_units=resource.units-reserved_units
-        units=[]
+        reserved_units = get_reserved_units(resource, start_time, end_time)
+        available_units = resource.units-reserved_units
+        units = []
         units.append(reserved_units)
         units.append(available_units)
         resource_units[resource.uuid] = units
     return resource_units
 
-def get_all_reserved_units(term,delta):
+
+def get_all_reserved_units(term, delta):
     start_time = datetime.today()
-    all_units={}
+    all_units = {}
     for i in range(term):
         end_time = start_time + timedelta(hours=delta)
-        reserved_units = get_reserved_resource(start_time,end_time)
-        start_time=end_time
+        reserved_units = get_reserved_resource(start_time, end_time)
+        start_time = end_time
         all_units[i] = reserved_units
     return all_units
 
-def is_resource_available_time(resource, start_time,end_time):
+
+def is_resource_available_time(resource, start_time, end_time):
     if not resource.is_units_available():
         return False
+    print("oookkkk")
+    print(start_time)
+    print(end_time)
     reserved_units = get_reserved_units(resource,start_time,end_time)
     return resource.is_units_available_reservation(reserved_units)
 
 def get_reserved_units(resource,start,end):
-    qs1 = Reservation.objects.filter(start_date__lte=end)
+    qs0 = Reservation.objects.filter(state=ReservationStatusChoice.SUCCESS.value)
+    qs1 = qs0.filter(start_date__lte=end)
     qs2 = qs1.filter(end_date__gte=end)
-    qs3= qs2.filter(resource = resource)
-    units=0
+    qs3 = qs2.filter(resource=resource)
+    units = 0
     for rs in qs3:
-        units+=rs.units
+        units += rs.units
     return units

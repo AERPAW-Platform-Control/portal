@@ -31,8 +31,8 @@ def create_new_reservation(request, form, experiment_uuid):
     reservation.resource = Resource.objects.get(id=int(resource_id))
     reservation.units = form.data.getlist('units')[0]
 
-    reservation.start_date = timezone.now()
-    reservation.end_date = reservation.end_date
+    reservation.start_date = form.data.getlist('start_date')[0]
+    reservation.end_date = form.data.getlist('end_date')[0]
     reservation.save()
     reservation.experiment.reservation_of_experiment.add(reservation)
     reservation.save()
@@ -49,7 +49,7 @@ def create_new_reservation(request, form, experiment_uuid):
     return str(reservation.uuid)
 
 
-def update_existing_reservation(request, reservation, form):
+def update_existing_reservation(request, original_units, reservation, form):
     """
     Create new AERPAW reservation
 
@@ -57,6 +57,13 @@ def update_existing_reservation(request, reservation, form):
     :param form:
     :return:
     """
+    is_available = reservation.resource.update_units(int(reservation.units),original_units)
+    if not is_available:
+        reservation.state=ReservationStatusChoice.FAILURE.value
+        print("The resource is not available at this time")
+    else:
+        reservation.state=ReservationStatusChoice.SUCCESS.value
+
     reservation.modified_by = request.user
     reservation.modified_date = timezone.now()
 
@@ -89,5 +96,6 @@ def get_reservation_list(request):
         reservations = Reservation.objects.order_by('name')
     else:
         experiment_id=request.session['experiment_id']
-        reservations = Reservation.objects.filter(expriment.id==experiment_id).order_by('name')
+        ex=Experiment.objects.get(id=experiment_id)
+        reservations = Reservation.objects.filter(experiment=ex).order_by('name')
     return reservations
