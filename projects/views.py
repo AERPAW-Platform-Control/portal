@@ -41,6 +41,7 @@ def project_detail(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
+    request.session['project_id'] = project.id 
     project_members = project.project_members.order_by('oidc_claim_name')
     project_experiments = project.experiment_of_project
     return render(request, 'project_detail.html', {'project': project, 'project_members': project_members, 'experiments': project_experiments.all()})

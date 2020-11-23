@@ -92,7 +92,7 @@ def resource_detail(request, resource_uuid):
     resource_reservations = resource.reservation_of_resource
     return render(request, 'resource_detail.html', {'resource': resource}, {'reservations': resource_reservations.all()})
 
-
+@user_passes_test(lambda u: u.is_superuser)
 def resource_update(request, resource_uuid):
     """
 

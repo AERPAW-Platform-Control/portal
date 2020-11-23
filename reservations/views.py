@@ -1,8 +1,4 @@
-from django.shortcuts import render
-
-# Create your views here.
-
-from django.shortcuts import render
+from django.utils import timezone
 
 # Create your views here.
 
@@ -34,15 +30,12 @@ def reservation_create(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    if request.method == "POST":
-        form = ReservationCreateForm(request.POST, experiment_id=experiment.id)
-        if form.is_valid():
-            reservation_uuid = create_new_reservation(
-                request, form, experiment_uuid)
-            return redirect('reservation_detail', reservation_uuid=reservation_uuid, experiment_uuid=experiment_uuid)
-    else:
-        form = ReservationCreateForm(experiment_id=experiment.id)
-    return render(request, 'reservation_create.html', {'form': form, 'experiment': experiment, 'experimenter': experiment.experimenter.all()})
+    form = ReservationCreateForm(request.POST,experiment_id=experiment.id)
+    if form.is_valid():
+        reservation_uuid = create_new_reservation(request, form, experiment_uuid)
+        return redirect('reservation_detail', reservation_uuid=reservation_uuid, experiment_uuid=experiment_uuid)
+
+    return render(request, 'reservation_create.html', {'form': form, 'experiment': experiment, 'experimenter':experiment.experimenter.all()})
 
 
 def reservation_detail(request, reservation_uuid, experiment_uuid):
@@ -79,14 +72,23 @@ def reservation_update(request, reservation_uuid):
     :param reservation_uuid:
     :return:
     """
+<<<<<<< HEAD
     reservation = get_object_or_404(
         Reservation, uuid=UUID(str(reservation_uuid)))
+=======
+    reservation = get_object_or_404(Reservation, uuid=UUID(str(reservation_uuid)))
+    original_units=reservation.units
+>>>>>>> 17-reservations
     if request.method == "POST":
         form = ReservationChangeForm(request.POST, instance=reservation)
         if form.is_valid():
             reservation = form.save(commit=False)
+<<<<<<< HEAD
             reservation_uuid = update_existing_reservation(
                 request, reservation, form)
+=======
+            reservation_uuid = update_existing_reservation(request, original_units, reservation, form)
+>>>>>>> 17-reservations
             return redirect('reservation_detail_own', reservation_uuid=str(reservation.uuid))
     else:
         form = ReservationChangeForm(instance=reservation)

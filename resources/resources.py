@@ -6,7 +6,7 @@ from django.db.models import Q
 
 from .models import Resource
 from accounts.models import AerpawUser
-from reservations.models import Reservation
+from reservations.models import Reservation,ReservationStatusChoice
 
 
 def create_new_resource(request, form):
@@ -116,12 +116,15 @@ def get_all_reserved_units(term, delta):
 def is_resource_available_time(resource, start_time, end_time):
     if not resource.is_units_available():
         return False
-    reserved_units = get_reserved_units(resource, start_time, end_time)
+    print("oookkkk")
+    print(start_time)
+    print(end_time)
+    reserved_units = get_reserved_units(resource,start_time,end_time)
     return resource.is_units_available_reservation(reserved_units)
 
-
-def get_reserved_units(resource, start, end):
-    qs1 = Reservation.objects.filter(start_date__lte=end)
+def get_reserved_units(resource,start,end):
+    qs0 = Reservation.objects.filter(state=ReservationStatusChoice.SUCCESS.value)
+    qs1 = qs0.filter(start_date__lte=end)
     qs2 = qs1.filter(end_date__gte=end)
     qs3 = qs2.filter(resource=resource)
     units = 0

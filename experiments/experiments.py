@@ -17,7 +17,7 @@ def create_new_experiment(request, form):
     """
     experiment = Experiment()
     experiment.uuid = uuid.uuid4()
-    request.session['experiment_uuid'] = experiment.uuid 
+    #request.session['experiment_uuid'] = experiment.uuid 
     experiment.name = form.data.getlist('name')[0]
     try:
         experiment.description = form.data.getlist('description')[0]
@@ -27,6 +27,7 @@ def create_new_experiment(request, form):
 
     experiment.created_by = request.user
     experiment.created_date = timezone.now()
+    experiment.stage = form.data.getlist('stage')[0]
     experiment.save()
 
     experimenter_id_list = form.data.getlist('experimenter')
@@ -122,5 +123,5 @@ def get_experiment_list(request):
     if request.user.is_superuser:
         experiments = Experiment.objects.order_by('name')
     else:
-        experiments = Experiment.objects.order_by('name')
+        experiments = Experiment.objects.filter(experimenter=request.user).order_by('name')
     return experiments

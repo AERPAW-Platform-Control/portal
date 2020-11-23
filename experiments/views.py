@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ExperimentCreateForm, ExperimentUpdateForm
 from .models import Experiment
 from .experiments import create_new_experiment, get_experiment_list, update_existing_experiment, delete_existing_experiment
+from experiments.models import Project
 
 
 def experiments(request):
@@ -27,13 +28,16 @@ def experiment_create(request):
     :param request:
     :return:
     """
-    if request.method == "POST":
-        form = ExperimentCreateForm(request.POST)
-        if form.is_valid():
-            experiment_uuid = create_new_experiment(request, form)
-            return redirect('experiment_detail', experiment_uuid=experiment_uuid)
-    else:
-        form = ExperimentCreateForm()
+    experimenter=request.user
+    try:
+        project_id=request.session['project_id']
+        project=get_object_or_404(Project, id=project_id)
+    except KeyError:
+        project=Project.objects.filter(project_members__=experiment)[0]
+    form = ExperimentCreateForm(request.POST,project=project,experimenter=experimenter)
+    if form.is_valid():
+        experiment_uuid = create_new_experiment(request, form)
+        return redirect('experiment_detail', experiment_uuid=experiment_uuid)
     return render(request, 'experiment_create.html', {'form': form})
 
 
@@ -81,7 +85,7 @@ def experiment_delete(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    experiment_reservations = experiment.reservations
+    experiment_reservations = experiment.reservation_of_experiment
     if request.method == "POST":
         is_removed = delete_existing_experiment(request, experiment)
         if is_removed:

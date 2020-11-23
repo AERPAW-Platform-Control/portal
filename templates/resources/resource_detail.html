@@ -44,13 +44,16 @@
             </tr>
             <tr>
               <td>Reservations</td>
-              <td>
-                {% for reservation in reservations %}
+              {% for reservation in reservations %}
+                <td>
                   <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">
-                  {{ reservation.name }}
-                </a>
-                {% endfor %}
-              </td>
+                    {{ reservation.name }}
+                  </a>
+                </td>
+                <td>
+                  reservation.units
+                </td>
+              {% endfor %}
             </tr>
           </table>
           <button class="btn btn-success mr-2">
