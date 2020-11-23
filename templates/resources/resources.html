@@ -42,25 +42,6 @@
             <!-- prepare a DOM container with width and height -->
             <div id="main" style="width: 1000px;height:400px;" class="mt-4"></div>
           </div>
-          <!-- <table class="table table-striped table-bordered mt-4">
-            <tr>
-              <th>Term</th>
-              <th>Resource</th>
-              <th>In Use</th>
-              <th>Available Units</th>
-            </tr>
-            {% for term,resource_reservations in reservations.items %}
-                <tr>
-                    {% for resource, units in resource_reservations.items %}
-                        <td>{{ term }}</td>
-                        <td>{{ resource }}</td>
-                        {% for unit in units %}
-                            <td>{{ unit }}</td>
-                        {% endfor %}    
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-          </table> -->
           <table class="table table-striped table-bordered mt-4">
               <tr>
                 <th>Name</th>
@@ -93,8 +74,8 @@
                   </tr>
               {% endfor %}
           </table>
-          <input type="hidden" id="hidden-element" name="variable" value="{{ reservations_json }}">
-          <input type="hidden" id="hidden-element-2" name="variable" value="{{ resources_json }}">
+          <input type="hidden" id="hidden-reservations" name="variable" value="{{ reservations_json }}">
+          <input type="hidden" id="hidden-resources" name="variable" value="{{ resources_json }}">
         </div>
     {% else %}
         <div class="container">
@@ -104,8 +85,8 @@
     <script type="text/javascript">
       // based on prepared DOM, initialize echarts instance
       let myChart = echarts.init(document.getElementById('main'));
-      let reservations_json = JSON.parse(document.getElementById("hidden-element").value);
-      let resources_json = JSON.parse(document.getElementById("hidden-element-2").value);
+      let reservations_json = JSON.parse(document.getElementById("hidden-reservations").value);
+      let resources_json = JSON.parse(document.getElementById("hidden-resources").value);
 
       // dynamically generate diagram config options.
       const x_axis_data = [];
@@ -126,9 +107,19 @@
       }
 
       let n_of_terms = series[0].data.length;
-
-      for (let i = 0; i < n_of_terms; i++) { 
-        let time = moment(i,'HH').format('HH:mm');
+      let date = new Date();
+      let year = date.getUTCFullYear();
+      let month = date.getUTCMonth();
+      let day = date.getUTCDate();
+      let hour = date.getHours();
+      let utc_hour = (hour + 5) % 24;
+      let full_date = year + "/" + month + "/" + day;
+      
+      for (let i = utc_hour; i < n_of_terms + utc_hour; i++) {
+        if (i > 24) {
+          full_date = year + "/" + month + "/" + (day + 1);
+        } 
+        let time = moment(i % 24,'HH').format('HH:mm') + " " + full_date;
         x_axis_data.push(time)
       }
 
