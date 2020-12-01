@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 
 from experiments.models import Experiment
 from resources.models import Resource
+from resources.resources import remove_units, update_units
 from .models import Reservation,ReservationStatusChoice
 from accounts.models import AerpawUser
 
@@ -37,7 +38,7 @@ def create_new_reservation(request, form, experiment_uuid):
     reservation.experiment.reservation_of_experiment.add(reservation)
     reservation.save()
 
-    is_available = reservation.resource.remove_units(int(reservation.units))
+    is_available = remove_units(reservation.resource,int(reservation.units),reservation.start_date,reservation.end_date)
     if not is_available:
         reservation.state=ReservationStatusChoice.FAILURE.value
         print("The resource is not available at this time")
@@ -57,7 +58,10 @@ def update_existing_reservation(request, original_units, reservation, form):
     :param form:
     :return:
     """
-    is_available = reservation.resource.update_units(int(reservation.units),original_units)
+    reservation.start_date = form.data.getlist('start_date')[0]
+    reservation.end_date = form.data.getlist('end_date')[0]
+    
+    is_available = update_units(reservation.resource,int(reservation.units),original_units,eservation.start_date,reservation.end_date)
     if not is_available:
         reservation.state=ReservationStatusChoice.FAILURE.value
         print("The resource is not available at this time")
