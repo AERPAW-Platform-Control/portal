@@ -23,7 +23,7 @@ def reservations(request):
     return render(request, 'reservations.html', {'reservations': reservations})
 
 
-def reservation_create(request,experiment_uuid):
+def reservation_create(request, experiment_uuid):
     """
 
     :param request:
@@ -45,10 +45,12 @@ def reservation_detail(request, reservation_uuid, experiment_uuid):
     :param project_uuid:
     :return:
     """
-    reservation = get_object_or_404(Reservation, uuid=UUID(str(reservation_uuid)))
+    reservation = get_object_or_404(
+        Reservation, uuid=UUID(str(reservation_uuid)))
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     reservation_resource = reservation.resource
-    return render(request, 'reservation_detail.html', {'reservation': reservation, 'experiment':experiment, 'reservation_resource': reservation_resource})
+    return render(request, 'reservation_detail.html', {'reservation': reservation, 'experiment': experiment, 'reservation_resource': reservation_resource})
+
 
 def reservation_detail_own(request, reservation_uuid):
     """
@@ -57,9 +59,11 @@ def reservation_detail_own(request, reservation_uuid):
     :param project_uuid:
     :return:
     """
-    reservation = get_object_or_404(Reservation, uuid=UUID(str(reservation_uuid)))
+    reservation = get_object_or_404(
+        Reservation, uuid=UUID(str(reservation_uuid)))
     reservation_resource = reservation.resource
     return render(request, 'reservation_detail.html', {'reservation': reservation, 'reservation_resource': reservation_resource})
+
 
 def reservation_update(request, reservation_uuid):
     """
@@ -91,7 +95,8 @@ def reservation_delete(request, reservation_uuid):
     :param reservation_uuid:
     :return:
     """
-    reservation = get_object_or_404(Reservation, uuid=UUID(str(reservation_uuid)))
+    reservation = get_object_or_404(
+        Reservation, uuid=UUID(str(reservation_uuid)))
     if request.method == "POST":
         is_removed = delete_existing_reservation(request, reservation)
         if is_removed:
