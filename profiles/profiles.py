@@ -39,8 +39,12 @@ def create_new_profile(request, form):
     profile.created_by = request.user
     profile.created_date = timezone.now()
     profile.project = Project.objects.get(id=int(form.data.getlist('project')[0]))
+    profile.stage = form.data.getlist('stage')[0]
 
-    create_new_emulab_profile(request, profile)
+    # not every profile need to be sent to emulab,
+    # now in is_emulab_profile(), using Stage 'DEVELOPMENT' to see if it's for emulab
+    if is_emulab_profile(profile.stage):
+        create_new_emulab_profile(request, profile)
 
     profile.save()
     try:
@@ -71,10 +75,20 @@ def update_existing_profile(request, profile, form):
     :param form:
     :return:
     """
+    try:
+        profile.description = form.data.getlist('description')[0]
+    except ValueError as e:
+        profile.description = None
     profile.modified_by = request.user
     profile.modified_date = timezone.now()
+
+    if is_emulab_profile(profile.stage):
+        delete_emulab_profile(request, profile)
+        create_new_emulab_profile(request, profile)
+
     profile.save()
     return str(profile.uuid)
+
 
 def delete_existing_profile(request, profile):
     """
@@ -84,7 +98,8 @@ def delete_existing_profile(request, profile):
     :return:
     """
     try:
-        delete_emulab_profile(request, profile)
+        if is_emulab_profile(profile.stage):
+            delete_emulab_profile(request, profile)
         profile.delete()
         return True
     except Exception as e:
@@ -103,6 +118,15 @@ def get_profile_list(request):
     else:
         profiles = Profile.objects.order_by('name')
     return profiles
+
+
+def is_emulab_profile(stage):
+    # not every profile need to be sent to emulab,
+    # now in is_emulab_profile(), using Stage 'DEVELOPMENT' to see if it's for emulab
+    if stage.upper() == 'DEVELOPMENT':
+        return True
+    else:
+        return False
 
 
 def query_emulab_profile(request, emulab_profile_name):
