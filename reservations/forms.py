@@ -50,13 +50,13 @@ class ReservationCreateForm(forms.ModelForm):
     )
 
     start_date = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'class':'datepicker', 'value': timezone.now()}),
+        widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': timezone.now()}),
         initial=timezone.now, 
         required=True,
     )
 
     end_date = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'class':'datepicker', 'value': one_day_hence()}),
+        widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': one_day_hence()}),
         initial=one_day_hence, 
         required=True,
     )
@@ -93,6 +93,7 @@ class ReservationCreateForm(forms.ModelForm):
         return cleaned_data
 
 class ReservationChangeForm(forms.ModelForm):
+
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60}),
         required=True,
@@ -118,6 +119,20 @@ class ReservationChangeForm(forms.ModelForm):
         label='Resource Units',
     )
 
+    start_date = forms.DateTimeField(
+        input_formats=['%Y-%m-%d %H:%M:%S.%f%z'],
+        widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': timezone.now()}),
+        initial=timezone.now, 
+        required=True,
+    )
+
+    end_date = forms.DateTimeField(
+        input_formats=['%Y-%m-%d %H:%M:%S.%f%z'],
+        widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': one_day_hence()}),
+        initial=one_day_hence, 
+        required=True,
+    )
+
     class Meta:
         model = Reservation
         fields = (
@@ -128,3 +143,20 @@ class ReservationChangeForm(forms.ModelForm):
             'start_date',
             'end_date',
         )
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean(*args, **kwargs)
+
+        rs=cleaned_data.get("resource")
+        qs=Resource.objects.filter(name=rs)
+        if not qs.exists():
+            return redirect("/")
+        resource=qs.first()
+
+        start_date=cleaned_data.get("start_date")
+        end_date=cleaned_data.get("end_date")
+        is_available = is_resource_available_time(resource,start_date, end_date)
+        if not is_available:
+            raise forms.ValidationError("This resource has no units avaialble for reservation at this time!")
+
+        return cleaned_data
