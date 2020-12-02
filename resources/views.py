@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 
 from .forms import ResourceCreateForm, ResourceChangeForm
 from .models import Resource
-from .resources import create_new_resource, get_resource_list, update_existing_resource, delete_existing_resource, get_all_reserved_units
+from .resources import *
 
 import json
 
@@ -50,6 +50,7 @@ def resources(request):
     :param request:
     :return:
     """
+    import_cloud_resources(request)
     resources = get_resource_list(request)
     resources_json = get_resources_json(resources)
     reserved_resource = get_all_reserved_units(24, 2)

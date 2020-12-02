@@ -9,7 +9,11 @@ from django.db.models import Q
 
 from .models import Resource
 from accounts.models import AerpawUser
-from reservations.models import Reservation,ReservationStatusChoice
+from reservations.models import Reservation, ReservationStatusChoice
+import swagger_client as AerpawGW
+from swagger_client.rest import ApiException
+import logging
+logger = logging.getLogger(__name__)
 
 
 def create_new_resource(request, form):
@@ -123,6 +127,7 @@ def is_resource_available_time(resource, start_time, end_time):
     reserved_units = get_reserved_units(resource,start_time,end_time)
     return resource.is_units_available_reservation(reserved_units)
 
+
 def get_reserved_units(resource,start,end):
     qs0 = Reservation.objects.filter(state=ReservationStatusChoice.SUCCESS.value)
     qs1 = qs0.filter(start_date__lte=end)
@@ -133,9 +138,11 @@ def get_reserved_units(resource,start,end):
         units += rs.units
     return units
 
+
 def update_units(resource, updated_units, original_units, start_time, end_time, save=True):
       count = updated_units - original_units
       return remove_units(resource, count, start_time, end_time)
+
 
 def remove_units(resource, count, start_time, end_time, save=True):
     remove = is_resource_available_time(resource, start_time, end_time)
@@ -151,3 +158,99 @@ def remove_units(resource, count, start_time, end_time, save=True):
         if save == True:
             resource.save()
     return remove
+
+
+def import_cloud_resources(request):
+    """
+    Import cloud resources to portal
+
+    :param request:
+    :param form:
+    :return:
+    """
+    emulab_resources = get_emulab_resource_list(request)
+    total_cloud_resources = {}
+    avail_cloud_resources = {}
+
+    for emulab_node in emulab_resources:
+        if emulab_node.type in total_cloud_resources:
+            total_cloud_resources[emulab_node.type] += 1
+            if emulab_node.available is True:
+                avail_cloud_resources[emulab_node.type] += 1
+        else:
+            total_cloud_resources[emulab_node.type] = 1
+            if emulab_node.available is True:
+                avail_cloud_resources[emulab_node.type] = 1
+            else:
+                avail_cloud_resources[emulab_node.type] = 0
+
+    logger.warning("total_cloud_resources:{}".format(total_cloud_resources))
+    logger.warning("avail_cloud_resources:{}".format(avail_cloud_resources))
+
+    # create or update resources in database
+    for key in total_cloud_resources.keys():
+        create_or_update_cloud_resource(request, key,
+                                        total_cloud_resources[key],
+                                        avail_cloud_resources[key])
+
+    # delete resources if they are no longer on emulab
+    existing_resources = get_resource_list(request)
+    for resource in existing_resources:
+        if resource.description == 'Emulab nodes' \
+                and resource.resourceType.upper() == 'CLOUD'\
+                and resource.name not in total_cloud_resources.keys():
+            logger.warning('Emulab resource \'{}\' no longer exists, deleting it'.format(resource.name))
+            delete_existing_resource(request, resource)
+
+
+def create_or_update_cloud_resource(request, name, units, avail_units):
+    """
+
+    :param request:
+    :param name:
+    :param units:
+    :param avail_units:
+    :return:
+    """
+
+    existing_resources = get_resource_list(request)
+    for resource in existing_resources:
+        if resource.name == name and resource.units != units:
+            resource.units = units
+            # resource.availableUnits = avail_units
+            resource.modified_date = timezone.now()
+            resource.save()
+            logger.warning('Emulab resource \'{}\' is updated'.format(resource.name))
+            return
+    # there was no such resource, let's create a new one
+    newresource = Resource()
+    newresource.uuid = uuid.uuid4()
+    newresource.name = name
+    newresource.description = 'Emulab nodes'
+    newresource.units = units
+    newresource.availableUnits = avail_units
+    newresource.resourceType = 'Cloud'
+    newresource.stage = 'Development'
+    newresource.location = 'DCS'
+    newresource.save()
+    logger.warning('Emulab resource \'{}\' is created'.format(newresource.name))
+    return
+
+
+def get_emulab_resource_list(request):
+    """
+    Query emulab resource
+
+    :param request: in case we need user info later
+    :return emulab_resources:
+    """
+    api_instance = AerpawGW.ResourcesApi()
+    try:
+        # list resources
+        api_response = api_instance.list_resources()
+        logger.info(api_response)
+        return api_response.nodes
+    except ApiException as e:
+        logger.error("Exception when calling ResourcesApi->list_resources: %s\n" % e)
+        raise Exception(e)
+
