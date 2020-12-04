@@ -23,8 +23,8 @@ def experiments(request):
     experiments = get_experiment_list(request)
 
     # emulab cloud:
-    emulab_experiments = get_emulab_instances(request)
-    return render(request, 'experiments.html', {'experiments': emulab_experiments})
+    # emulab_experiments = get_emulab_instances(request)
+    return render(request, 'experiments.html', {'experiments': experiments})
 
 
 def experiment_create(request):
