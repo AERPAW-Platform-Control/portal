@@ -215,12 +215,13 @@ def create_or_update_cloud_resource(request, name, units, avail_units):
 
     existing_resources = get_resource_list(request)
     for resource in existing_resources:
-        if resource.name == name and resource.units != units:
-            resource.units = units
-            # resource.availableUnits = avail_units
-            resource.modified_date = timezone.now()
-            resource.save()
-            logger.warning('Emulab resource \'{}\' is updated'.format(resource.name))
+        if resource.name == name:
+            if resource.units != units:
+                # resource.availableUnits = avail_units # portal calculates its own avail_units
+                resource.units = units
+                resource.modified_date = timezone.now()
+                resource.save()
+                logger.warning('Emulab resource \'{}\' is updated'.format(resource.name))
             return
     # there was no such resource, let's create a new one
     newresource = Resource()
