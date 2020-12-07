@@ -46,8 +46,6 @@ def create_new_reservation(request, form, experiment_uuid):
         reservation.state = ReservationStatusChoice.FAILURE.value
         print("The resource is not available at this time")
     else:
-        create_new_emulab_reservation(request, reservation)
-        delete_emulab_reservation(request, reservation.experiment.name, reservation.resource.name)
         reservation.state = ReservationStatusChoice.SUCCESS.value
 
     reservation.save()
