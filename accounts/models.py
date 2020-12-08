@@ -3,7 +3,18 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from enum import Enum
 
+class AerpawUserRoleChoice(Enum):   # A subclass of Enum
+    ADMIN = 'Admin'
+    PI = 'PI'
+    LEADEXPERIMENTER = 'Lead Experimenter'
+    EXPERIMENTER = 'Experimenter'
+    OBSERVERS = 'Observers'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
 
 # Extends basic User model: https://docs.djangoproject.com/en/3.1/ref/contrib/auth/
 class AerpawUser(AbstractUser):
@@ -50,3 +61,42 @@ def is_project_member(user,project_group):
     print(user)
     print(user.groups.all())
     return user.groups.filter(name=project_group).exists()
+
+class AerpawUserSignup(models.Model):
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(AerpawUser, on_delete=models.CASCADE, primary_key=True)
+    name = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    organization = models.CharField(max_length=255)
+    description = models.TextField()
+    userRole=models.CharField(
+      max_length=64,
+      choices=AerpawUserRoleChoice.choices(),
+    )
+
+    def __str__(self):
+        return self.user.oidc_claim_email
+
+def create_new_signup(request, form):
+    """
+
+    :param request:
+    :param form:
+    :return:
+    """
+
+    signup = AerpawUserSignup()
+    signup.uuid = uuid.uuid4()
+    signup.user = request.user
+    signup.name = form.data.getlist('name')[0]
+    signup.title = form.data.getlist('title')[0]
+    signup.organization = form.data.getlist('organization')[0]
+    try:
+        resource.description = form.data.getlist('description')[0]
+    except ValueError as e:
+        print(e)
+        resource.description = None
+
+    resource.userRole = form.data.getlist('userRole')[0]
+
+    return str(signup.uuid)
