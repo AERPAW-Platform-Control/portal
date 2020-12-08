@@ -24,7 +24,7 @@ def signup(request):
         form = AerpawUserSignupForm(request.POST)
         if form.is_valid():
             signup_uuid = create_new_signup(request, form)
-            return redirect('signup')
+            return redirect('home')
     else:
         form =AerpawUserSignupForm()
     return render(request, 'signup.html', {'form': form})
