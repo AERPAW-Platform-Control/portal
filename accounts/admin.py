@@ -15,7 +15,7 @@ class AerpawUserAdmin(UserAdmin):
 
 admin.site.register(AerpawUser, AerpawUserAdmin)
 
-class AerpawUserSignupAdmin(UserAdmin):
+class AerpawUserSignupAdmin(admin.ModelAdmin):
     add_form = AerpawUserSignupForm
     form = AerpawUserSignupForm
     model = AerpawUserSignup

@@ -92,11 +92,12 @@ def create_new_signup(request, form):
     signup.title = form.data.getlist('title')[0]
     signup.organization = form.data.getlist('organization')[0]
     try:
-        resource.description = form.data.getlist('description')[0]
+        signup.description = form.data.getlist('description')[0]
     except ValueError as e:
         print(e)
-        resource.description = None
+        signup.description = None
 
-    resource.userRole = form.data.getlist('userRole')[0]
+    signup.userRole = form.data.getlist('userRole')[0]
+    signup.save()
 
     return str(signup.uuid)
