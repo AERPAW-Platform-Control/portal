@@ -5,8 +5,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProjectCreateForm, ProjectUpdateForm
 from .models import Project
 from .projects import create_new_project, get_project_list, update_existing_project, delete_existing_project
+from accounts.decorator import user_passes_test
+from accounts.models import is_PI
 
-
+PI_message = "Please email the admin to become a PI first!"
 def projects(request):
     """
 
@@ -16,7 +18,7 @@ def projects(request):
     projects = get_project_list(request)
     return render(request, 'projects.html', {'projects': projects})
 
-
+@user_passes_test(is_PI,PI_message)
 def project_create(request):
     """
 
@@ -46,7 +48,7 @@ def project_detail(request, project_uuid):
     project_experiments = project.experiment_of_project
     return render(request, 'project_detail.html', {'project': project, 'project_members': project_members, 'experiments': project_experiments.all()})
 
-
+@user_passes_test(is_PI,PI_message)
 def project_update(request, project_uuid):
     """
 

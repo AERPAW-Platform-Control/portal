@@ -40,3 +40,13 @@ class AerpawUser(AbstractUser):
 
     def __str__(self):
         return self.oidc_claim_name + ' (' + self.username + ')'
+
+def is_PI(user):
+    print(user)
+    print(user.groups.all())
+    return user.groups.filter(name='PI').exists()
+
+def is_project_member(user,project_group):
+    print(user)
+    print(user.groups.all())
+    return user.groups.filter(name=project_group).exists()
