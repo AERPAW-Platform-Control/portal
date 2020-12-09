@@ -59,8 +59,11 @@ def update_project_members(project, project_member_email_list):
     #project.project_members.clear()
     # add members from project_member_id_update_list
     for member_email in project_member_email_list:
-        project_member = AerpawUser.objects.get(oidc_claim_email=member_email)
-        project.project_members.add(project_member)
+        try:
+            project_member = AerpawUser.objects.get(oidc_claim_email=member_email)
+            project.project_members.add(project_member)
+        except AerpawUser.DoesNotExist:
+            project.project_pending_member_emails = project.project_pending_member_emails + member_email+','  
     project.save()
 
 def delete_project_members(project, project_member_id_list):
