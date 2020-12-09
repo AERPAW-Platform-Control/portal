@@ -51,8 +51,8 @@ class Resource(models.Model):
       choices=ResourceTypeChoice.choices(),
     )
 
-    units=models.PositiveSmallIntegerField(default=1)
-    availableUnits=models.PositiveSmallIntegerField(default=1)
+    units=models.PositiveSmallIntegerField(default=1) #total units in inventory.
+    availableUnits=models.PositiveSmallIntegerField(default=1) #current available units.
     location=models.CharField(
       max_length=64,
       choices=ResourceLocationChoice.choices(),
@@ -84,18 +84,6 @@ class Resource(models.Model):
 
     def is_correct_stage(self,stage):
       return (stage == self.stage) 
-
-    def remove_units(self, count=1, save=True):
-      if self.availableUnits - count >= 0:
-        self.availableUnits -= count
-        if save == True:
-          self.save()
-        return True
-      return False
-    
-    def update_units(self, updated_units, original_units, save=True):
-      count = updated_units - original_units
-      return self.remove_units(count)
 
     def get_resource_stage(self):
       return self.stage
