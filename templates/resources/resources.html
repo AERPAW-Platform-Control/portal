@@ -27,15 +27,10 @@
                   <label class="input-group-text" for="typeSelect">Type</label>
                 </div>
                 <select class="custom-select" id="typeSelect" onChange="changeType()">
-                  <option selected value="FixedNode">Fixed Node</option>
-                  <option value="PortableNode">Portable Nodes</option>
-                  <option value="all">All Types</option>
-                  <!-- <option value="2">Cloud VMs</option>
-                  <option value="3">Commercial BS</option>
-                  <option value="4">RF Sensors</option>
-                  <option value="5">Lora</option>
-                  <option value="6">Terragraph</option>
-                  <option value="7">CICD Ports</option> -->
+                  <option selected value="all">All Types</option>
+                  {% for resourceType in resource_list%}
+                    <option value="{{ resourceType }}">{{ resourceType }}</option>
+                  {% endfor %}
                 </select>
               </div>
             </div>
@@ -86,6 +81,8 @@
       let myChart = echarts.init(document.getElementById('main'));
       let reservations_json = JSON.parse(document.getElementById("hidden-reservations").value);
       let resources_json = JSON.parse(document.getElementById("hidden-resources").value);
+
+      console.log(resources_json)
 
       function generateDiagramData(type) {
         const x_axis_data = [];
@@ -173,7 +170,7 @@
     }
 
     // use configuration item and data specified to show chart
-    myChart.setOption(generateDiagramData("FixedNode"));
+    myChart.setOption(generateDiagramData("all"));
 
     function changeType() {
       let type = document.getElementById("typeSelect").value;
