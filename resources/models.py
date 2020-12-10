@@ -34,6 +34,7 @@ class ResourceLocationChoice(Enum):   # A subclass of Enum
     LAKEWHEELER = 'LakeWheeler'
     CENTENNIAL = 'Centennial'
     CARY = 'Cary'
+    RENCIEMULAB = 'RENCIEmulab'   # need correspondent entry in .env for the urn
     OTHERS = 'Others'
     @classmethod
     def choices(cls):
@@ -57,7 +58,7 @@ class Resource(models.Model):
       max_length=64,
       choices=ResourceLocationChoice.choices(),
     )
-    
+
     stage=models.CharField(
       max_length=64,
       choices=ResourceStageChoice.choices(),
@@ -77,13 +78,13 @@ class Resource(models.Model):
       return self.name
 
     def is_units_available(self):
-      return (self.units > 0) 
+      return (self.units > 0)
 
     def is_units_available_reservation(self, count):
-      return (self.units - count > 0) 
+      return (self.units - count > 0)
 
     def is_correct_stage(self,stage):
-      return (stage == self.stage) 
+      return (stage == self.stage)
 
     def get_resource_stage(self):
       return self.stage

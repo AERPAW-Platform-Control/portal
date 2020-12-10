@@ -1,5 +1,5 @@
 import uuid
-
+import os
 from django.utils import timezone
 from datetime import datetime, timedelta
 
@@ -232,7 +232,7 @@ def create_or_update_cloud_resource(request, name, units, avail_units):
     newresource.availableUnits = avail_units
     newresource.resourceType = 'Cloud'
     newresource.stage = 'Development'
-    newresource.location = 'DCS'
+    newresource.location = 'RENCIEmulab'
     newresource.save()
     logger.warning('Emulab resource \'{}\' is created'.format(newresource.name))
     return
@@ -255,3 +255,16 @@ def get_emulab_resource_list(request):
         logger.error("Exception when calling ResourcesApi->list_resources: %s\n" % e)
         raise Exception(e)
 
+
+def emulab_location_to_urn(location):
+    if location == 'RENCIEmulab':
+        return os.getenv('URN_RENCIEMULAB')
+    else:
+        raise Exception('unknown location')
+
+
+def emulab_urn_to_location(urn):
+    if urn == os.getenv('URN_RENCIEMULAB'):
+        return 'RENCIEmulab'
+    else:
+        raise Exception('unknown urn')
