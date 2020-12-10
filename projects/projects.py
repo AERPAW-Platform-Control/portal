@@ -20,22 +20,35 @@ def create_new_project(request, form):
     except ValueError as e:
         print(e)
         project.description = None
-    project.principal_investigator = AerpawUser.objects.get(
-        id=int(form.data.getlist('principal_investigator')[0])
-    )
+
+    # project.principal_investigator = AerpawUser.objects.get(
+    #     id=int(form.data.getlist('principal_investigator')[0])
+    # )
+
+    project.principal_investigator = request.user
+    project.save()
+    # add principal_investigator to project_members if not already there
+    if project.principal_investigator not in project.project_members.all():
+        project.project_members.add(project.principal_investigator)
+        project.save()
 
     project.created_by = request.user
     project.created_date = timezone.now()
     project.modified_by = project.created_by
     project.modified_date = project.created_date
     project.save()
-    project_member_id_list = form.data.getlist('project_members')
-    update_project_members(project, project_member_id_list)
-    project.save()
+
+    try:
+        project_member_email_list = form.data.getlist('add_project_members')[0].split(',')
+        update_project_members(project, project_member_email_list)
+        project.save()
+    except ValueError as e:
+        print(e)
+
     return str(project.uuid)
 
 
-def update_project_members(project, project_member_id_list):
+def update_project_members(project, project_member_email_list):
     """
 
     :param project:
@@ -43,17 +56,30 @@ def update_project_members(project, project_member_id_list):
     :return:
     """
     # clear current project membership
-    project.project_members.clear()
+    #project.project_members.clear()
+    # add members from project_member_id_update_list
+    for member_email in project_member_email_list:
+        try:
+            project_member = AerpawUser.objects.get(oidc_claim_email=member_email)
+            project.project_members.add(project_member)
+        except AerpawUser.DoesNotExist:
+            project.project_pending_member_emails = project.project_pending_member_emails + member_email+','  
+    project.save()
+
+def delete_project_members(project, project_member_id_list):
+    """
+
+    :param project:
+    :param project_member_id_list:
+    :return:
+    """
+    # clear current project membership
+    #project.project_members.clear()
     # add members from project_member_id_update_list
     for member_id in project_member_id_list:
         project_member = AerpawUser.objects.get(id=int(member_id))
-        project.project_members.add(project_member)
+        project.project_members.remove(project_member)
     project.save()
-    # add principal_investigator to project_members if not already there
-    if project.principal_investigator not in project.project_members.all():
-        project.project_members.add(project.principal_investigator)
-        project.save()
-
 
 def update_existing_project(request, project, form):
     """
@@ -66,9 +92,20 @@ def update_existing_project(request, project, form):
     project.modified_by = request.user
     project.modified_date = timezone.now()
     project.save()
-    project_member_id_list = form.data.getlist('project_members')
-    update_project_members(project, project_member_id_list)
-    project.save()
+    try:
+        project_member_id_list = form.data.getlist('delete_project_members')
+        delete_project_members(project, project_member_id_list)
+        project.save()
+    except ValueError as e:
+        print(e)
+
+    try:
+        project_member_email_list = form.data.getlist('add_project_members')[0].split(',')
+        update_project_members(project, project_member_email_list)
+        project.save()
+    except ValueError as e:
+        print(e)
+
     return str(project.uuid)
 
 

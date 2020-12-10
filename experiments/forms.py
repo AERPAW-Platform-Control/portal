@@ -11,7 +11,7 @@ class ExperimentCreateForm(forms.ModelForm):
         queryset=AerpawUser.objects.order_by('oidc_claim_name'),
         required=True,
         widget=forms.SelectMultiple(),
-        label='Experimenter',
+        label='Lead Experimenter',
     )
 
     project = forms.ModelChoiceField(
@@ -68,7 +68,7 @@ class ExperimentUpdateForm(forms.ModelForm):
         required=True,
         initial=0,
         widget=forms.Select(),
-        label='Experimenter',
+        label='Lead Experimenter',
     )
 
     experiment_reservations = forms.ModelMultipleChoiceField(

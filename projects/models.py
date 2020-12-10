@@ -26,6 +26,7 @@ class Project(models.Model):
     project_members = models.ManyToManyField(
         AerpawUser, related_name='projects'
     )
+    project_pending_member_emails = models.CharField(max_length=140,default='')
     created_by = models.ForeignKey(
         User, related_name='project_created_by', on_delete=models.CASCADE, null=True, blank=True
     )
@@ -34,10 +35,6 @@ class Project(models.Model):
         User, related_name='project_modified_by', on_delete=models.CASCADE, null=True, blank=True
     )
     modified_date = models.DateTimeField(blank=True, null=True)
-
-    #experiments = models.ForeignKey(
-    #    'experiments.Experiment', related_name='project_of_experiment', null=True, on_delete=models.SET_NULL
-    #)
 
     class Meta:
         verbose_name = 'AERPAW Project'
