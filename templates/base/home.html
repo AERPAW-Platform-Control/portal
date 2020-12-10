@@ -4,6 +4,9 @@
 
 {% block content %}
 {% if user.is_authenticated %}
+<head>
+  <meta charset="UTF-8">
+</head>
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <div class="homepage">
     <img class="rounded my-4 img-fluid" width="25%" src="{% static 'images/logo/aerpaw-logo.png' %}">

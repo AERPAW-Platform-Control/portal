@@ -55,12 +55,20 @@ def resources(request):
     reserved_resource = get_all_reserved_units(24, 2)
     reservations_json = get_reservations_json(reserved_resource)
 
+    # resource type list
+    resource_list = []
+    for res in resources.values():
+        type = res.get('resourceType')
+        if type not in resource_list:
+            resource_list.append(type)
+
     return render(request, 'resources.html',
                   {
                       'resources': resources,
                       'resources_json': resources_json,
                       'reservations': reserved_resource,
-                      'reservations_json': reservations_json
+                      'reservations_json': reservations_json,
+                      'resource_list': resource_list,
                   })
 
 
@@ -90,7 +98,8 @@ def resource_detail(request, resource_uuid):
     """
     resource = get_object_or_404(Resource, uuid=UUID(str(resource_uuid)))
     resource_reservations = resource.reservation_of_resource
-    return render(request, 'resource_detail.html', {'resource': resource}, {'reservations': resource_reservations.all()})
+    return render(request, 'resource_detail.html', {'resource': resource, 'reservations': resource_reservations.all()})
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def resource_update(request, resource_uuid):
