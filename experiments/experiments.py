@@ -6,6 +6,9 @@ from .models import Experiment
 from reservations.models import Reservation
 from accounts.models import AerpawUser
 from projects.models import Project
+from profiles.models import Profile
+from profiles.profiles import *
+from resources.resources import *
 import swagger_client as AerpawGW
 from swagger_client.rest import ApiException
 from swagger_client.models.experiment import Experiment as EmulabExperiment
@@ -45,6 +48,7 @@ def create_new_experiment(request, form):
     try:
         experiment.project = Project.objects.get(id=int(form.data.getlist('project')[0]))
         experiment.project.experiment_of_project.add(experiment)
+        experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
         experiment.save()
     except ValueError as e:
         print(e)
@@ -86,6 +90,7 @@ def update_existing_experiment(request, experiment, form):
     """
     experiment.modified_by = request.user
     experiment.modified_date = timezone.now()
+    experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
     experiment.save()
     #experiment_reservation_id_list = form.data.getlist('experiment_reservations')
     #update_experiment_reservations(experiment, experiment_reservation_id_list)
@@ -182,3 +187,68 @@ def get_emulab_manifest(emulab_eid):
         logger.error("Exception when calling ResourcesApi->list_resources: %s\n" % e)
         api_response = None
     return api_response
+
+
+def initiate_emulab_instance(request, experiment):
+    status = query_emulab_instance_status(request, experiment)
+    logger.warning(status)
+    if status != 'not_started':
+        logger.warning('emulab experiment already started')
+        logger.error('[testing code] Stopping emulab instance now, but we might want to move this stop to another button')
+        return terminate_emulab_instance(request, experiment)
+
+    # create an instance of the API class
+    api_instance = AerpawGW.ExperimentApi()
+    profile = get_emulab_profile_name(experiment.profile.project.name, experiment.profile.name)
+    location = 'RENCIEmulab'
+    # location = experiment.reservation.location
+    logger.error('[IMPORTANT] We should check if Reservation exists, and use that Reservation.location')
+    logger.error('[IMPORTANT] now just use default: {}'.format(location))
+    experiment_body = AerpawGW.Experiment(name=experiment.name,
+                                          profile=profile,
+                                          cluster=emulab_location_to_urn(location))
+    try:
+        # create a experiment
+        logger.warning(experiment_body)
+        api_response = api_instance.create_experiment(experiment_body)
+        logger.warning(api_response)
+    except ApiException as e:
+        logger.warning("Exception when calling ExperimentApi->create_experiment: %s\n" % e)
+        return False
+
+    return True
+
+
+def query_emulab_instance_status(request, experiment):
+    """
+
+    :param request:
+    :param experiment:
+    :return status of emulab experiment: str
+    """
+    api_instance = AerpawGW.ExperimentApi()
+    try:
+        # get status of specific experiment
+        emulab_experiment = api_instance.query_experiment(experiment.name)
+        logger.warning(emulab_experiment)
+        return emulab_experiment.status
+    except ApiException as e:
+        logger.warning("Exception when calling ExperimentApi->query_experiment: %s\n" % e)
+        return 'not_started'
+
+
+def terminate_emulab_instance(request, experiment):
+    status = query_emulab_instance_status(request, experiment)
+    logger.warning(status)
+    if status == 'not_started':
+        return True
+    elif status != 'ready' and status != 'failed':
+        logger.error('The instance operation is in progress. Please try later.')
+        return False
+    api_instance = AerpawGW.ExperimentApi()
+    try:
+        # delete experiment
+        api_instance.delete_experiment(experiment.name)
+    except ApiException as e:
+        logger.warning("Exception when calling ExperimentApi->delete_experiment: %s\n" % e)
+    return True
