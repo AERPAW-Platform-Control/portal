@@ -10,8 +10,8 @@ from django.db.models import Q
 from .models import Resource
 from accounts.models import AerpawUser
 from reservations.models import Reservation, ReservationStatusChoice
-import swagger_client as AerpawGW
-from swagger_client.rest import ApiException
+import aerpawgw_client
+from aerpawgw_client.rest import ApiException
 import logging
 logger = logging.getLogger(__name__)
 
@@ -168,6 +168,10 @@ def import_cloud_resources(request):
     :param form:
     :return:
     """
+    if not os.getenv('AERPAWGW_HOST') \
+            or not os.getenv('AERPAWGW_PORT') \
+            or not os.getenv('AERPAWGW_VERSION'):
+        return
     emulab_resources = get_emulab_resource_list(request)
     total_cloud_resources = {}
     avail_cloud_resources = {}
@@ -254,7 +258,7 @@ def get_emulab_resource_list(request):
     :param request: in case we need user info later
     :return emulab_resources:
     """
-    api_instance = AerpawGW.ResourcesApi()
+    api_instance = aerpawgw_client.ResourcesApi()
     try:
         # list resources
         api_response = api_instance.list_resources()

@@ -9,8 +9,8 @@ from resources.models import Resource
 from resources.resources import remove_units, update_units
 from .models import Reservation,ReservationStatusChoice
 from accounts.models import AerpawUser
-import swagger_client as AerpawGW
-from swagger_client.rest import ApiException
+import aerpawgw_client
+from aerpawgw_client.rest import ApiException
 from datetime import datetime
 import logging
 
@@ -121,10 +121,10 @@ def create_new_emulab_reservation(request, reservation):
     :return:
     """
     # create on emulab
-    api_instance = AerpawGW.ReservationApi()
+    api_instance = aerpawgw_client.ReservationApi()
     start_timestamp = str(int(datetime.fromisoformat(reservation.start_date).timestamp()))
     end_timestamp = str(int(datetime.fromisoformat(reservation.end_date).timestamp()))
-    body = AerpawGW.Reservation(type=reservation.resource.name,
+    body = aerpawgw_client.Reservation(type=reservation.resource.name,
                                 nodes=int(reservation.units),
                                 experiment=reservation.experiment.name,
                                 start=start_timestamp,
@@ -157,7 +157,7 @@ def query_emulab_reservation(request, experiment, resourcetype):
     :param experiment:
     :return emulab_reservation:
     """
-    api_instance = AerpawGW.ReservationApi()
+    api_instance = aerpawgw_client.ReservationApi()
     try:
         # check if there is reserveration matches the experiment and resourcetype
         emulab_reservations = api_instance.get_reservation()
@@ -187,7 +187,7 @@ def delete_emulab_reservation(request, experiment, resourcetype):
             return
     except Exception as e:
         raise Exception("failed to query the created emulab reservation")
-    api_instance = AerpawGW.ReservationApi()
+    api_instance = aerpawgw_client.ReservationApi()
     try:
         # delete reservation
         api_instance.delete_reservation(reservation_cloud_uuid)

@@ -1,16 +1,16 @@
 import uuid
-
+import os
 from django.utils import timezone
 
 from .models import Profile
 from accounts.models import AerpawUser
 from projects.models import Project
-import swagger_client as AerpawGW
-from swagger_client.rest import ApiException
-from datetime import datetime
+import aerpawgw_client
+from aerpawgw_client.rest import ApiException
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 def create_new_profile(request, form):
     """
@@ -122,8 +122,13 @@ def get_profile_list(request):
 
 def is_emulab_profile(stage):
     # not every profile need to be sent to emulab,
-    # now in is_emulab_profile(), using Stage 'DEVELOPMENT' to see if it's for emulab
-    if stage.upper() == 'DEVELOPMENT':
+    # first check if we have AERPAWGW env setup,
+    # and check the Stage 'DEVELOPMENT' to see if it's for emulab
+    if not os.getenv('AERPAWGW_HOST') \
+            or not os.getenv('AERPAWGW_PORT') \
+            or not os.getenv('AERPAWGW_VERSION'):
+        return False
+    elif stage.upper() == 'DEVELOPMENT':
         return True
     else:
         return False
@@ -137,7 +142,7 @@ def query_emulab_profile(request, emulab_profile_name):
     :param emulab_profile_name:
     :return emulab_profile:
     """
-    api_instance = AerpawGW.ProfileApi()
+    api_instance = aerpawgw_client.ProfileApi()
     print(emulab_profile_name)
     try:
         # query specific profile
@@ -160,8 +165,8 @@ def create_new_emulab_profile(request, profile):
     emulab_profile_name = get_emulab_profile_name(profile.project.name, profile.name)
 
     # create on emulab
-    api_instance = AerpawGW.ProfileApi()
-    body = AerpawGW.Profile(name=emulab_profile_name, script=profile.profile)
+    api_instance = aerpawgw_client.ProfileApi()
+    body = aerpawgw_client.Profile(name=emulab_profile_name, script=profile.profile)
     logger.debug(body)
     try:
         api_response = api_instance.create_profile(body)
@@ -188,12 +193,11 @@ def delete_emulab_profile(request, profile, name_to_delete=None):
                             we will need to use the oldnname to delete
     :return
     """
-
     if name_to_delete is None:
         emulab_profile_name = get_emulab_profile_name(profile.project.name, profile.name)
     else:
         emulab_profile_name = get_emulab_profile_name(profile.project.name, name_to_delete)
-    api_instance = AerpawGW.ProfileApi()
+    api_instance = aerpawgw_client.ProfileApi()
     try:
         # delete profile
         api_instance.delete_profile(emulab_profile_name)

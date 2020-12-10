@@ -9,10 +9,8 @@ from projects.models import Project
 from profiles.models import Profile
 from profiles.profiles import *
 from resources.resources import *
-import swagger_client as AerpawGW
-from swagger_client.rest import ApiException
-from swagger_client.models.experiment import Experiment as EmulabExperiment
-from swagger_client.models.resource import Resource
+import aerpawgw_client
+from aerpawgw_client.rest import ApiException
 from datetime import datetime
 import logging
 
@@ -141,7 +139,7 @@ def get_experiment_list(request):
 
 
 def get_emulab_instances(request):
-    api_instance = AerpawGW.ExperimentApi()
+    api_instance = aerpawgw_client.ExperimentApi()
 
     try:
         # get experiment(s) under user
@@ -151,7 +149,7 @@ def get_emulab_instances(request):
         logger.error("Exception when calling ExperimentApi->get_experiments: %s\n" % e)
 
     emulab_experiments = []
-    for emulab_e in api_response:  # swagger_client.models.experiment.Experiment
+    for emulab_e in api_response:  # aerpawgw_client.models.experiment.Experiment
         e = Experiment()
         e.name = emulab_e.name
         e.created_date = datetime.fromtimestamp(int(emulab_e.start))
@@ -175,7 +173,7 @@ def get_emulab_instances(request):
 
 
 def get_emulab_manifest(emulab_eid):
-    api_instance = AerpawGW.ResourcesApi()
+    api_instance = aerpawgw_client.ResourcesApi()
     project = emulab_eid.split(',')[0]
     experiment = emulab_eid.split(',')[1]
     logger.warning(emulab_eid)
@@ -192,19 +190,23 @@ def get_emulab_manifest(emulab_eid):
 def initiate_emulab_instance(request, experiment):
     status = query_emulab_instance_status(request, experiment)
     logger.warning(status)
-    if status != 'not_started':
+
+    if status == '':
+        logger.error('Do nothing since we cannot get the status from emulab')
+        return False
+    elif status != 'not_started':
         logger.warning('emulab experiment already started')
         logger.error('[testing code] Stopping emulab instance now, but we might want to move this stop to another button')
         return terminate_emulab_instance(request, experiment)
 
-    # create an instance of the API class
-    api_instance = AerpawGW.ExperimentApi()
+    # the status is 'not_started': create an instance of the API class
+    api_instance = aerpawgw_client.ExperimentApi()
     profile = get_emulab_profile_name(experiment.profile.project.name, experiment.profile.name)
     location = 'RENCIEmulab'
     # location = experiment.reservation.location
     logger.error('[IMPORTANT] We should check if Reservation exists, and use that Reservation.location')
     logger.error('[IMPORTANT] now just use default: {}'.format(location))
-    experiment_body = AerpawGW.Experiment(name=experiment.name,
+    experiment_body = aerpawgw_client.Experiment(name=experiment.name,
                                           profile=profile,
                                           cluster=emulab_location_to_urn(location))
     try:
@@ -226,7 +228,12 @@ def query_emulab_instance_status(request, experiment):
     :param experiment:
     :return status of emulab experiment: str
     """
-    api_instance = AerpawGW.ExperimentApi()
+    if not os.getenv('AERPAWGW_HOST') \
+            or not os.getenv('AERPAWGW_PORT') \
+            or not os.getenv('AERPAWGW_VERSION'):
+        return ''
+
+    api_instance = aerpawgw_client.ExperimentApi()
     try:
         # get status of specific experiment
         emulab_experiment = api_instance.query_experiment(experiment.name)
@@ -240,12 +247,16 @@ def query_emulab_instance_status(request, experiment):
 def terminate_emulab_instance(request, experiment):
     status = query_emulab_instance_status(request, experiment)
     logger.warning(status)
-    if status == 'not_started':
+
+    if status == '':
+        logger.error('Do nothing since we cannot get the status from emulab')
+        return False
+    elif status == 'not_started':
         return True
     elif status != 'ready' and status != 'failed':
         logger.error('The instance operation is in progress. Please try later.')
         return False
-    api_instance = AerpawGW.ExperimentApi()
+    api_instance = aerpawgw_client.ExperimentApi()
     try:
         # delete experiment
         api_instance.delete_experiment(experiment.name)
