@@ -173,40 +173,49 @@ def import_cloud_resources(request):
     avail_cloud_resources = {}
 
     for emulab_node in emulab_resources:
-        if emulab_node.type in total_cloud_resources:
-            total_cloud_resources[emulab_node.type] += 1
+        end_index = emulab_node.component_id.find('node')  # "urn:publicid:IDN+exogeni.net+node+pc1"
+        location_urn = emulab_node.component_id[:end_index-1]
+        location = emulab_urn_to_location(location_urn)
+        key = location + ',' + emulab_node.type
+        logger.warning('component_name = {}, location_urn = {}, key = {}'.format(
+            emulab_node.component_name, location_urn, key))
+
+        if key in total_cloud_resources:
+            total_cloud_resources[key] += 1
             if emulab_node.available is True:
-                avail_cloud_resources[emulab_node.type] += 1
+                avail_cloud_resources[key] += 1
         else:
-            total_cloud_resources[emulab_node.type] = 1
+            total_cloud_resources[key] = 1
             if emulab_node.available is True:
-                avail_cloud_resources[emulab_node.type] = 1
+                avail_cloud_resources[key] = 1
             else:
-                avail_cloud_resources[emulab_node.type] = 0
+                avail_cloud_resources[key] = 0
 
     logger.warning("total_cloud_resources:{}".format(total_cloud_resources))
     logger.warning("avail_cloud_resources:{}".format(avail_cloud_resources))
 
     # create or update resources in database
     for key in total_cloud_resources.keys():
-        create_or_update_cloud_resource(request, key,
+        create_or_update_cloud_resource(request, key.split(',')[0], key.split(',')[1],
                                         total_cloud_resources[key],
                                         avail_cloud_resources[key])
 
     # delete resources if they are no longer on emulab
     existing_resources = get_resource_list(request)
     for resource in existing_resources:
+        key = resource.location + ',' + resource.name
         if resource.description == 'Emulab nodes' \
                 and resource.resourceType.upper() == 'CLOUD'\
-                and resource.name not in total_cloud_resources.keys():
+                and key not in total_cloud_resources.keys():
             logger.warning('Emulab resource \'{}\' no longer exists, deleting it'.format(resource.name))
             delete_existing_resource(request, resource)
 
 
-def create_or_update_cloud_resource(request, name, units, avail_units):
+def create_or_update_cloud_resource(request, location, name, units, avail_units):
     """
 
     :param request:
+    :param location:
     :param name:
     :param units:
     :param avail_units:
@@ -215,7 +224,7 @@ def create_or_update_cloud_resource(request, name, units, avail_units):
 
     existing_resources = get_resource_list(request)
     for resource in existing_resources:
-        if resource.name == name:
+        if resource.name == name and resource.location == location:
             if resource.units != units:
                 # resource.availableUnits = avail_units # portal calculates its own avail_units
                 resource.units = units
@@ -232,7 +241,7 @@ def create_or_update_cloud_resource(request, name, units, avail_units):
     newresource.availableUnits = avail_units
     newresource.resourceType = 'Cloud'
     newresource.stage = 'Development'
-    newresource.location = 'RENCIEmulab'
+    newresource.location = location
     newresource.save()
     logger.warning('Emulab resource \'{}\' is created'.format(newresource.name))
     return
