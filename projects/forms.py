@@ -1,4 +1,5 @@
 from django import forms
+from django.shortcuts import render, redirect, get_object_or_404
 
 from accounts.models import AerpawUser
 from .models import Project
@@ -46,6 +47,17 @@ class ProjectCreateForm(forms.ModelForm):
             #'principal_investigator',
             #'project_members',
         )
+
+    def clean(self, *args, **kwargs):
+        cleaned_data = super().clean(*args, **kwargs)
+
+        rs=cleaned_data.get("name")
+        qs=Project.objects.filter(name=rs)
+        if qs.exists():
+            raise forms.ValidationError("This project name has been used!")
+            return redirect("/create")
+        
+        return cleaned_data
 
 
 class ProjectUpdateForm(forms.ModelForm):

@@ -82,7 +82,7 @@ class ReservationCreateForm(forms.ModelForm):
         resource=qs.first()
 
         if not resource.is_correct_stage(self.stage):
-            raise forms.ValidationError("This resource is not in yourexperiment's stage!")
+            raise forms.ValidationError("This resource is not in your experiment's stage!")
 
         start_date=cleaned_data.get("start_date")
         end_date=cleaned_data.get("end_date")
