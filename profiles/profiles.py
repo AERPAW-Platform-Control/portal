@@ -157,7 +157,7 @@ def create_new_emulab_profile(request, profile):
     :param profile:
     :return:
     """
-    emulab_profile_name = '{}-{}'.format(profile.project.name, profile.name)
+    emulab_profile_name = get_emulab_profile_name(profile.project.name, profile.name)
 
     # create on emulab
     api_instance = AerpawGW.ProfileApi()
@@ -178,19 +178,28 @@ def create_new_emulab_profile(request, profile):
         raise Exception("failed to query the created emulab profile")
 
 
-def delete_emulab_profile(request, profile):
+def delete_emulab_profile(request, profile, name_to_delete=None):
     """
     Delte profile in emulab cloud
 
     :param request: in case we need user info later
     :param profile:
+    :param name_to_delete: in case of user updates the name in profile,
+                            we will need to use the oldnname to delete
     :return
     """
 
-    emulab_profile_name = '{}-{}'.format(profile.project.name, profile.name)
+    if name_to_delete is None:
+        emulab_profile_name = get_emulab_profile_name(profile.project.name, profile.name)
+    else:
+        emulab_profile_name = get_emulab_profile_name(profile.project.name, name_to_delete)
     api_instance = AerpawGW.ProfileApi()
     try:
         # delete profile
         api_instance.delete_profile(emulab_profile_name)
     except ApiException as e:
         print("Exception when calling ProfileApi->delete_profile: %s\n" % e)
+
+
+def get_emulab_profile_name(projectname, profilename):
+    return '{}-{}'.format(projectname, profilename)
