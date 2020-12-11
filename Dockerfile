@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
   && pip install virtualenv \
   && mkdir /code/
 
+RUN pip install git+https://github.com/AERPAW-Platform-Control/aerpaw-gateway-client.git
+
 WORKDIR /code
 VOLUME ["/code"]
 ENTRYPOINT ["/code/docker-entrypoint.sh"]
