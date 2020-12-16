@@ -65,9 +65,10 @@ def experiment_detail(request, experiment_uuid):
     status = ''
     if experiment.stage.upper() == 'DEVELOPMENT':
         status = query_emulab_instance_status(request, experiment)
-        logger.warning(status)
         # the status can be any of following:
         # 'created', 'provisioning', 'provisioned', 'ready', 'failed', 'teriminating', 'not_started'
+        if status == 'provisioned':
+            status = 'booting'  # for better user understanding
 
     return render(request, 'experiment_detail.html',
     {'experiment': experiment,
@@ -116,6 +117,7 @@ def experiment_delete(request, experiment_uuid):
 
 def experiment_initiate(request, experiment_uuid):
     """
+    render experiment initiate/stop page for the experiment
 
     :param request:
     :param experiment_uuid:
@@ -127,8 +129,32 @@ def experiment_initiate(request, experiment_uuid):
         is_success = initiate_emulab_instance(request, experiment)
         if is_success:
             status = query_emulab_instance_status(request, experiment)
-            logger.warning(status)
             return redirect('experiment_detail', experiment_uuid=experiment_uuid)
         else:
             logger.error('Need to pop up something to indicate "Retry later"')
     return render(request, 'experiment_initiate.html', {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'experiment_reservations': experiment_reservations})
+
+
+def experiment_manifest(request, experiment_uuid):
+    """
+    render manifest information for the experiment
+
+    :param request:
+    :param experiment_uuid:
+    :return:
+    """
+    experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
+
+    manifest = None
+    if experiment.stage.upper() == 'DEVELOPMENT':
+        manifest = get_emulab_manifest(request, experiment)
+
+    if manifest is not None:
+        logger.warning(manifest)
+        return render(request, 'experiment_manifest.html',
+                  {'experiment': experiment,
+                   'rspec': manifest.rspec,
+                   'vnodes': manifest.vnodes})
+    else:
+        logger.error('not emulab experiment or not ready, temporary redirect back, need better handling')
+        return redirect('experiment_detail', experiment_uuid=experiment_uuid)

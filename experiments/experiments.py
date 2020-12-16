@@ -64,6 +64,7 @@ def create_new_experiment(request, form):
 
     return str(experiment.uuid)
 
+
 def update_experimenter(experiment, experimenter_id_list):
     """
 
@@ -77,6 +78,7 @@ def update_experimenter(experiment, experimenter_id_list):
     for experimenter_id in experimenter_id_list:
         experiment_experimenter = AerpawUser.objects.get(id=int(experimenter_id))
         experiment.experimenter.add(experiment_experimenter)
+
 
 def update_existing_experiment(request, experiment, form):
     """
@@ -94,6 +96,7 @@ def update_existing_experiment(request, experiment, form):
     #update_experiment_reservations(experiment, experiment_reservation_id_list)
     experiment.save()
     return str(experiment.uuid)
+
 
 def update_experiment_reservations(experiment, experiment_reservation_id_list):
     """
@@ -138,58 +141,15 @@ def get_experiment_list(request):
     return experiments
 
 
-def get_emulab_instances(request):
-    api_instance = aerpawgw_client.ExperimentApi()
-
-    try:
-        # get experiment(s) under user
-        api_response = api_instance.get_experiments()
-        logger.warning(api_response)
-    except ApiException as e:
-        logger.error("Exception when calling ExperimentApi->get_experiments: %s\n" % e)
-
-    emulab_experiments = []
-    for emulab_e in api_response:  # aerpawgw_client.models.experiment.Experiment
-        e = Experiment()
-        e.name = emulab_e.name
-        e.created_date = datetime.fromtimestamp(int(emulab_e.start))
-        e.created_by = request.user
-        e.uuid = emulab_e.uuid
-
-        # we need a field to store emulab eid (project+name)
-        # borrow description field first.
-        emulab_eid = '{},{}'.format(emulab_e.project, emulab_e.name)
-        e.description = emulab_eid
-        # e.emulab_eid = emulab_eid
-
-        # e.project =
-        # e.stage =
-        emulab_experiments.append(e)
-
-        # test code before experiment_detail is ready
-        get_emulab_manifest(emulab_eid)
-
-    return emulab_experiments
-
-
-def get_emulab_manifest(emulab_eid):
-    api_instance = aerpawgw_client.ResourcesApi()
-    project = emulab_eid.split(',')[0]
-    experiment = emulab_eid.split(',')[1]
-    logger.warning(emulab_eid)
-    try:
-        api_response = api_instance.list_resources(project=project,
-                                                   experiment=experiment)
-        logger.warning(api_response)
-    except ApiException as e:
-        logger.error("Exception when calling ResourcesApi->list_resources: %s\n" % e)
-        api_response = None
-    return api_response
-
-
 def initiate_emulab_instance(request, experiment):
+    """
+    Start experiment instance status on Emulab
+
+    :param request:
+    :param experiment:
+    :return: True - success, False - otherwise
+    """
     status = query_emulab_instance_status(request, experiment)
-    logger.warning(status)
 
     if status == '':
         logger.error('Do nothing since we cannot get the status from emulab')
@@ -223,30 +183,42 @@ def initiate_emulab_instance(request, experiment):
 
 def query_emulab_instance_status(request, experiment):
     """
+    Query the experiment instance status on Emulab
 
     :param request:
     :param experiment:
-    :return status of emulab experiment: str
+    :return status of emulab experiment: str, including 'not_started', 'provisioning',
+                                             'provisioned', 'ready', 'failed'
     """
     if not os.getenv('AERPAWGW_HOST') \
             or not os.getenv('AERPAWGW_PORT') \
             or not os.getenv('AERPAWGW_VERSION'):
+        return ''
+    if experiment.profile is None or not is_emulab_profile(experiment.stage):
         return ''
 
     api_instance = aerpawgw_client.ExperimentApi()
     try:
         # get status of specific experiment
         emulab_experiment = api_instance.query_experiment(experiment.name)
+        logger.warning('emulab_experiment:')
         logger.warning(emulab_experiment)
+        logger.warning('experiment status on emulab: {}'.format('emulab_experiment.status'))
         return emulab_experiment.status
     except ApiException as e:
-        logger.warning("Exception when calling ExperimentApi->query_experiment: %s\n" % e)
+        logger.warning('experiment status on emulab: {}'.format('not_started'))
         return 'not_started'
 
 
 def terminate_emulab_instance(request, experiment):
+    """
+    terminate the experiment instance on Emulab, the status has to be ready or failed.
+
+    :param request:
+    :param experiment:
+    :return : True - success, False - try later
+    """
     status = query_emulab_instance_status(request, experiment)
-    logger.warning(status)
 
     if status == '':
         logger.error('Do nothing since we cannot get the status from emulab')
@@ -263,3 +235,57 @@ def terminate_emulab_instance(request, experiment):
     except ApiException as e:
         logger.warning("Exception when calling ExperimentApi->delete_experiment: %s\n" % e)
     return True
+
+
+def get_emulab_manifest(request, experiment):
+    """
+    Get manifest from Emulab, the status has to be ready.
+
+    :param request:
+    :param experiment:
+    :return : class Resource of aerpawgw_client. rspec and vnodes are what we need
+    """
+    status = query_emulab_instance_status(request, experiment)
+    if status != 'ready':
+        return None
+    api_instance = aerpawgw_client.ResourcesApi()
+    try:
+        exp_resources = api_instance.list_resources(experiment=experiment.name)
+        logger.info(exp_resources)
+    except ApiException as e:
+        logger.error("Exception when calling ResourcesApi->list_resources: %s\n" % e)
+        exp_resources = None
+    return exp_resources
+
+
+'''
+def get_emulab_instances(request):
+    api_instance = aerpawgw_client.ExperimentApi()
+
+    try:
+        # get experiment(s) under user
+        api_response = api_instance.get_experiments()
+        logger.warning(api_response)
+    except ApiException as e:
+        logger.error("Exception when calling ExperimentApi->get_experiments: %s\n" % e)
+
+    emulab_experiments = []
+    for emulab_e in api_response:  # aerpawgw_client.models.experiment.Experiment
+        e = Experiment()
+        e.name = emulab_e.name
+        e.created_date = datetime.fromtimestamp(int(emulab_e.start))
+        e.created_by = request.user
+        e.uuid = emulab_e.uuid
+
+        # we need a field to store emulab eid (project+name)
+        # borrow description field first.
+        emulab_eid = '{},{}'.format(emulab_e.project, emulab_e.name)
+        e.description = emulab_eid
+        # e.emulab_eid = emulab_eid
+
+        # e.project =
+        # e.stage =
+        emulab_experiments.append(e)
+
+    return emulab_experiments
+'''

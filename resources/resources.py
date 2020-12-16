@@ -176,6 +176,7 @@ def import_cloud_resources(request):
     total_cloud_resources = {}
     avail_cloud_resources = {}
 
+    logger.warning('parsing emulab resources:')
     for emulab_node in emulab_resources:
         end_index = emulab_node.component_id.find('node')  # "urn:publicid:IDN+exogeni.net+node+pc1"
         location_urn = emulab_node.component_id[:end_index-1]

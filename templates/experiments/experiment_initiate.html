@@ -2,13 +2,12 @@
 {% load static %}
 
 {% block title %}
-    Delete: {{ experiment.name }}
+    Initiate/Stop: {{ experiment.name }}
 {% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
-        <div class="container">
-            <div class="post">
+       <div class="container">
                 <h2>Initiate or Terminate "{{ experiment.name }}"</h2>
                 <table class="table table-striped table-bordered my-4">
                   <tr>
