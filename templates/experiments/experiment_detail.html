@@ -61,6 +61,19 @@
               <td>Modified Date</td>
               <td>{{ experiment.modified_date }}</td>
             </tr>
+            <tr>
+              <td>Profile</td>
+              <td>{{ experiment.profile }}</td>
+            </tr>
+            <tr>
+              <td>Experiment Status</td>
+              <td>{{ experiment_status }}</td>
+              <td>
+                <button class="btn btn-success mr-2">
+                  <a href="{% url 'experiment_manifest' experiment_uuid=experiment.uuid %}" class="unlink">Manifest</a>
+                </button>
+              </td>
+            </tr>
           </table>
           <button class="btn btn-success mr-2">
             <a href="{% url 'experiment_update' experiment_uuid=experiment.uuid %}" class="unlink">Update</a>
@@ -70,6 +83,9 @@
           </button>
           <button class="btn btn-danger">
             <a href="{% url 'experiment_delete' experiment_uuid=experiment.uuid %}" class="unlink">Delete</a>
+          </button>
+          <button class="btn btn-success mr-2">
+            <a href="{% url 'experiment_initiate' experiment_uuid=experiment.uuid %}" class="unlink">Initiate/Terminate</a>
           </button>
         </div>
     {% else %}

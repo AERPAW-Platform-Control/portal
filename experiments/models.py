@@ -9,6 +9,7 @@ from django.utils import timezone
 from accounts.models import AerpawUser
 from projects.models import Project
 from resources.models import ResourceStageChoice
+from profiles.models import Profile
 
 class ReservationStatusChoice(Enum):   # A subclass of Enum
     IDLE = 'Idle'
@@ -31,6 +32,7 @@ class Experiment(models.Model):
     experimenter = models.ManyToManyField(
         AerpawUser, related_name='experiment_of_experimenter'
     )
+
     project = models.ForeignKey(
         Project, related_name='experiment_of_project',null=True, on_delete=models.SET_NULL
     )
@@ -39,7 +41,7 @@ class Experiment(models.Model):
         AerpawUser, related_name='experiment_created_by', null=True, on_delete=models.SET_NULL
     )
     created_date = models.DateTimeField(default=timezone.now)
-    
+
     modified_by = models.ForeignKey(
         AerpawUser, related_name='experiment_modified_by', null=True, on_delete=models.SET_NULL
     )
@@ -52,6 +54,10 @@ class Experiment(models.Model):
     stage=models.CharField(
       max_length=64,
       choices=ResourceStageChoice.choices(),
+    )
+
+    profile = models.ForeignKey(
+        Profile, related_name='experiment_profile', null=True, on_delete=models.SET_NULL
     )
 
     class Meta:

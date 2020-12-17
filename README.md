@@ -121,6 +121,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Install Aerpaw Gateway Client
+```console
+pip install git+https://github.com/AERPAW-Platform-Control/aerpaw-gateway-client.git
+```
+
 Once completed you should be ready to run the script that launches the Django application using uWSGI
 
 ```console
