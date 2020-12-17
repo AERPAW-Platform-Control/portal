@@ -151,7 +151,7 @@ def query_emulab_profile(request, emulab_profile_name):
         return emulab_profile
     except ApiException as e:
         print("Exception when calling ProfileApi->query_profile: %s\n" % e)
-        raise Exception(e)
+        return None
 
 
 def create_new_emulab_profile(request, profile):

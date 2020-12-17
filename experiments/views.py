@@ -18,12 +18,7 @@ def experiments(request):
     :param request:
     :return:
     """
-
-    # aerpaw nodes:
     experiments = get_experiment_list(request)
-
-    # emulab cloud:
-    # emulab_experiments = get_emulab_instances(request)
     return render(request, 'experiments.html', {'experiments': experiments})
 
 
@@ -33,18 +28,18 @@ def experiment_create(request):
     :param request:
     :return:
     """
-    experimenter=request.user
+    experimenter = request.user
     try:
-        project_id=request.session['project_id']
-        project=get_object_or_404(Project, id=project_id)
+        project_id = request.session['project_id']
+        project = get_object_or_404(Project, id=project_id)
     except KeyError:
-        project_qs=Project.objects.filter(project_members=experimenter)
+        project_qs = Project.objects.filter(project_members=experimenter)
         if project_qs:
-            project=project_qs[0]
+            project = project_qs[0]
         else:
             return redirect('/')
-        
-    form = ExperimentCreateForm(request.POST,project=project,experimenter=experimenter)
+
+    form = ExperimentCreateForm(request.POST, project=project, experimenter=experimenter)
     if form.is_valid():
         experiment_uuid = create_new_experiment(request, form)
         return redirect('experiment_detail', experiment_uuid=experiment_uuid)
@@ -71,10 +66,10 @@ def experiment_detail(request, experiment_uuid):
             status = 'booting'  # for better user understanding
 
     return render(request, 'experiment_detail.html',
-    {'experiment': experiment,
-     'experimenter':experiment.experimenter.all(),
-     'experiment_status': status,
-     'reservations': experiment_reservations.all()})
+                  {'experiment': experiment,
+                   'experimenter': experiment.experimenter.all(),
+                   'experiment_status': status,
+                   'reservations': experiment_reservations.all()})
 
 
 def experiment_update(request, experiment_uuid):
@@ -95,7 +90,8 @@ def experiment_update(request, experiment_uuid):
         form = ExperimentUpdateForm(instance=experiment)
     return render(request, 'experiment_update.html',
                   {
-                      'form': form, 'experiment_uuid': str(experiment_uuid), 'experiment_name': experiment.name}
+                      'form': form, 'experiment_uuid': str(experiment_uuid),
+                      'experiment_name': experiment.name}
                   )
 
 
@@ -112,7 +108,9 @@ def experiment_delete(request, experiment_uuid):
         is_removed = delete_existing_experiment(request, experiment)
         if is_removed:
             return redirect('experiments')
-    return render(request, 'experiment_delete.html', {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'experiment_reservations': experiment_reservations})
+    return render(request, 'experiment_delete.html',
+                  {'experiment': experiment, 'experimenter': experiment.experimenter.all(),
+                   'experiment_reservations': experiment_reservations})
 
 
 def experiment_initiate(request, experiment_uuid):
@@ -152,9 +150,10 @@ def experiment_manifest(request, experiment_uuid):
     if manifest is not None:
         logger.warning(manifest)
         return render(request, 'experiment_manifest.html',
-                  {'experiment': experiment,
-                   'rspec': manifest.rspec,
-                   'vnodes': manifest.vnodes})
+                      {'experiment': experiment,
+                       'rspec': manifest.rspec,
+                       'vnodes': manifest.vnodes})
     else:
-        logger.error('not emulab experiment or not ready, temporary redirect back, need better handling')
+        logger.error(
+            'not emulab experiment or not ready, temporary redirect back, need better handling')
         return redirect('experiment_detail', experiment_uuid=experiment_uuid)

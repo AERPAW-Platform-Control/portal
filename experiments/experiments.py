@@ -160,15 +160,20 @@ def initiate_emulab_instance(request, experiment):
         return terminate_emulab_instance(request, experiment)
 
     # the status is 'not_started': create an instance of the API class
+    # before that, make sure profile existed in emulab
+    emulab_profile_name = get_emulab_profile_name(experiment.profile.project.name,
+                                                  experiment.profile.name)
+    if query_emulab_profile(request, emulab_profile_name) is None:
+        create_new_emulab_profile(request, experiment.profile)
+
     api_instance = aerpawgw_client.ExperimentApi()
-    profile = get_emulab_profile_name(experiment.profile.project.name, experiment.profile.name)
     location = 'RENCIEmulab'
     # location = experiment.reservation.location
     logger.error('[IMPORTANT] We should check if Reservation exists, and use that Reservation.location')
-    logger.error('[IMPORTANT] now just use default: {}'.format(location))
+    logger.error('[IMPORTANT] now just hard-coded default: {}'.format(location))
     experiment_body = aerpawgw_client.Experiment(name=experiment.name,
-                                          profile=profile,
-                                          cluster=emulab_location_to_urn(location))
+                                                 profile=emulab_profile_name,
+                                                 cluster=emulab_location_to_urn(location))
     try:
         # create a experiment
         logger.warning(experiment_body)
@@ -203,7 +208,7 @@ def query_emulab_instance_status(request, experiment):
         emulab_experiment = api_instance.query_experiment(experiment.name)
         logger.warning('emulab_experiment:')
         logger.warning(emulab_experiment)
-        logger.warning('experiment status on emulab: {}'.format('emulab_experiment.status'))
+        logger.warning('experiment status on emulab: {}'.format(emulab_experiment.status))
         return emulab_experiment.status
     except ApiException as e:
         logger.warning('experiment status on emulab: {}'.format('not_started'))
