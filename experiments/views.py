@@ -33,13 +33,14 @@ def experiment_create(request):
         project_id = request.session['project_id']
         project = get_object_or_404(Project, id=project_id)
     except KeyError:
-        project_qs = Project.objects.filter(project_members=experimenter)
+        project_qs=Project.objects.filter(project_members=experimenter)
         if project_qs:
-            project = project_qs[0]
+            project=project_qs[0]
         else:
             return redirect('/')
+        
+    form = ExperimentCreateForm(request.POST,project=project,experimenter=experimenter)
 
-    form = ExperimentCreateForm(request.POST, project=project, experimenter=experimenter)
     if form.is_valid():
         experiment_uuid = create_new_experiment(request, form)
         return redirect('experiment_detail', experiment_uuid=experiment_uuid)
