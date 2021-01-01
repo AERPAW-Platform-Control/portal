@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
+from profiles.models import Profile
 from .models import Experiment
 
 
@@ -20,6 +21,13 @@ class ExperimentCreateForm(forms.ModelForm):
         required=True,
         widget=forms.Select(),
         label='Project',
+    )
+
+    profile = forms.ModelChoiceField(
+        queryset=Profile.objects.order_by('name'),
+        required=False,
+        widget=forms.Select(),
+        label='Profile',
     )
 
     class Meta:
@@ -88,6 +96,13 @@ class ExperimentUpdateForm(forms.ModelForm):
         required=False,
         widget=forms.SelectMultiple(),
         label='Experiment Reservations',
+    )
+
+    profile = forms.ModelChoiceField(
+        queryset=Profile.objects.order_by('name'),
+        required=False,
+        widget=forms.Select(),
+        label='Profile',
     )
 
     class Meta:

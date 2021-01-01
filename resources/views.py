@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 
 from .forms import ResourceCreateForm, ResourceChangeForm
 from .models import Resource
-from .resources import create_new_resource, get_resource_list, update_existing_resource, delete_existing_resource, get_all_reserved_units
+from .resources import *
 
 import json
 
@@ -50,17 +50,26 @@ def resources(request):
     :param request:
     :return:
     """
+    import_cloud_resources(request)
     resources = get_resource_list(request)
     resources_json = get_resources_json(resources)
     reserved_resource = get_all_reserved_units(24, 2)
     reservations_json = get_reservations_json(reserved_resource)
+
+    # resource type list
+    resource_list = []
+    for res in resources.values():
+        type = res.get('resourceType')
+        if type not in resource_list:
+            resource_list.append(type)
 
     return render(request, 'resources.html',
                   {
                       'resources': resources,
                       'resources_json': resources_json,
                       'reservations': reserved_resource,
-                      'reservations_json': reservations_json
+                      'reservations_json': reservations_json,
+                      'resource_list': resource_list,
                   })
 
 
@@ -90,7 +99,8 @@ def resource_detail(request, resource_uuid):
     """
     resource = get_object_or_404(Resource, uuid=UUID(str(resource_uuid)))
     resource_reservations = resource.reservation_of_resource
-    return render(request, 'resource_detail.html', {'resource': resource}, {'reservations': resource_reservations.all()})
+    return render(request, 'resource_detail.html', {'resource': resource, 'reservations': resource_reservations.all()})
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def resource_update(request, resource_uuid):

@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import ProfileCreateForm, ProfileUpdateForm
 from .models import Profile
-from .profiles import create_new_profile, get_profile_list, update_existing_profile, delete_existing_profile
+from .profiles import *
 
 
 def profiles(request):
@@ -45,7 +45,7 @@ def profile_detail(request, profile_uuid):
     :return:
     """
     profile = get_object_or_404(Profile, uuid=UUID(str(profile_uuid)))
-    return render(request, 'profile_detail.html', 
+    return render(request, 'profile_detail.html',
     {'profile': profile})
 
 
@@ -58,8 +58,11 @@ def profile_update(request, profile_uuid):
     """
     profile = get_object_or_404(Profile, uuid=UUID(str(profile_uuid)))
     if request.method == "POST":
+        old_profile_name = profile.name
         form = ProfileUpdateForm(request.POST, instance=profile)
         if form.is_valid():
+            if is_emulab_profile(profile.stage):
+                delete_emulab_profile(request, profile, old_profile_name)
             profile = form.save(commit=False)
             profile_uuid = update_existing_profile(request, profile, form)
             return redirect('profile_detail', profile_uuid=str(profile.uuid))
