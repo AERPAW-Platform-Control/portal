@@ -134,6 +134,11 @@ def delete_existing_experiment(request, experiment):
     :return:
     """
     try:
+        if experiment.profile is not None and is_emulab_profile(experiment.stage):
+            # instance on emulab should be terminated first
+            emulab_deleted = terminate_emulab_instance(request, experiment)
+            if emulab_deleted is False:
+                return False
         experiment.delete()
         return True
     except Exception as e:
