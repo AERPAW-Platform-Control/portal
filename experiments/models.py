@@ -85,6 +85,8 @@ class Experiment(models.Model):
         Profile, related_name='experiment_profile',blank=True, null=True, on_delete=models.SET_NULL
     )
 
+    key_inserted = models.BooleanField(default=False)
+
     class Meta:
         verbose_name = 'AERPAW Experiment'
 

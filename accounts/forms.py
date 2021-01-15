@@ -22,4 +22,4 @@ class AerpawUserSignupForm(forms.ModelForm):
 
     class Meta:
         model = AerpawUserSignup
-        fields = ('user', 'name', 'title', 'organization', 'description', 'userRole')
+        fields = ('user', 'name', 'title', 'organization', 'description', 'userRole', 'publickey')
