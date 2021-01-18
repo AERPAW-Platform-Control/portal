@@ -1,6 +1,8 @@
 import uuid
 
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import Project, AerpawUser
 
@@ -63,8 +65,21 @@ def update_project_members(project, project_member_email_list):
             project_member = AerpawUser.objects.get(oidc_claim_email=member_email)
             project.project_members.add(project_member)
         except AerpawUser.DoesNotExist:
-            project.project_pending_member_emails = project.project_pending_member_emails + member_email+','  
+            project.project_pending_member_emails = project.project_pending_member_emails + member_email+',' 
+    if project.project_pending_member_emails != '':
+        send_pending_memeber_emails(project.project_pending_member_emails)
+
     project.save()
+
+def send_pending_memeber_emails(pending_member_emails):
+    subject = 'AERPAW project sign up'
+    message = 'You received this email because a project PI has added you to the project. Please go to aerpaw.org to login and signup.' 
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list=pending_member_emails.split(',')
+    print(email_from)
+    print(recipient_list)
+    send_mail( subject, message, email_from, recipient_list )
+    
 
 def delete_project_members(project, project_member_id_list):
     """
