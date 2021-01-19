@@ -5,14 +5,14 @@ from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
 from profiles.models import Profile
-from .models import Experiment
+from .models import Experiment,ResourceStageRequestChoice,StageChoice
 
 
 class ExperimentCreateForm(forms.ModelForm):
-    experimenter = forms.ModelMultipleChoiceField(
+    experimenter = forms.ModelChoiceField(
         queryset=AerpawUser.objects.order_by('oidc_claim_name'),
         required=True,
-        widget=forms.SelectMultiple(),
+        widget=forms.Select(),
         label='Lead Experimenter',
     )
 
@@ -21,6 +21,13 @@ class ExperimentCreateForm(forms.ModelForm):
         required=True,
         widget=forms.Select(),
         label='Project',
+    )
+
+    stage = forms.ChoiceField(
+        choices=ResourceStageRequestChoice.choices(),
+        required=True,
+        widget=forms.Select(),
+        label='Stage',
     )
 
     profile = forms.ModelChoiceField(
@@ -98,6 +105,13 @@ class ExperimentUpdateForm(forms.ModelForm):
         label='Experiment Reservations',
     )
 
+    stage = forms.ChoiceField(
+        choices=ResourceStageRequestChoice.choices(),
+        required=True,
+        widget=forms.Select(),
+        label='Stage',
+    )
+
     profile = forms.ModelChoiceField(
         queryset=Profile.objects.order_by('name'),
         required=False,
@@ -114,4 +128,57 @@ class ExperimentUpdateForm(forms.ModelForm):
             'modified_by',
             'modified_date',
             'stage',
+        )
+
+class ExperimentAdminForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'size': 60}),
+        required=True,
+    )
+
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='Experiment Description',
+    )
+
+    experimenter = forms.ModelChoiceField(
+        queryset=AerpawUser.objects.order_by('oidc_claim_name'),
+        required=True,
+        initial=0,
+        widget=forms.Select(),
+        label='Lead Experimenter',
+    )
+
+    experiment_reservations = forms.ModelMultipleChoiceField(
+        queryset=Reservation.objects.order_by('name'),
+        required=False,
+        widget=forms.SelectMultiple(),
+        label='Experiment Reservations',
+    )
+
+    stage = forms.ChoiceField(
+        choices=ResourceStageRequestChoice.choices(),
+        required=True,
+        widget=forms.Select(),
+        label='Stage',
+    )
+
+    profile = forms.ModelChoiceField(
+        queryset=Profile.objects.order_by('name'),
+        required=False,
+        widget=forms.Select(),
+        label='Profile',
+    )
+
+    class Meta:
+        model = Experiment
+        fields = (
+            'name',
+            'description',
+            'experimenter',
+            'modified_by',
+            'modified_date',
+            'stage',
+            'profile',
         )

@@ -88,13 +88,18 @@ def update_existing_experiment(request, experiment, form):
     :param form:
     :return:
     """
-    experiment.modified_by = request.user
-    experiment.modified_date = timezone.now()
-    experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
-    experiment.save()
+    try:
+        experiment.modified_by = request.user
+        experiment.modified_date = timezone.now()
+        experiment.stage = form.data.getlist('stage')[0]
+        experiment.save()
+        experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
+        experiment.save()
+    except ValueError as e:
+        print(e)
+        experiment.description = None
     #experiment_reservation_id_list = form.data.getlist('experiment_reservations')
     #update_experiment_reservations(experiment, experiment_reservation_id_list)
-    experiment.save()
     return str(experiment.uuid)
 
 

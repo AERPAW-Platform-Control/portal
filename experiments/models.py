@@ -11,6 +11,31 @@ from projects.models import Project
 from resources.models import ResourceStageChoice
 from profiles.models import Profile
 
+class StageChoice(Enum):   # A subclass of Enum
+    IDLE = 'Idle'
+    DEVELOPMENT = 'Development'
+    SANDBOX = 'Sandbox'
+    SANDBOXRequest = 'SandboxRequest'
+    EMULATION = 'Emulation'
+    EMULATIONRequest = 'EmulationRequest'
+    TESTBED = 'Testbed'
+    TESTBEDRequest = 'TestbedRequest'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
+class ResourceStageRequestChoice(Enum):   # A subclass of Enum
+    IDLE = 'Idle'
+    DEVELOPMENT = 'Development'
+    SANDBOXRequest = 'SandboxRequest'
+    EMULATIONRequest = 'EmulationRequest'
+    TESTBEDRequest = 'TestbedRequest'
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
 class ReservationStatusChoice(Enum):   # A subclass of Enum
     IDLE = 'Idle'
     SUCCESS = 'Success'
@@ -53,11 +78,11 @@ class Experiment(models.Model):
 
     stage=models.CharField(
       max_length=64,
-      choices=ResourceStageChoice.choices(),
+      choices=StageChoice.choices(),
     )
 
     profile = models.ForeignKey(
-        Profile, related_name='experiment_profile', null=True, on_delete=models.SET_NULL
+        Profile, related_name='experiment_profile',blank=True, null=True, on_delete=models.SET_NULL
     )
 
     class Meta:
