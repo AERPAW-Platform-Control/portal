@@ -81,14 +81,21 @@ def experiment_update(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
+    stage = experiment.stage
     if request.method == "POST":
         form = ExperimentUpdateForm(request.POST, instance=experiment)
         if form.is_valid():
             experiment = form.save(commit=False)
             experiment_uuid = update_existing_experiment(request, experiment, form)
+            new_stage = experiment.stage
+            
+            if stage != new_stage:
+                experiment.stage = new_stage
+                send_exepriment_update_email(experiment)
             return redirect('experiment_detail', experiment_uuid=str(experiment.uuid))
     else:
         form = ExperimentUpdateForm(instance=experiment)
+        
     return render(request, 'experiment_update.html',
                   {
                       'form': form, 'experiment_uuid': str(experiment_uuid),

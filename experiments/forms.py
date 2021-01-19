@@ -57,7 +57,7 @@ class ExperimentCreateForm(forms.ModelForm):
                 self.fields['project'].queryset = qs
 
             qs = AerpawUser.objects.filter(projects__id=project.id)
-            print(qs)
+            #print(qs)
             if qs:
                 self.fields['experimenter'].queryset = qs
 
