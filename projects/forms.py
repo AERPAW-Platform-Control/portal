@@ -92,6 +92,12 @@ class ProjectUpdateForm(forms.ModelForm):
         label='Add project members emails',
     )
 
+    project_pending_member_emails = forms.CharField(
+        widget=forms.TextInput(attrs={'size': 60}),
+        required=False,
+        label='Pending members',
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         project = self.instance
@@ -105,6 +111,7 @@ class ProjectUpdateForm(forms.ModelForm):
         fields = (
             'name',
             'description',
+            'project_pending_member_emails',
             #'principal_investigator',
             #'project_members',
         )
