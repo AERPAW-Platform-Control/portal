@@ -1,6 +1,8 @@
 import uuid
 
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import Experiment
 from reservations.models import Reservation
@@ -88,15 +90,26 @@ def update_existing_experiment(request, experiment, form):
     :param form:
     :return:
     """
-    experiment.modified_by = request.user
-    experiment.modified_date = timezone.now()
-    experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
-    experiment.save()
+    try:
+        experiment.modified_by = request.user
+        experiment.modified_date = timezone.now()
+        experiment.stage = form.data.getlist('stage')[0]
+        experiment.save()
+        experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
+        experiment.save()
+    except ValueError as e:
+        print(e)
     #experiment_reservation_id_list = form.data.getlist('experiment_reservations')
     #update_experiment_reservations(experiment, experiment_reservation_id_list)
-    experiment.save()
     return str(experiment.uuid)
 
+def send_exepriment_update_email(experiment):
+    subject = 'AERPAW experiment stage update'
+    message = 'This experiment requires a stage update:' + str(experiment) 
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list=[]
+    recipient_list.append(settings.EMAIL_ADMIN_USER)
+    send_mail(subject, message, email_from, recipient_list )
 
 def update_experiment_reservations(experiment, experiment_reservation_id_list):
     """

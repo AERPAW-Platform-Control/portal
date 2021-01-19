@@ -142,6 +142,7 @@ class ReservationChangeForm(forms.ModelForm):
             'units',
             'start_date',
             'end_date',
+            'experiment',
         )
 
     def clean(self, *args, **kwargs):

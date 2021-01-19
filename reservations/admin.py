@@ -1,4 +1,4 @@
-from django.contrib import admin
+import functools
 
 # Register your models here.
 
@@ -16,9 +16,17 @@ from .models import Reservation
 
 class AerpawReservationAdmin(admin.ModelAdmin):
     add_form = ReservationCreateForm
-    form = ReservationCreateForm
+    form = ReservationChangeForm
     model = Reservation
     list_display = ['name', 'description', 'state', 'start_date', 'end_date','experiment','resource']
+""" 
+    def get_form(self, request, obj=None, **kwargs):
+        try:
+            kwargs['form'] = ReservationCreateForm
+            Form = super().get_form(request, obj=None, **kwargs)
+            return functools.partial(Form,experiment_id = request.session['experiment_id'])
+        except KeyError as e:
+            print(e) """
 
 
 admin.site.register(Reservation, AerpawReservationAdmin)
