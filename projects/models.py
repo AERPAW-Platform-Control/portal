@@ -26,7 +26,7 @@ class Project(models.Model):
     project_members = models.ManyToManyField(
         AerpawUser, related_name='projects'
     )
-    project_pending_member_emails = models.CharField(max_length=140,default='')
+    project_pending_member_emails = models.CharField(max_length=280,default='')
     created_by = models.ForeignKey(
         User, related_name='project_created_by', on_delete=models.CASCADE, null=True, blank=True
     )
