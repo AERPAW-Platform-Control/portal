@@ -176,14 +176,14 @@ def import_cloud_resources(request):
     total_cloud_resources = {}
     avail_cloud_resources = {}
 
-    logger.warning('parsing emulab resources:')
+    logger.info('parsing emulab resources:')
     for emulab_node in emulab_resources:
         end_index = emulab_node.component_id.find('node')  # "urn:publicid:IDN+exogeni.net+node+pc1"
         location_urn = emulab_node.component_id[:end_index-1]
         location = emulab_urn_to_location(location_urn)
         key = location + ',' + emulab_node.type
-        logger.warning('component_name = {}, location_urn = {}, key = {}'.format(
-            emulab_node.component_name, location_urn, key))
+        logger.warning('component_name = {}, location_urn = {}, key = {}, available = {}'.format(
+            emulab_node.component_name, location_urn, key, emulab_node.available))
 
         if key in total_cloud_resources:
             total_cloud_resources[key] += 1
@@ -198,6 +198,8 @@ def import_cloud_resources(request):
 
     logger.warning("total_cloud_resources:{}".format(total_cloud_resources))
     logger.warning("avail_cloud_resources:{}".format(avail_cloud_resources))
+    logger.warning("portal should calculate the available counts by reservation, " +
+                   "the avail_cloud_resources returned by emulab should just be reference \n")
 
     # create or update resources in database
     for key in total_cloud_resources.keys():
