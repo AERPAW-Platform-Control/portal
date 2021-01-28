@@ -1,8 +1,9 @@
 # accounts/views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import create_new_signup
-from .forms import AerpawUserSignupForm
+from .models import create_new_signup, update_credential
+from .forms import AerpawUserSignupForm, AerpawUserCredentialForm
+
 
 def profile(request):
     """
@@ -12,6 +13,7 @@ def profile(request):
     """
     user = request.user
     return render(request, 'profile.html', {'user': user})
+
 
 def signup(request):
     """
@@ -26,5 +28,22 @@ def signup(request):
             signup_uuid = create_new_signup(request, form)
             return redirect('home')
     else:
-        form =AerpawUserSignupForm()
+        form = AerpawUserSignupForm()
     return render(request, 'signup.html', {'form': form})
+
+
+def credential(request):
+    """
+
+    :param request:
+    :return:
+    """
+
+    if request.method == "POST":
+        form = AerpawUserCredentialForm(request.POST)
+        if form.is_valid():
+            update_credential(request, form)
+            return redirect('home')
+    else:
+        form = AerpawUserCredentialForm()
+    return render(request, 'credential.html', {'form': form})

@@ -60,10 +60,12 @@ def is_PI(user):
     print(user.groups.all())
     return user.groups.filter(name='PI').exists()
 
+
 def is_project_member(user,project_group):
     print(user)
     print(user.groups.all())
     return user.groups.filter(name=project_group).exists()
+
 
 class AerpawUserSignup(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
@@ -80,6 +82,14 @@ class AerpawUserSignup(models.Model):
 
     def __str__(self):
         return self.user.oidc_claim_email
+
+
+class AerpawUserCredential(models.Model):
+    publickey = models.TextField(null=True)
+
+    def __str__(self):
+        return self.publickey
+
 
 def create_new_signup(request, form):
     """
@@ -108,3 +118,15 @@ def create_new_signup(request, form):
     signup.save()
 
     return str(signup.uuid)
+
+
+def update_credential(request, form):
+    """
+
+    :param request:
+    :param form:
+    :return:
+    """
+    request.user.publickey = form.data.getlist('publickey')[0]
+    request.user.save()
+    return str(request.user.publickey)
