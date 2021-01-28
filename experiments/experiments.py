@@ -134,6 +134,11 @@ def delete_existing_experiment(request, experiment):
     :return:
     """
     try:
+        if experiment.profile is not None and is_emulab_profile(experiment.stage):
+            # instance on emulab should be terminated first
+            emulab_deleted = terminate_emulab_instance(request, experiment)
+            if emulab_deleted is False:
+                return False
         experiment.delete()
         return True
     except Exception as e:
@@ -187,6 +192,8 @@ def initiate_emulab_instance(request, experiment):
     experiment_body = aerpawgw_client.Experiment(name=experiment.name,
                                                  profile=emulab_profile_name,
                                                  cluster=emulab_location_to_urn(location))
+    experiment.key_inserted = False
+    experiment.save()
     try:
         # create a experiment
         logger.warning(experiment_body)
@@ -222,6 +229,12 @@ def query_emulab_instance_status(request, experiment):
         logger.warning('emulab_experiment:')
         logger.warning(emulab_experiment)
         logger.warning('experiment status on emulab: {}'.format(emulab_experiment.status))
+
+        if emulab_experiment.status == 'ready' and not experiment.key_inserted:
+            userid = request.user.username.split('@')[0]
+            insert_user_to_emulab(request, userid, request.user.publickey, experiment)
+            experiment.key_inserted = True
+            experiment.save()
         return emulab_experiment.status
     except ApiException as e:
         logger.warning('experiment status on emulab: {}'.format('not_started'))
@@ -250,6 +263,8 @@ def terminate_emulab_instance(request, experiment):
     try:
         # delete experiment
         api_instance.delete_experiment(experiment.name)
+        experiment.key_inserted = False
+        experiment.save()
     except ApiException as e:
         logger.warning("Exception when calling ExperimentApi->delete_experiment: %s\n" % e)
     return True
@@ -274,6 +289,28 @@ def get_emulab_manifest(request, experiment):
         logger.error("Exception when calling ResourcesApi->list_resources: %s\n" % e)
         exp_resources = None
     return exp_resources
+
+
+def insert_user_to_emulab(request, user, pubkey, experiment):
+    """
+    Insert user and pubkey to emulab instance.
+
+    :param request:
+    :param user: str
+    :param pubkey: str
+    :param experiment:
+    :return: None
+    """
+    api_instance = aerpawgw_client.UserApi()
+    body = aerpawgw_client.Userkey(user, pubkey)
+    try:
+        # add/update user and sshkey on experiment nodes
+        logger.warning("insert user %s and public key to the instance\n" % user)
+        api_instance.adduser(body, experiment.name)
+
+    except ApiException as e:
+        logger.error("Exception when calling UserApi->adduser: %s\n" % e)
+
 
 
 '''

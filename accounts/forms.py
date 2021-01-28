@@ -1,7 +1,7 @@
 # accounts/forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import AerpawUser, AerpawUserSignup
+from .models import AerpawUser, AerpawUserSignup, AerpawUserCredential
 
 
 class AerpawUserCreationForm(UserCreationForm):
@@ -22,4 +22,11 @@ class AerpawUserSignupForm(forms.ModelForm):
 
     class Meta:
         model = AerpawUserSignup
-        fields = ('user', 'name', 'title', 'organization', 'description', 'userRole')
+        fields = ('user', 'name', 'title', 'organization', 'description', 'userRole', 'publickey')
+
+
+class AerpawUserCredentialForm(forms.ModelForm):
+
+    class Meta:
+        model = AerpawUserCredential
+        fields = ('publickey',)
