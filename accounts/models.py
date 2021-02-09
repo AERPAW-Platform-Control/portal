@@ -85,7 +85,7 @@ class AerpawUserSignup(models.Model):
 
 
 class AerpawUserCredential(models.Model):
-    publickey = models.TextField(null=True)
+    publickey = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.publickey
