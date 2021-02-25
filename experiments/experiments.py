@@ -11,10 +11,15 @@ from projects.models import Project
 from profiles.models import Profile
 from profiles.profiles import *
 from resources.resources import *
+from resources.models import Resource
 import aerpawgw_client
 from aerpawgw_client.rest import ApiException
+from aerpawgw_client.models.vnode import Vnode
+from aerpawgw_client.models.resource import Resource as Manifest
 from datetime import datetime
 import logging
+import os, tempfile, subprocess, json
+
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +110,7 @@ def update_existing_experiment(request, experiment, form):
 
 def send_exepriment_update_email(experiment):
     subject = 'AERPAW experiment stage update'
-    message = 'This experiment requires a stage update:' + str(experiment) 
+    message = 'This experiment requires a stage update:' + str(experiment)
     email_from = settings.EMAIL_HOST_USER
     recipient_list=[]
     recipient_list.append(settings.EMAIL_ADMIN_USER)
@@ -268,6 +273,43 @@ def terminate_emulab_instance(request, experiment):
     except ApiException as e:
         logger.warning("Exception when calling ExperimentApi->delete_experiment: %s\n" % e)
     return True
+
+
+def get_non_emulab_manifest(request, experiment):
+    script = experiment.profile.profile
+    fd, path = tempfile.mkstemp(suffix='.py')
+    with open(path, 'w') as f:
+        f.write(script)
+    cmd = 'python {}'.format(path)
+    print(cmd)
+    output = subprocess.check_output(cmd, shell=True)
+    nodes=json.loads(output)
+    print(nodes)
+    os.unlink(path)
+
+    manifest = Manifest()
+    vnodes = []
+    for reqnode in nodes:
+        try:
+            resource = Resource.objects.get(resourceType=reqnode['hardware_type'], name=reqnode['component_id'])
+            vnode = Vnode()
+            vnode.hardware_type = resource.resourceType
+            vnode.ipv4 = resource.description
+            vnode.hostname = resource.description
+            vnode.node = reqnode['component_id']
+            vnode.name = reqnode['name']
+            vnode.type = 'raw-pc'
+            vnode.disk_image = 'UBUNTU'
+            vnodes.append(vnode)
+        except Resource.DoesNotExist:
+            logger.error("we were not able to find {}/{}".format(reqnode['hardware_type'], reqnode['component_id']))
+
+    if len(vnodes) >= 1:
+        manifest.vnodes = vnodes
+        return manifest
+    else:
+        logger.error("return manifest as None")
+        return None
 
 
 def get_emulab_manifest(request, experiment):
