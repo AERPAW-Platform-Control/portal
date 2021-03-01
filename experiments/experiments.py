@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
@@ -11,10 +12,16 @@ from projects.models import Project
 from profiles.models import Profile
 from profiles.profiles import *
 from resources.resources import *
+from resources.models import Resource
 import aerpawgw_client
 from aerpawgw_client.rest import ApiException
+from aerpawgw_client.models.vnode import Vnode
+from aerpawgw_client.models.resource import Resource as Manifest
 from datetime import datetime
 import logging
+import os
+import sys
+
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +112,7 @@ def update_existing_experiment(request, experiment, form):
 
 def send_exepriment_update_email(experiment):
     subject = 'AERPAW experiment stage update'
-    message = 'This experiment requires a stage update:' + str(experiment) 
+    message = 'This experiment requires a stage update:' + str(experiment)
     email_from = settings.EMAIL_HOST_USER
     recipient_list=[]
     recipient_list.append(settings.EMAIL_ADMIN_USER)
@@ -268,6 +275,40 @@ def terminate_emulab_instance(request, experiment):
     except ApiException as e:
         logger.warning("Exception when calling ExperimentApi->delete_experiment: %s\n" % e)
     return True
+
+
+def get_non_emulab_manifest(request, experiment):
+    """
+    Send to script to aerpaw-gateway to parse and get the resources.
+
+    :param request:
+    :param experiment:
+    :return : class Resource of aerpawgw_client. rspec and vnodes are what we need
+    """
+    # send to aerpaw-gateway to parse the script to get the resources
+    api_instance = aerpawgw_client.ResourcesApi()
+    body = aerpawgw_client.Profile(name='', script=experiment.profile.profile)
+    logger.info(body)
+    try:
+        exp_resources = api_instance.parse_resources(body)
+        for vnode in exp_resources.vnodes:
+            # fill the IP and hostname info which is available at portal database
+            # but not known by aerpaw-gateway
+            # Use ('hardware_type': 'FixedNode', 'node': 'CC1') to find the resource
+            resource = Resource.objects.get(resourceType=vnode.hardware_type, name=vnode.node)
+            vnode.ipv4 = resource.description       # later need to use another proper field
+            vnode.hostname = resource.description   # later need to use another proper field
+    except ApiException as e:
+        logger.error("Exception when calling ResourcesApi->parse_resources: %s\n" % e)
+        return None
+    except ObjectDoesNotExist as e:
+        logger.error("ObjectDoesNotExist: %s\n" % e)
+        return None
+    except:
+        e = sys.exc_info()[0]
+        logger.error("Exception getting resource: %s\n" % e)
+        return None
+    return exp_resources
 
 
 def get_emulab_manifest(request, experiment):
