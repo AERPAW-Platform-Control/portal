@@ -47,7 +47,12 @@ def project_detail(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
-    cicd = get_object_or_404(Cicd, aerpaw_uuid=str(project.uuid))
+    try:
+        cicd = Cicd.objects.get(aerpaw_uuid=str(project.uuid))
+    except Cicd.DoesNotExist as err:
+        print(err)
+        cicd = None
+    #cicd = get_object_or_404(Cicd, aerpaw_uuid=str(project.uuid))
     request.session['project_id'] = project.id
     project_members = project.project_members.order_by('oidc_claim_name')
     project_experiments = project.experiment_of_project
