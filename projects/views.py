@@ -2,13 +2,16 @@ from uuid import UUID
 
 from django.shortcuts import render, redirect, get_object_or_404
 
+from accounts.decorator import user_passes_test
+from accounts.models import is_PI
+from cicd.models import Cicd
 from .forms import ProjectCreateForm, ProjectUpdateForm
 from .models import Project
 from .projects import create_new_project, get_project_list, update_existing_project, delete_existing_project
-from accounts.decorator import user_passes_test
-from accounts.models import is_PI
 
 PI_message = "Please email the admin to become a PI first!"
+
+
 def projects(request):
     """
 
@@ -18,7 +21,8 @@ def projects(request):
     projects = get_project_list(request)
     return render(request, 'projects.html', {'projects': projects})
 
-@user_passes_test(is_PI,PI_message)
+
+@user_passes_test(is_PI, PI_message)
 def project_create(request):
     """
 
@@ -43,12 +47,22 @@ def project_detail(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
-    request.session['project_id'] = project.id 
+    try:
+        cicd = Cicd.objects.get(aerpaw_uuid=str(project.uuid))
+    except Cicd.DoesNotExist as err:
+        print(err)
+        cicd = None
+    #cicd = get_object_or_404(Cicd, aerpaw_uuid=str(project.uuid))
+    request.session['project_id'] = project.id
     project_members = project.project_members.order_by('oidc_claim_name')
     project_experiments = project.experiment_of_project
-    return render(request, 'project_detail.html', {'project': project, 'project_members': project_members, 'experiments': project_experiments.all()})
+    # TODO: update ci/cd links
+    return render(request, 'project_detail.html',
+                  {'project': project, 'project_members': project_members,
+                   'experiments': project_experiments.all(), 'cicd': cicd})
 
-@user_passes_test(is_PI,PI_message)
+
+@user_passes_test(is_PI, PI_message)
 def project_update(request, project_uuid):
     """
 

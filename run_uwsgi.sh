@@ -7,6 +7,7 @@ APPS_LIST=(
   "reservations"
   "resources"
   "profiles"
+  "cicd"
 )
 
 FIXTURES_LIST=()

@@ -4,4 +4,6 @@ django-crispy-forms
 mozilla-django-oidc
 psycopg2-binary
 python-dotenv
+python-jenkins
 uWSGI
+-e git+https://github.com/AERPAW-Platform-Control/aerpaw-gateway-client.git#egg=aerpawgw-client

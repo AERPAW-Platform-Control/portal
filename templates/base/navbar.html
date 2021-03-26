@@ -20,6 +20,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'projects' %}">Projects</a>
                 </li>
+                <!-- TODO: expose CI/CD link only to ADMIN or OPERATOR level users -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>
+                </li>
+                <!-- TODO: end of todo -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'resources' %}">Resources</a>
                 </li>

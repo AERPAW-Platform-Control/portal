@@ -28,4 +28,5 @@ urlpatterns = [
     path('reservations/', include('reservations.urls')),
     path('resources/', include('resources.urls')),
     path('profile/', include('profiles.urls')),
+    path('cicd/', include('cicd.urls')),
 ]
