@@ -38,6 +38,18 @@ def create_new_resource(request, form):
 
     resource.location = form.data.getlist('location')[0]
 
+    try:
+        resource.ip_address = form.data.getlist('ip_address')[0]
+    except ValueError as e:
+        print(e)
+        resource.ip_address = None
+
+    try:
+        resource.hostname = form.data.getlist('hostname')[0]
+    except ValueError as e:
+        print(e)
+        resource.hostname = None
+
     resource.save()
     return str(resource.uuid)
 
@@ -64,6 +76,19 @@ def update_existing_resource(request, resource, form):
     resource.location = form.data.getlist('location')[0]
     resource.modified_by = request.user
     resource.modified_date = timezone.now()
+
+    try:
+        resource.ip_address = form.data.getlist('ip_address')[0]
+    except ValueError as e:
+        print(e)
+        resource.ip_address = None
+
+    try:
+        resource.hostname = form.data.getlist('hostname')[0]
+    except ValueError as e:
+        print(e)
+        resource.hostname = None
+
     resource.save()
     return str(resource.uuid)
 

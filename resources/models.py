@@ -65,6 +65,8 @@ class Resource(models.Model):
     )
 
     created_date=models.DateTimeField(default=timezone.now)
+    ip_address = models.TextField(null=True)
+    hostname = models.TextField(null=True)
 
     @property
     def reservation_btn_title(self):

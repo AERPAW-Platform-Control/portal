@@ -163,6 +163,7 @@ def experiment_manifest(request, experiment_uuid):
     else:
         manifest = get_non_emulab_manifest(request, experiment)
 
+
     if manifest is not None:
         logger.warning(manifest)
         return render(request, 'experiment_manifest.html',
