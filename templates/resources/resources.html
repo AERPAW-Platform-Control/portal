@@ -65,6 +65,8 @@
                       <td>{{ resource.stage }}</td>
                       <td>{{ resource.admin }}</td>
                       <td>{{ resource.created_date }}</td>
+                      <td>{{ resource.ip_address }}</td>
+                      <td>{{ resource.hostname }}</td>
                   </tr>
               {% endfor %}
           </table>
@@ -96,7 +98,7 @@
           let res = resources_json[key]
           // filter series based on type.
           if (type === "all" || resources_json[key].resourceType === type) {
-            let series_obj = { 
+            let series_obj = {
               name: res.name,
               type: "line",
               step: step,
@@ -117,11 +119,11 @@
         let hour = date.getHours();
         let utc_hour = (hour + 5) % 24;
         let full_date = year + "/" + month + "/" + day;
-        
+
         for (let i = utc_hour; i < n_of_terms + utc_hour; i++) {
           if (i > 24) {
             full_date = year + "/" + month + "/" + (day + 1);
-          } 
+          }
           let time = moment(i % 24,'HH').format('HH:mm') + " " + full_date;
           x_axis_data.push(time)
         }
@@ -165,7 +167,7 @@
           ],
           series: series,
       };
-      
+
       return option;
     }
 
@@ -174,7 +176,7 @@
 
     function changeType() {
       let type = document.getElementById("typeSelect").value;
-      myChart.setOption(generateDiagramData(type), {notMerge: true, lazyUpdate: true}); 
+      myChart.setOption(generateDiagramData(type), {notMerge: true, lazyUpdate: true});
     }
   </script>
 {% endblock %}

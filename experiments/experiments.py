@@ -296,8 +296,8 @@ def get_non_emulab_manifest(request, experiment):
             # but not known by aerpaw-gateway
             # Use ('hardware_type': 'FixedNode', 'node': 'CC1') to find the resource
             resource = Resource.objects.get(resourceType=vnode.hardware_type, name=vnode.node)
-            vnode.ipv4 = resource.description       # later need to use another proper field
-            vnode.hostname = resource.description   # later need to use another proper field
+            vnode.ipv4 = resource.ip_address
+            vnode.hostname = resource.hostname
     except ApiException as e:
         logger.error("Exception when calling ResourcesApi->parse_resources: %s\n" % e)
         return None

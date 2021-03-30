@@ -43,6 +43,14 @@
               <td>{{ resource.stage}}</td>
             </tr>
             <tr>
+              <td>IP Address</td>
+              <td>{{ resource.ip_address }}</td>
+            </tr>
+            <tr>
+              <td>Hostname</td>
+              <td>{{ resource.hostname }}</td>
+            </tr>
+            <tr>
               <td>Reservations</td>
               {% for reservation in reservations %}
                 <td>

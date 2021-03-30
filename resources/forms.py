@@ -45,6 +45,19 @@ class ResourceCreateForm(forms.ModelForm):
         required=False,
         label='Resource Stage',
     )
+
+    ip_address = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'cols': 20}),
+        required=False,
+        label='IP Address',
+    )
+
+    hostname = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 1, 'cols': 20}),
+        required=False,
+        label='Hostname',
+    )
+
     class Meta:
         model = Resource
         fields = '__all__'
