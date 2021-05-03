@@ -1,17 +1,16 @@
 from uuid import UUID
 
-from django.http.request import QueryDict
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from .forms import CicdCreateForm, CicdUpdateForm
-from .cicd import get_cicd_list, create_new_cicd, update_existing_cicd
-from .models import Cicd
+
 from projects.models import Project
+from .cicd import get_cicd_list, get_cicd_host_info_list, create_new_cicd, create_new_cicd_host_info, \
+    update_existing_cicd
+from .forms import CicdCreateForm, CicdUpdateForm, CicdCreateHostInfoForm
 from .jenkins_api import deploy_cicd_environment
-
-from django.contrib import messages
-
 from .jenkins_api import start_cicd_environment, stop_cicd_environment, purge_cicd_environment, info_cicd_environment
+from .models import Cicd, CicdHostInfo
 
 
 def cicd(request):
@@ -20,8 +19,21 @@ def cicd(request):
     :param request:
     :return:
     """
-    cicds = get_cicd_list(request)
-    return render(request, 'cicd.html', {'cicds': cicds})
+    if request.user.is_authenticated:
+        cicds = get_cicd_list(request)
+        return render(request, 'cicd.html', {'cicds': cicds})
+    else:
+        return render(request, 'cicd.html')
+
+
+def cicd_host_info(request):
+    """
+
+    :param request:
+    :return:
+    """
+    cicd_his = get_cicd_host_info_list(request)
+    return render(request, 'cicd_host_info.html', {'cicd_his': cicd_his})
 
 
 # def experiment_create(request):
@@ -71,7 +83,7 @@ def cicd_create(request):
         form = CicdCreateForm(request.POST, initial=initial_data)
         if form.is_valid():
             cicd_uuid = create_new_cicd(request, form)
-            deploy_cicd_environment(cicd_uuid)
+            # deploy_cicd_environment(cicd_uuid)
             return redirect('cicd_detail', cicd_uuid=cicd_uuid)
         else:
             messages.error(request, "Error")
@@ -79,6 +91,37 @@ def cicd_create(request):
         form = CicdCreateForm(request.GET, initial=initial_data)
 
     return render(request, 'cicd_create.html', {'form': form})
+
+
+def cicd_host_info_create(request):
+    """
+
+    :param request:
+    :return:
+    """
+    user = request.user
+    # if request.GET.get('project_uuid'):
+    #     project_uuid = request.GET.get('project_uuid')
+    # else:
+    #     project_uuid = '00000000-0000-0000-0000-000000000000'
+
+    # initial_data = {
+    #     'aerpaw_uuid': project_uuid,
+    # }
+    # q_dict = QueryDict('', mutable=True)
+    # q_dict.update(initial_data)
+
+    if request.method == 'POST':
+        form = CicdCreateHostInfoForm(request.POST)
+        if form.is_valid():
+            cicd_hi_uuid = create_new_cicd_host_info(request, form)
+            return redirect('cicd_host_info_detail', cicd_host_info_uuid=cicd_hi_uuid)
+        else:
+            messages.error(request, "Error")
+    else:
+        form = CicdCreateHostInfoForm(request.GET)
+
+    return render(request, 'cicd_host_info_create.html', {'form': form})
 
 
 # def experiment_detail(request, experiment_uuid):
@@ -117,14 +160,25 @@ def cicd_detail(request, cicd_uuid):
     cicd = get_object_or_404(Cicd, uuid=UUID(str(cicd_uuid)))
     try:
         project = Project.objects.get(uuid=UUID(str(cicd.aerpaw_uuid)))
-        # project = get_object_or_404(Project, uuid=UUID(str(cicd.aerpaw_uuid)))
     except Project.DoesNotExist:
         project = {
             'name': 'UNDEFINED',
             'uuid': cicd.aerpaw_uuid
         }
 
-    if request.GET.get('start_cicd'):
+    if request.GET.get('deploy_cicd'):
+        info = deploy_cicd_environment(cicd.uuid)
+        if info == -1:
+            status = {
+                'message': 'ERROR: CI/CD deployment requires a valid project link',
+                'timestamp': timezone.now()
+            }
+        else:
+            status = {
+                'message': 'Deploying CI/CD as job #{0}'.format(info),
+                'timestamp': timezone.now()
+            }
+    elif request.GET.get('restart_cicd'):
         info = start_cicd_environment(cicd.uuid)
         status = {
             'message': 'Starting CI/CD as job #{0}'.format(info),
@@ -142,7 +196,10 @@ def cicd_detail(request, cicd_uuid):
             'message': 'Purging CI/CD as job #{0}'.format(info),
             'timestamp': timezone.now()
         }
+        cicd_hi = CicdHostInfo.objects.get(id=cicd.cicd_host_info_id)
+        cicd_hi.is_allocated = False
         cicd.delete()
+        cicd_hi.save()
         return redirect('cicd')
     else:
         info = info_cicd_environment(cicd.uuid)
@@ -156,6 +213,21 @@ def cicd_detail(request, cicd_uuid):
                       'cicd': cicd,
                       'project': project,
                       'status': status
+                  })
+
+
+def cicd_host_info_detail(request, cicd_host_info_uuid):
+    """
+
+    :param request:
+    :param experiment_uuid:
+    :return:
+    """
+    cicd_hi = get_object_or_404(CicdHostInfo, uuid=UUID(str(cicd_host_info_uuid)))
+
+    return render(request, 'cicd_host_info_detail.html',
+                  {
+                      'cicd_hi': cicd_hi
                   })
 
 

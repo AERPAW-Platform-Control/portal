@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',    
     'crispy_forms',  # django-crispy-forms: https://django-crispy-forms.readthedocs.io/en/latest/dj
     'bootstrap4',  # django-bootstrap4: https://django-bootstrap4.readthedocs.io/en/latest/quickstart.html
-
     'accounts',  # custom user accounts
     'resources',  # aerpaw resources
     'reservations',  # aerpaw reservations
@@ -182,13 +181,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 # placeholder for future static imports
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'base/static'),
 )
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default Django logging is WARNINGS+ to console
@@ -221,3 +220,6 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_ADMIN_USER = os.getenv('EMAIL_ADMIN_USER')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+
+# account for Django 3.2 (Warning models.W042)
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

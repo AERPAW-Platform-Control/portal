@@ -31,9 +31,9 @@
                         URL
                     </td>
                     <td>
-                        <a href="https://{{ cicd.fqdn_or_ip }}:{{ cicd.nginx_https_port }}"
+                        <a href="https://{{ cicd.cicd_host_info.fqdn_or_ip }}:{{ cicd.cicd_host_info.nginx_https_port }}"
                            target="_blank" class="unlink" style="color: dodgerblue">
-                            https://{{ cicd.fqdn_or_ip }}:{{ cicd.nginx_https_port }}
+                            https://{{ cicd.cicd_host_info.fqdn_or_ip }}:{{ cicd.cicd_host_info.nginx_https_port }}
                         </a>
                     </td>
                 </tr>
@@ -81,10 +81,17 @@
         </div>
         <div>
             <form action="#" method="get">
-                <input type="submit" class="btn btn-success mr-2" value="Start/Run" name="start_cicd">
-                <input type="submit" class="btn btn-warning mr-2" value="Stop/Pause" name="stop_cicd">
+                {% if not cicd.aerpaw_uuid == '00000000-0000-0000-0000-000000000000' %}
+                    <input type="submit" class="btn btn-success mr-2" value="Deploy" name="deploy_cicd">
+                    <input type="submit" class="btn btn-success mr-2" value="Restart" name="restart_cicd">
+                    <input type="submit" class="btn btn-warning mr-2" value="Stop" name="stop_cicd">
+                {% else %}
+                    <input type="submit" class="btn btn-success mr-2" value="Deploy" name="deploy_cicd" disabled>
+                    <input type="submit" class="btn btn-success mr-2" value="Restart" name="restart_cicd" disabled>
+                    <input type="submit" class="btn btn-warning mr-2" value="Stop" name="stop_cicd" disabled>
+                {% endif %}
                 <input type="submit" class="btn btn-danger mr-2" value="Delete/Purge" name="purge_cicd"
-                 onclick="return confirm('Are you sure you want to DELETE: {{ cicd.name }}?')">
+                       onclick="return confirm('Are you sure you want to DELETE: {{ cicd.name }}?')">
                 <button class="btn btn-primary mr-2">
                     <a href="{% url 'cicd_update' cicd_uuid=cicd.uuid %}" class="unlink">Update Config</a>
                 </button>
