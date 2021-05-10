@@ -89,9 +89,8 @@ def credential(request):
         if 'savebtn' in request.POST and form.is_valid():
             if request.POST['publickey']:
                 update_credential(request, form)
-                return redirect('profile')
-            else:
-                render(request, 'credential.html', {'form': form})
+                form = AerpawUserCredentialForm() # clear form
+            render(request, 'credential.html', {'form': form})
 
         elif 'generatebtn' in request.POST:
             keyfile = os.path.join(tempfile.gettempdir(), 'aerpaw_id_rsa')

@@ -9,9 +9,9 @@
     {% if user.is_authenticated %}
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
-                <h2>AERPAW Profiles</h2>
+                <h2>Experiment Definition</h2>
                 <button class="btn btn-success mr-2">
-                    <a href="{% url 'profile_create' %}" class="unlink">Create New Profile</a>
+                    <a href="{% url 'profile_create' %}" class="unlink">Create New</a>
                 </button>
             </div>
             <table class="table table-striped table-bordered mt-4">
@@ -21,21 +21,19 @@
                     <th>Project</th>
                     <th>Created By</th>
                     <th>Created Date</th>
-                    <th>Experiment Stage</th>
                 </tr>
                 {% for profile in profiles %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'profile_detail' profile_uuid=profile.uuid %}">
-                                {{ profile.name }}
-                            </a>
-                        </td>
-                        <td>{{ profile.description }}</td>
-                        <td>{{ profile.project }}</td>
-                        <td>{{ profile.created_by }}</td>
-                        <td>{{ profile.created_date }}</td>
-                        <td>{{ profile.stage }}</td>
-                    </tr>
+                <tr>
+                    <td>
+                        <a href="{% url 'profile_detail' profile_uuid=profile.uuid %}">
+                            {{ profile.name }}
+                        </a>
+                    </td>
+                    <td>{{ profile.description }}</td>
+                    <td>{{ profile.project }}</td>
+                    <td>{{ profile.created_by }}</td>
+                    <td>{{ profile.created_date }}</td>
+                </tr>
                 {% endfor %}
             </table>
         </div>

@@ -7,8 +7,9 @@
 
 {% block content %}
     {% if user.is_authenticated %}
+
         <div class="container">
-            <h2>Initiate or Terminate "{{ experiment.name }}"</h2>
+            <h2>Experiment "{{ experiment.name }}"</h2>
             <table class="table table-striped table-bordered my-4">
                 <tr>
                     <td>Description</td>
@@ -19,6 +20,14 @@
                     <td>{{ experiment.project }}</td>
                 </tr>
                 <tr>
+                    <td>Experiment Status</td>
+                    <td>{{ experiment.status }}</td>
+                </tr>
+                <tr>
+                    <td>Experiment Definition</td>
+                    <td>{{ experiment.profile }}</td>
+                </tr>
+                <tr>
                     <td>Experiment Members</td>
                     <td>
                         {% for member in experimenter %}
@@ -26,30 +35,20 @@
                         {% endfor %}
                     </td>
                 </tr>
-                <tr>
-                    <td>Created By</td>
-                    <td>{{ experiment.created_by }}</td>
-                </tr>
-                <tr>
-                    <td>Created Date</td>
-                    <td>{{ experiment.created_date }}</td>
-                </tr>
-                <tr>
-                    <td>Modified By</td>
-                    <td>{{ experiment.modified_by }}</td>
-                </tr>
-                <tr>
-                    <td>Modified Date</td>
-                    <td>{{ experiment.modified_date }}</td>
-                </tr>
             </table>
         </div>
-        <form method="POST" class="post-form">
-            {% csrf_token %}
-            <input class="btn btn-success mr-2" type="submit" value="Initiate/Terminate"/>
-            <a href="{% url 'experiment_detail' experiment_uuid=experiment.uuid %}" class="btn btn-secondary">Back</a>
-        </form>
-
+            <p style="color:red";>{{ msg }}</p>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                <a href="{% url 'experiment_detail' experiment_uuid=experiment.uuid %}" class="btn btn-secondary">Back</a>
+                &emsp;
+                {% if experiment.can_initiate %}
+                <input class="btn btn-success mr-2" type="submit" value="Initiate"/>
+                {% endif %}
+                {% if experiment.can_terminate %}
+                <input class="btn btn-success mr-2" type="submit" value="Terminate"/>
+                {% endif %}
+            </form>
         </div>
     {% else %}
         <div class="container">

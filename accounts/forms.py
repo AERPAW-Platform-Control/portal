@@ -24,6 +24,12 @@ class AerpawUserSignupForm(forms.ModelForm):
 
 
 class AerpawUserCredentialForm(forms.ModelForm):
+    publickey = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='New public key',
+    )
+
     class Meta:
         model = AerpawUserCredential
         fields = ('publickey',)

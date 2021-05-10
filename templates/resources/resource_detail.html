@@ -19,14 +19,6 @@
                     <td>{{ resource.resourceType }}</td>
                 </tr>
                 <tr>
-                    <td>Managed By</td>
-                    <td>{{ resource.admin }}</td>
-                </tr>
-                <tr>
-                    <td>Created Date</td>
-                    <td>{{ resource.created_date }}</td>
-                </tr>
-                <tr>
                     <td>Total units</td>
                     <td>{{ resource.units }}</td>
                 </tr>
@@ -37,6 +29,15 @@
                 <tr>
                     <td>Location</td>
                     <td>{{ resource.location }}</td>
+                </tr>
+                {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
+                <tr>
+                    <td>Managed By</td>
+                    <td>{{ resource.admin }}</td>
+                </tr>
+                <tr>
+                    <td>Created Date</td>
+                    <td>{{ resource.created_date }}</td>
                 </tr>
                 <tr>
                     <td>Resource Stage</td>
@@ -50,6 +51,7 @@
                     <td>Hostname</td>
                     <td>{{ resource.hostname }}</td>
                 </tr>
+                {% endif %}
                 <tr>
                     <td>Reservations</td>
                     {% for reservation in reservations %}
@@ -64,15 +66,17 @@
                     {% endfor %}
                 </tr>
             </table>
-            <button class="btn btn-success mr-2">
-                <a href="{% url 'resource_update' resource_uuid=resource.uuid %}" class="unlink">Update</a>
-            </button>
             <button class="btn btn-secondary mr-2">
                 <a href="{% url 'resources' %}" class="unlink">Back</a>
             </button>
+            {% if user.is_resource_manager %}
             <button class="btn btn-danger">
                 <a href="{% url 'resource_delete' resource_uuid=resource.uuid %}" class="unlink">Delete</a>
             </button>
+            <button class="btn btn-success mr-2">
+                <a href="{% url 'resource_update' resource_uuid=resource.uuid %}" class="unlink">Update</a>
+            </button>
+            {% endif %}
         </div>
     {% else %}
         <div class="container">

@@ -8,7 +8,9 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>Update Experiment</h2>
+            <h2>Update Experiment {{ experiment_name }}</h2>
+            <br>
+            <br>
             <form method="POST" class="form-group">
                 {% csrf_token %}
                 {{ form.as_p }}
