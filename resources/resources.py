@@ -1,5 +1,6 @@
 import uuid
 import os
+import sys
 from django.utils import timezone
 from datetime import datetime, timedelta
 
@@ -197,40 +198,43 @@ def import_cloud_resources(request):
             or not os.getenv('AERPAWGW_PORT') \
             or not os.getenv('AERPAWGW_VERSION'):
         return
-    emulab_resources = get_emulab_resource_list(request)
+
     total_cloud_resources = {}
     avail_cloud_resources = {}
+    try:
+        emulab_resources = get_emulab_resource_list(request)
+        logger.info('parsing emulab resources:')
+        for emulab_node in emulab_resources:
+            end_index = emulab_node.component_id.find('node')  # "urn:publicid:IDN+exogeni.net+node+pc1"
+            location_urn = emulab_node.component_id[:end_index-1]
+            location = emulab_urn_to_location(location_urn)
+            key = location + ',' + emulab_node.type
+            logger.warning('component_name = {}, location_urn = {}, key = {}, available = {}'.format(
+                emulab_node.component_name, location_urn, key, emulab_node.available))
 
-    logger.info('parsing emulab resources:')
-    for emulab_node in emulab_resources:
-        end_index = emulab_node.component_id.find('node')  # "urn:publicid:IDN+exogeni.net+node+pc1"
-        location_urn = emulab_node.component_id[:end_index-1]
-        location = emulab_urn_to_location(location_urn)
-        key = location + ',' + emulab_node.type
-        logger.warning('component_name = {}, location_urn = {}, key = {}, available = {}'.format(
-            emulab_node.component_name, location_urn, key, emulab_node.available))
-
-        if key in total_cloud_resources:
-            total_cloud_resources[key] += 1
-            if emulab_node.available is True:
-                avail_cloud_resources[key] += 1
-        else:
-            total_cloud_resources[key] = 1
-            if emulab_node.available is True:
-                avail_cloud_resources[key] = 1
+            if key in total_cloud_resources:
+                total_cloud_resources[key] += 1
+                if emulab_node.available is True:
+                    avail_cloud_resources[key] += 1
             else:
-                avail_cloud_resources[key] = 0
+                total_cloud_resources[key] = 1
+                if emulab_node.available is True:
+                    avail_cloud_resources[key] = 1
+                else:
+                    avail_cloud_resources[key] = 0
 
-    logger.warning("total_cloud_resources:{}".format(total_cloud_resources))
-    logger.warning("avail_cloud_resources:{}".format(avail_cloud_resources))
-    logger.warning("portal should calculate the available counts by reservation, " +
-                   "the avail_cloud_resources returned by emulab should just be reference \n")
+        logger.warning("total_cloud_resources:{}".format(total_cloud_resources))
+        logger.warning("avail_cloud_resources:{}".format(avail_cloud_resources))
+        logger.warning("portal should calculate the available counts by reservation, " +
+                       "the avail_cloud_resources returned by emulab should just be reference \n")
 
-    # create or update resources in database
-    for key in total_cloud_resources.keys():
-        create_or_update_cloud_resource(request, key.split(',')[0], key.split(',')[1],
-                                        total_cloud_resources[key],
-                                        avail_cloud_resources[key])
+        # create or update resources in database
+        for key in total_cloud_resources.keys():
+            create_or_update_cloud_resource(request, key.split(',')[0], key.split(',')[1],
+                                            total_cloud_resources[key],
+                                            avail_cloud_resources[key])
+    except:
+        logger.error("Import Emulab resource error", sys.exc_info()[0])
 
     # delete resources if they are no longer on emulab
     existing_resources = get_resource_list(request)
