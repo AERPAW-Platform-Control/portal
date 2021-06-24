@@ -1,6 +1,7 @@
 import unicodedata
 
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+from django.contrib.auth.models import Group
 
 
 def generate_username(oidc_claim_email):
@@ -56,6 +57,12 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.last_name = claims.get('family_name', '')
         user.email = claims.get('email', '')
 
+        user.save()
+        # set display name
+        user.display_name = user.oidc_claim_name + ' (' + user.username + ')'
+        # add user to aerpaw-user group
+        aug = Group.objects.get(name='aerpaw-user')
+        user.groups.add(aug)
         user.save()
 
         return user

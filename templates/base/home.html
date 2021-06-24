@@ -46,18 +46,21 @@
                     NC State Named a Hotspot for 5G Innovation
                 </a>.
             </p>
-            <hr>
-            {# TODO: add check for OPERATOR level permissions #}
-            <p>
-                <b>Operator's Tools</b><br>
-                - <b>Jenkins</b> - <a href="https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/jenkins/" target="_blank">
-                https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/jenkins/
-            </a><br/>
-                - <b>Gitea</b> - <a href="https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/gitea/" target="_blank">
-                https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/gitea/
-            </a><br/>
-            </p>
-            <hr>
+            {% if user.is_operator %}
+                <hr>
+                <p>
+                    <b>Operator's Tools</b><br>
+                    - <b>Jenkins</b> - <a href="https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/jenkins/"
+                                          target="_blank">
+                    https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/jenkins/
+                </a><br/>
+                    - <b>Gitea</b> - <a href="https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/gitea/"
+                                        target="_blank">
+                    https://{{ operator_cicd.url }}:{{ operator_cicd.port }}/gitea/
+                </a><br/>
+                </p>
+                <hr>
+            {% endif %}
         </div>
     {% else %}
         <h3 class="text-center mt-4">Please log in to gain full access of AERPAW testbed.</h3>

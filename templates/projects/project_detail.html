@@ -6,29 +6,13 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and is_pc or user.is_authenticated and is_po or user.is_authenticated and is_pm or user.is_authenticated and user.is_site_admin %}
         <div class="container">
             <h2>{{ project.name }}</h2>
             <table class="table table-striped table-bordered my-4">
                 <tr>
                     <td>Description</td>
                     <td>{{ project.description }}</td>
-                </tr>
-                <tr>
-                    <td>Principal Investigator</td>
-                    <td>{{ project.principal_investigator }}</td>
-                </tr>
-                <tr>
-                    <td>Project Members</td>
-                    <td>
-                        {% for member in project_members %}
-                            {{ member }},
-                        {% endfor %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>Pending Project Members, Please ask them to login and signup first</td>
-                    <td>{{ project.project_pending_member_emails }}</td>
                 </tr>
                 <tr>
                     <td>Experiments</td>
@@ -41,25 +25,70 @@
                     </td>
                     <td>
                         <button class="btn btn-success mr-2">
-                            <a href="{% url 'experiment_create' %}" class="unlink">Create a New Experiment</a>
+                            <a href="{% url 'experiment_create' %}?project_id={{ project.id }}" class="unlink">
+                                Create a New Experiment
+                            </a>
                         </button>
                     </td>
                 </tr>
                 <tr>
-{#                TODO: update ci/cd links#}
                     <td>CI/CD</td>
-                    {% if cicd.name %}
-                        <td>
+
+                    <td>
+                        {% if cicd.name %}
                             <a href="{% url 'cicd_detail' cicd.uuid %}" class="unlink" style="color: dodgerblue">
-                                {{ cicd.name }}
-                            </a>
-                        </td>
-                    {% else %}
+                            {{ cicd.name }}
+                        {% else %}
+                            Not Created
+                        {% endif %}
+                        </a>
+                    </td>
+
+                    {% if not cicd.name %}
+                        {% if is_pc or is_po or is_site_admin %}
+                            <td>
+                                <button class="btn btn-success mr-2">
+                                    <a href="{% url 'cicd_create' %}?project_uuid={{ project.uuid }}"
+                                       class="unlink">
+                                        Create CI/CD
+                                    </a>
+                                </button>
+                            </td>
+                        {% endif %}
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Project Creator</td>
+                    <td>{{ project.project_creator }}</td>
+                </tr>
+                <tr>
+                    <td>Project Owners</td>
+                    <td>
+                        {% for owner in project_owners %}
+                            {{ owner.display_name }},
+                        {% endfor %}
+                    </td>
+                    {% if is_pc or user.is_site_admin %}
                         <td>
-                            <button class="btn btn-success mr-2">
-                                <a href="{% url 'cicd_create' %}?project_uuid={{ project.uuid }}" class="unlink">
-                                    Configure and Run CI/CD
-                                </a>
+                            <button class="btn btn-info mr-2">
+                                <a href="{% url 'project_update_owners' project_uuid=project.uuid %}"
+                                   class="unlink">Update Project Owners</a>
+                            </button>
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Project Members</td>
+                    <td>
+                        {% for member in project_members %}
+                            {{ member.display_name }},
+                        {% endfor %}
+                    </td>
+                    {% if is_pc or is_po or user.is_site_admin %}
+                        <td>
+                            <button class="btn btn-info mr-2">
+                                <a href="{% url 'project_update_members' project_uuid=project.uuid %}"
+                                   class="unlink">Update Project Members</a>
                             </button>
                         </td>
                     {% endif %}
@@ -81,19 +110,24 @@
                     <td>{{ project.modified_date }}</td>
                 </tr>
             </table>
-            <button class="btn btn-success mr-2">
-                <a href="{% url 'project_update' project_uuid=project.uuid %}" class="unlink">Update</a>
-            </button>
+            {% if is_pc or is_po or user.is_site_admin %}
+                <button class="btn btn-success mr-2">
+                    <a href="{% url 'project_update' project_uuid=project.uuid %}" class="unlink">Update</a>
+                </button>
+            {% endif %}
             <button class="btn btn-secondary mr-2">
                 <a href="{% url 'projects' %}" class="unlink">Back</a>
             </button>
-            <button class="btn btn-danger">
-                <a href="{% url 'project_delete' project_uuid=project.uuid %}" class="unlink">Delete</a>
-            </button>
+            {% if is_pc or user.is_site_admin %}
+                <button class="btn btn-danger">
+                    <a href="{% url 'project_delete' project_uuid=project.uuid %}" class="unlink">Delete</a>
+                </button>
+            {% endif %}
         </div>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>
         </div>
+
     {% endif %}
 {% endblock %}

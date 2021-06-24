@@ -20,6 +20,7 @@ class AerpawUserRoleChoice(Enum):   # A subclass of Enum
 class AerpawUser(AbstractUser):
     # universal unique identifier for user within infrastructure
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    display_name = models.CharField(max_length=255)
 
     # oidc scope openid
     oidc_claim_sub = models.CharField(max_length=255)
@@ -53,7 +54,26 @@ class AerpawUser(AbstractUser):
     publickey = models.TextField(null=True)
 
     def __str__(self):
-        return self.oidc_claim_name + ' (' + self.username + ')'
+        return self.display_name
+
+    def is_aerpaw_user(self):
+        return self.groups.filter(name='aerpaw-user').exists()
+
+    def is_operator(self):
+        return self.groups.filter(name='operator').exists()
+
+    def is_project_manager(self):
+        return self.groups.filter(name='project-manager').exists()
+
+    def is_resource_manager(self):
+        return self.groups.filter(name='resource-manager').exists()
+
+    def is_user_manager(self):
+        return self.groups.filter(name='user-manager').exists()
+
+    def is_site_admin(self):
+        return self.groups.filter(name='site-admin').exists()
+
 
 def is_PI(user):
     print(user)

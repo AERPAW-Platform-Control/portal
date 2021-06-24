@@ -8,34 +8,70 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-          <div class="d-flex flex-row align-items-center justify-content-between">
-            <h2>AERPAW Projects</h2>
-            <button class="btn btn-success mr-2">
-              <a href="{% url 'project_create' %}" class="unlink">Create New Project</a>
-            </button>
-          </div>
-          <table class="table table-striped table-bordered mt-4">
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Principal Investigator</th>
-                <th>Created By</th>
-                <th>Created Date</th>
-              </tr>
-              {% for project in projects %}
-                  <tr>
-                      <td>
-                          <a href="{% url 'project_detail' project_uuid=project.uuid %}">
-                              {{ project.name }}
-                          </a>
-                      </td>
-                      <td>{{ project.description }}</td>
-                      <td>{{ project.principal_investigator }}</td>
-                      <td>{{ project.created_by }}</td>
-                      <td>{{ project.created_date }}</td>
-                  </tr>
-              {% endfor %}
-          </table>
+            <div class="d-flex flex-row align-items-center justify-content-between">
+                <h2>AERPAW Projects</h2>
+                {% if user.is_project_manager %}
+                    <button class="btn btn-success mr-2">
+                        <a href="{% url 'project_create' %}" class="unlink">Create New Project</a>
+                    </button>
+                {% endif %}
+            </div>
+            <h3>My Projects</h3>
+            <table class="table table-striped table-bordered mt-4">
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created By</th>
+                    <th>Created Date</th>
+                    <th>Last Modified</th>
+                </tr>
+                {% for project in my_projects %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'project_detail' project_uuid=project.uuid %}">
+                                {{ project.name }}
+                            </a>
+                        </td>
+                        <td>{{ project.description }}</td>
+                        <td>{{ project.project_creator }}</td>
+                        <td>{{ project.created_date }}</td>
+                        <td>{{ project.modified_date }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <h3>Other Projects</h3>
+            <table class="table table-striped table-bordered mt-4">
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created By</th>
+                    <th>Created Date</th>
+                    <th>Last Modified</th>
+                </tr>
+                {% for project in other_projects %}
+                    <tr>
+                        <td>
+                            {% if user.is_superuser or user.is_site_admin %}
+                                <a href="{% url 'project_detail' project_uuid=project.uuid %}">
+                                    {{ project.name }}
+                                </a>
+                            {% else %}
+                                {{ project.name }}
+                            {% endif %}
+                        </td>
+                        <td>{{ project.description }}</td>
+                        <td>{{ project.project_creator }}</td>
+                        <td>{{ project.created_date }}</td>
+                        <td>{{ project.modified_date }}</td>
+                        <td>
+                            <!-- TODO: add request to join code -->
+                            <button class="btn btn-info mr-2" disabled>
+                                <a href="#" class="unlink">Join</a>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
         </div>
     {% else %}
         <div class="container">

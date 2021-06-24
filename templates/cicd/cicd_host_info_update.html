@@ -6,16 +6,16 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_resource_manager or user.is_site_admin %}
         <div class="container">
-            <h2>Update CI/CD</h2>
-            <form method="POST" class="form-group">
+            <h2>Update CI/CD Host Entry</h2>
+            <b>UUID:</b> {{ cicd_hi_uuid }}
+            <br><br>
+            <form method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input class="btn btn-success mr-2" type="submit" value="Save/Deploy"/>
-                <button class="btn btn-secondary mr-2">
-                  <a href="{% url 'cicd_detail' cicd_uuid=cicd_uuid %}" class="unlink">Cancel</a>
-                </button>
+                <input class="btn btn-success mr-2" type="submit" value="Save"/>
+                <button class="btn btn-secondary" onclick="javascript:history.back();">Cancel</button>
             </form>
         </div>
     {% else %}

@@ -6,9 +6,9 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and is_pc or is_po or user.is_site_admin %}
         <div class="container">
-            <h2>Configure and Run CI/CD</h2>
+            <h2>Create CI/CD</h2>
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}

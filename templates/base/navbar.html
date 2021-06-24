@@ -21,9 +21,11 @@
                     <a class="nav-link" href="{% url 'projects' %}">Projects</a>
                 </li>
                 <!-- TODO: expose CI/CD link only to ADMIN or OPERATOR level users -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>
-                </li>
+                {% if user.is_resource_manager or user.is_site_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>
+                    </li>
+                {% endif %}
                 <!-- TODO: end of todo -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'resources' %}">Resources</a>
@@ -39,7 +41,6 @@
                         <a class="dropdown-item" href="{% url 'experiments' %}">Monitoring</a>
                     </div>
                 </li>
-
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false">
@@ -51,8 +52,19 @@
                         <a class="dropdown-item" href="{% url 'credential' %}">Credential</a>
                     </div>
                 </li>
+                {% if user.is_user_manager or user.is_site_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                            User Management
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'user_groups' %}">Users</a>
+                        </div>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    <a class="nav-link" href="{% url 'logout' %}">Logout: {{ user.display_name }}</a>
                 </li>
             {% else %}
                 <ul class="navbar-nav ml-auto ns-navbar pull-right">

@@ -8,9 +8,12 @@ APPS_LIST=(
   "resources"
   "profiles"
   "cicd"
+  "user_groups"
 )
 
-FIXTURES_LIST=()
+FIXTURES_LIST=(
+  "user_groups"
+)
 
 #APPS_LIST=()
 
