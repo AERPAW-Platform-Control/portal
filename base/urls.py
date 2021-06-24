@@ -31,4 +31,5 @@ urlpatterns = [
     path('resources/', include('resources.urls')),
     path('profile/', include('profiles.urls')),
     path('cicd/', include('cicd.urls')),
+    path('manage/', include('user_groups.urls')),
 ]

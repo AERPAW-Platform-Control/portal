@@ -6,91 +6,102 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and is_creator or is_exp or user.is_site_admin %}
         <div class="container">
-          <h2>{{ experiment.name }}</h2>
-          <table class="table table-striped table-bordered my-4">
-            <tr>
-              <td>Description</td>
-              <td>{{ experiment.description }}</td>
-            </tr>
-            <tr>
-              <td>Project</td>
-              <td>{{ experiment.project }}</td>
-            </tr>
-            <tr>
-              <td>Experimenters</td>
-              <td>
-                {% for member in experimenter %}
-                  {{ member }},
-                {% endfor %}
-              </td>
-            </tr>
-            <tr>
-              <td>Reservations</td>
-              <td>
-                {% for reservation in reservations %}
-                  <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">
-                  {{ reservation.name }}
-                </a>
-                {% endfor %}
-              </td>
-              <td>
-                <button class="btn btn-success mr-2">
-                  <a href="{% url 'reservation_create' experiment_uuid=experiment.uuid %}" class="unlink">Create a New Reservation</a>
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td>Stage</td>
-              <td>{{ experiment.stage }}</td>
-            </tr>
-            <tr>
-              <td>Created By</td>
-              <td>{{ experiment.created_by }}</td>
-            </tr>
-            <tr>
-              <td>Created Date</td>
-              <td>{{ experiment.created_date }}</td>
-            </tr>
-            <tr>
-              <td>Modified By</td>
-              <td>{{ experiment.modified_by }}</td>
-            </tr>
-            <tr>
-              <td>Modified Date</td>
-              <td>{{ experiment.modified_date }}</td>
-            </tr>
-            <tr>
-              <td>Profile</td>
-              <td>{{ experiment.profile }}</td>
-            </tr>
-            <tr>
-              <td>Experiment Status</td>
-              <td>{{ experiment_status }}</td>
-              <td>
-                <button class="btn btn-success mr-2">
-                  <a href="{% url 'experiment_manifest' experiment_uuid=experiment.uuid %}" class="unlink">Manifest</a>
-                </button>
-              </td>
-            </tr>
-          </table>
-          <button class="btn btn-success mr-2">
-            <a href="{% url 'experiment_update' experiment_uuid=experiment.uuid %}" class="unlink">Update</a>
-          </button>
-          <button class="btn btn-secondary mr-2">
-            <a href="{% url 'experiments' %}" class="unlink">Back</a>
-          </button>
-          <button class="btn btn-danger">
-            <a href="{% url 'experiment_delete' experiment_uuid=experiment.uuid %}" class="unlink">Delete</a>
-          </button>
-          <button class="btn btn-success mr-2">
-            <a href="{% url 'experiment_initiate' experiment_uuid=experiment.uuid %}" class="unlink">Initiate/Terminate</a>
-          </button>
+            <h2>{{ experiment.name }}</h2>
+            <table class="table table-striped table-bordered my-4">
+                <tr>
+                    <td>Description</td>
+                    <td>{{ experiment.description }}</td>
+                </tr>
+                <tr>
+                    <td>Project</td>
+                    <td>
+                        <a href="{% url 'project_detail' project_uuid=experiment.project.uuid %}">
+                            {{ experiment.project }}
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Experimenters</td>
+                    <td>
+                        {% for member in experimenter %}
+                            {{ member }},
+                        {% endfor %}
+                    </td>
+                <td>
+                            <button class="btn btn-info mr-2">
+                                <a href="{% url 'experiment_update_experimenters' experiment_uuid=experiment.uuid %}"
+                                   class="unlink">Update Experimenters</a>
+                            </button>
+                        </td>
+                </tr>
+                <tr>
+                    <td>Reservations</td>
+                    <td>
+                        {% for reservation in reservations %}
+                            <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">
+                                {{ reservation.name }}
+                            </a>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <button class="btn btn-success mr-2">
+                            <a href="{% url 'reservation_create' experiment_uuid=experiment.uuid %}" class="unlink">Create
+                                a New Reservation</a>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Stage</td>
+                    <td>{{ experiment.stage }}</td>
+                </tr>
+                <tr>
+                    <td>Created By</td>
+                    <td>{{ experiment.created_by }}</td>
+                </tr>
+                <tr>
+                    <td>Created Date</td>
+                    <td>{{ experiment.created_date }}</td>
+                </tr>
+                <tr>
+                    <td>Modified By</td>
+                    <td>{{ experiment.modified_by }}</td>
+                </tr>
+                <tr>
+                    <td>Modified Date</td>
+                    <td>{{ experiment.modified_date }}</td>
+                </tr>
+                <tr>
+                    <td>Profile</td>
+                    <td>{{ experiment.profile }}</td>
+                </tr>
+                <tr>
+                    <td>Experiment Status</td>
+                    <td>{{ experiment_status }}</td>
+                    <td>
+                        <button class="btn btn-success mr-2">
+                            <a href="{% url 'experiment_manifest' experiment_uuid=experiment.uuid %}" class="unlink">Manifest</a>
+                        </button>
+                    </td>
+                </tr>
+            </table>
+            <button class="btn btn-success mr-2">
+                <a href="{% url 'experiment_update' experiment_uuid=experiment.uuid %}" class="unlink">Update</a>
+            </button>
+            <button class="btn btn-secondary mr-2">
+                <a href="{% url 'experiments' %}" class="unlink">Back</a>
+            </button>
+            <button class="btn btn-danger">
+                <a href="{% url 'experiment_delete' experiment_uuid=experiment.uuid %}" class="unlink">Delete</a>
+            </button>
+            <button class="btn btn-success mr-2">
+                <a href="{% url 'experiment_initiate' experiment_uuid=experiment.uuid %}" class="unlink">Initiate/Terminate</a>
+            </button>
         </div>
     {% else %}
         <div class="container">
-          <p>You are not currently logged in or not authorized to view this page</p>
+            <p>You are not currently logged in or not authorized to view this page</p>
         </div>
     {% endif %}
 {% endblock %}

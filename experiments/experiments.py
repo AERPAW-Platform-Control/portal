@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import Experiment
+from .models import Experiment, StageChoice
 from reservations.models import Reservation
 from accounts.models import AerpawUser
 from projects.models import Project
@@ -26,7 +26,7 @@ import sys
 logger = logging.getLogger(__name__)
 
 
-def create_new_experiment(request, form):
+def create_new_experiment(request, form, project_id):
     """
 
     :param request:
@@ -42,24 +42,29 @@ def create_new_experiment(request, form):
     except ValueError as e:
         print(e)
         experiment.description = None
-
     experiment.created_by = request.user
     experiment.created_date = timezone.now()
-    experiment.stage = form.data.getlist('stage')[0]
     experiment.save()
 
-    experimenter_id_list = form.data.getlist('experimenter')
-    update_experimenter(experiment, experimenter_id_list)
+    experiment.project = Project.objects.get(id=str(project_id))
+    experiment.experimenter.add(request.user)
+    experiment.modified_by = experiment.created_by
+    experiment.modified_date = experiment.created_date
+    experiment.stage = 'Idle'
     experiment.save()
 
-    try:
-        experiment.project = Project.objects.get(id=int(form.data.getlist('project')[0]))
-        experiment.project.experiment_of_project.add(experiment)
-        experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
-        experiment.save()
-    except ValueError as e:
-        print(e)
-        experiment.project = None
+    # experimenter_id_list = form.data.getlist('experimenter')
+    # update_experimenter(experiment, experimenter_id_list)
+    # experiment.save()
+
+    # try:
+    #     experiment.project = Project.objects.get(id=int(form.data.getlist('project')[0]))
+    #     experiment.project.experiment_of_project.add(experiment)
+    #     experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
+    #     experiment.save()
+    # except ValueError as e:
+    #     print(e)
+    #     experiment.project = None
 
     #try:
     #    reservation_id_list=form.data.getlist('reservation')

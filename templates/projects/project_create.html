@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_project_manager %}
         <div class="container">
             <h2>Create Project</h2>
             <form method="POST" class="post-form">

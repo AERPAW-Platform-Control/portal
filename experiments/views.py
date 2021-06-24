@@ -6,7 +6,7 @@ from uuid import UUID
 
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import ExperimentCreateForm, ExperimentUpdateForm
+from .forms import ExperimentCreateForm, ExperimentUpdateForm, ExperimentUpdateExperimentersForm
 from .models import Experiment
 from .experiments import *
 from experiments.models import Project
@@ -28,23 +28,71 @@ def experiment_create(request):
     :param request:
     :return:
     """
-    experimenter = request.user
-    try:
-        project_id = request.session['project_id']
-        project = get_object_or_404(Project, id=project_id)
-    except KeyError:
-        project_qs=Project.objects.filter(project_members=experimenter)
-        if project_qs:
-            project=project_qs[0]
-        else:
-            return redirect('/')
-
-    form = ExperimentCreateForm(request.POST,project=project,experimenter=experimenter)
-
-    if form.is_valid():
-        experiment_uuid = create_new_experiment(request, form)
-        return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+    if request.method == "POST":
+        form = ExperimentCreateForm(request.POST)
+        if form.is_valid():
+            experiment_uuid = create_new_experiment(request, form, request.session.get('project_id'))
+            return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+    else:
+        form = ExperimentCreateForm()
     return render(request, 'experiment_create.html', {'form': form})
+
+
+def experiment_update_experimenters(request, experiment_uuid):
+    """
+
+    :param request:
+    :param project_uuid:
+    :return:
+    """
+    experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
+
+    if request.method == "POST":
+        form = ExperimentUpdateExperimentersForm(request.POST, instance=experiment)
+        if form.is_valid():
+            exps = form.cleaned_data.get('experimenter')
+            experiment.experimenter.through.objects.filter(experiment_id=experiment.id).delete()
+            for exp in exps:
+                experiment.experimenter.add(exp)
+            experiment.modified_by = request.user
+            experiment.modified_date = timezone.now()
+            experiment.save()
+            return redirect('experiment_detail', experiment_uuid=str(experiment.uuid))
+    else:
+        form = ExperimentUpdateExperimentersForm(instance=experiment)
+    return render(request, 'experiment_update_experimenters.html',
+                  {
+                      'form': form, 'experiment_uuid': str(experiment_uuid), 'experiment_name': experiment.name}
+                  )
+
+# def experiment_create(request):
+#     """
+#
+#     :param request:
+#     :return:
+#     """
+#     experimenter = request.user
+#     print(request.session.values())
+#     print(request.session.get('project_id'))
+#     project_id = request.session.get('project_id', None)
+#     try:
+#         # project_id = request.session['project_id']
+#         project = get_object_or_404(Project, id=project_id)
+#     except KeyError:
+#         project_qs=Project.objects.filter(project_members=experimenter)
+#         if project_qs:
+#             project=project_qs[0]
+#         else:
+#             return redirect('/')
+#
+#     form = ExperimentCreateForm()
+#     # form = ExperimentCreateForm(request.POST, project=project, experimenter=experimenter)
+#
+#     if form.is_valid():
+#         experiment_uuid = create_new_experiment(request, form)
+#         return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+#
+#     return render(request, 'experiment_create.html', {'form': form})
 
 
 def experiment_detail(request, experiment_uuid):
@@ -55,6 +103,8 @@ def experiment_detail(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
+    is_creator = (experiment.created_by == request.user)
+    is_exp = (request.user in experiment.experimenter.all())
     experiment_reservations = experiment.reservation_of_experiment
     request.session['experiment_id'] = experiment.id
 
@@ -72,7 +122,9 @@ def experiment_detail(request, experiment_uuid):
                   {'experiment': experiment,
                    'experimenter': experiment.experimenter.all(),
                    'experiment_status': status,
-                   'reservations': experiment_reservations.all()})
+                   'reservations': experiment_reservations.all(),
+                   'is_creator': is_creator, 'is_exp': is_exp}
+                  )
 
 
 def experiment_update(request, experiment_uuid):

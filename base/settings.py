@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'projects',  # aerpaw projects
     'profiles',  # aerpaw profiles
     'cicd',  # aerpaw cicd
+    'user_groups',  # user_groups
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -91,6 +92,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/resources'),
             os.path.join(BASE_DIR, 'templates/profiles'),
             os.path.join(BASE_DIR, 'templates/cicd'),
+            os.path.join(BASE_DIR, 'templates/manage'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

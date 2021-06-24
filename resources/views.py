@@ -5,6 +5,8 @@
 from django.contrib.auth.decorators import user_passes_test
 
 from uuid import UUID
+from urllib3.exceptions import MaxRetryError
+from django.contrib import messages
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.forms.models import model_to_dict
@@ -50,7 +52,11 @@ def resources(request):
     :param request:
     :return:
     """
-    import_cloud_resources(request)
+    try:
+        import_cloud_resources(request)
+    except MaxRetryError as err:
+        messages.info(request, 'ERROR: ' + str(err))
+
     resources = get_resource_list(request)
     resources_json = get_resources_json(resources)
     reserved_resource = get_all_reserved_units(24, 2)

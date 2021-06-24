@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_resource_manager or user.is_site_admin %}
         {# TODO: check for admin rights #}
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
@@ -15,7 +15,7 @@
                     <a href="{% url 'cicd_host_info_create' %}" class="unlink">Create New Host Entry</a>
                 </button>
                 <button class="btn btn-info mr-2">
-                    <a href="{% url 'cicd' %}" class="unlink">View CI/CD Deployments</a>
+                    <a href="{% url 'cicd' %}" class="unlink">CI/CD Deployments</a>
                 </button>
             </div>
             <table class="table table-striped table-bordered mt-4">
