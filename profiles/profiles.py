@@ -172,6 +172,7 @@ def parse_profile(request, experiment_definition):
 
 
 def is_emulab_stage(stage):
+    return False
     # not every profile need to be sent to emulab,
     # first check if we have AERPAWGW env setup,
     # and check the Stage 'DEVELOPMENT' to see if it's for emulab
