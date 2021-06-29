@@ -77,7 +77,7 @@
 
                 <input type="submit" class="btn btn-danger mr-2" value="Delete/Purge" name="purge_cicd"
                        onclick="return confirm('Are you sure you want to DELETE: {{ cicd_hi.name }}?')"
-                {% if cicd_hi.is_allocated %}disabled{% endif %}>
+                       {% if cicd_hi.is_allocated %}disabled{% endif %}>
                 <button class="btn btn-secondary mr-2">
                     <a href="{% url 'cicd_host_info' %}" class="unlink">Back</a>
                 </button>

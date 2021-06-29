@@ -7,48 +7,48 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-       <div class="container">
-                <h2>Initiate or Terminate "{{ experiment.name }}"</h2>
-                <table class="table table-striped table-bordered my-4">
-                  <tr>
+        <div class="container">
+            <h2>Initiate or Terminate "{{ experiment.name }}"</h2>
+            <table class="table table-striped table-bordered my-4">
+                <tr>
                     <td>Description</td>
                     <td>{{ experiment.description }}</td>
-                  </tr>
-                  <tr>
+                </tr>
+                <tr>
                     <td>Project</td>
                     <td>{{ experiment.project }}</td>
-                  </tr>
-                  <tr>
+                </tr>
+                <tr>
                     <td>Experiment Members</td>
                     <td>
-                      {% for member in experimenter%}
-                        {{ member }},
-                      {% endfor %}
+                        {% for member in experimenter %}
+                            {{ member }},
+                        {% endfor %}
                     </td>
-                  </tr>
-                  <tr>
+                </tr>
+                <tr>
                     <td>Created By</td>
                     <td>{{ experiment.created_by }}</td>
-                  </tr>
-                  <tr>
+                </tr>
+                <tr>
                     <td>Created Date</td>
                     <td>{{ experiment.created_date }}</td>
-                  </tr>
-                  <tr>
+                </tr>
+                <tr>
                     <td>Modified By</td>
                     <td>{{ experiment.modified_by }}</td>
-                  </tr>
-                  <tr>
+                </tr>
+                <tr>
                     <td>Modified Date</td>
                     <td>{{ experiment.modified_date }}</td>
-                  </tr>
-                </table>
-            </div>
-            <form method="POST" class="post-form">
-                {% csrf_token %}
-                <input class="btn btn-success mr-2" type="submit" value="Initiate/Terminate"/>
-                <a href="{% url 'experiment_detail' experiment_uuid=experiment.uuid %}" class="btn btn-secondary">Back</a>
-            </form>
+                </tr>
+            </table>
+        </div>
+        <form method="POST" class="post-form">
+            {% csrf_token %}
+            <input class="btn btn-success mr-2" type="submit" value="Initiate/Terminate"/>
+            <a href="{% url 'experiment_detail' experiment_uuid=experiment.uuid %}" class="btn btn-secondary">Back</a>
+        </form>
 
         </div>
     {% else %}

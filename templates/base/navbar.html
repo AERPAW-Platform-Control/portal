@@ -48,7 +48,8 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url 'profile' %}">User Profile</a>
-                        <a class="dropdown-item" href="{% url 'signup' %}">User Signup</a>
+                        <a class="dropdown-item" href="{% url 'request_roles' %}">Request Roles</a>
+                        {#                        <a class="dropdown-item" href="{% url 'signup' %}">User Signup</a>#}
                         <a class="dropdown-item" href="{% url 'credential' %}">Credential</a>
                     </div>
                 </li>
@@ -59,7 +60,8 @@
                             User Management
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{% url 'user_groups' %}">Users</a>
+                            <a class="dropdown-item" href="{% url 'user_groups' %}">All User Roles</a>
+                            <a class="dropdown-item" href="{% url 'user_requests' %}">Role Requests</a>
                         </div>
                     </li>
                 {% endif %}

@@ -14,7 +14,8 @@
                 {{ form.as_p }}
                 <input class="btn btn-success mr-2" type="submit" value="Save"/>
                 <button class="btn btn-secondary mr-2">
-                  <a href="{% url 'reservation_detail_own' reservation_uuid=reservation_uuid %}" class="unlink">Cancel</a>
+                    <a href="{% url 'reservation_detail_own' reservation_uuid=reservation_uuid %}"
+                       class="unlink">Cancel</a>
                 </button>
             </form>
         </div>

@@ -26,15 +26,15 @@
                     <td>Experimenters</td>
                     <td>
                         {% for member in experimenter %}
-                            {{ member }},
+                            {{ member }}<br>
                         {% endfor %}
                     </td>
-                <td>
-                            <button class="btn btn-info mr-2">
-                                <a href="{% url 'experiment_update_experimenters' experiment_uuid=experiment.uuid %}"
-                                   class="unlink">Update Experimenters</a>
-                            </button>
-                        </td>
+                    <td>
+                        <button class="btn btn-info mr-2">
+                            <a href="{% url 'experiment_update_experimenters' experiment_uuid=experiment.uuid %}"
+                               class="unlink">Update Experimenters</a>
+                        </button>
+                    </td>
                 </tr>
                 <tr>
                     <td>Reservations</td>
