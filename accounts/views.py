@@ -1,13 +1,21 @@
 # accounts/views.py
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import create_new_signup, update_credential
-from .forms import AerpawUserSignupForm, AerpawUserCredentialForm
-from django.http import FileResponse
-import os, subprocess, tempfile
+import os
+import subprocess
+import tempfile
 from zipfile import ZipFile
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import FileResponse
+from django.shortcuts import render, redirect
 
+from .accounts import create_new_role_request
+from .forms import AerpawUserSignupForm, AerpawUserCredentialForm, AerpawRoleRequestForm, AerpawUser
+from .models import create_new_signup, update_credential
+
+
+@login_required
 def profile(request):
     """
 
@@ -15,9 +23,42 @@ def profile(request):
     :return:
     """
     user = request.user
+    if request.method == 'POST':
+        for key in request.POST.keys():
+            if not key == 'csrfmiddlewaretoken':
+                display_name = request.POST.get(key)
+                if len(display_name) < 5:
+                    messages.error(request, 'ERROR: Display Name must be at least 5 characters long...')
+                    return render(request, 'profile.html', {'user': user})
+                user_obj = AerpawUser.objects.get(id=user.id)
+                if user_obj.display_name != display_name:
+                    user_obj.display_name = display_name
+                    user_obj.save()
+                    user = user_obj
+
     return render(request, 'profile.html', {'user': user})
 
 
+@login_required
+def request_roles(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.method == "POST":
+        form = AerpawRoleRequestForm(request.POST, user=request.user)
+        if form.is_valid():
+            # signup_uuid = create_new_signup(request, form)
+            role_request = create_new_role_request(request, form)
+            messages.info(request, 'INFO: Role Request has been created for - {0}'.format(str(role_request)))
+            return redirect('profile')
+    else:
+        form = AerpawRoleRequestForm(user=request.user)
+    return render(request, 'request_roles.html', {'form': form})
+
+
+@login_required
 def signup(request):
     """
 
@@ -35,6 +76,7 @@ def signup(request):
     return render(request, 'signup.html', {'form': form})
 
 
+@login_required
 def credential(request):
     """
 

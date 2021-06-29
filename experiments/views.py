@@ -1,17 +1,15 @@
-from django.shortcuts import render
-
 # Create your views here.
 
 from uuid import UUID
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import ExperimentCreateForm, ExperimentUpdateForm, ExperimentUpdateExperimentersForm
-from .models import Experiment
 from .experiments import *
-from experiments.models import Project
+from .forms import ExperimentCreateForm, ExperimentUpdateForm, ExperimentUpdateExperimentersForm
 
 
+@login_required
 def experiments(request):
     """
 
@@ -42,7 +40,7 @@ def experiment_update_experimenters(request, experiment_uuid):
     """
 
     :param request:
-    :param project_uuid:
+    :param experiment_uuid:
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
@@ -64,6 +62,7 @@ def experiment_update_experimenters(request, experiment_uuid):
                   {
                       'form': form, 'experiment_uuid': str(experiment_uuid), 'experiment_name': experiment.name}
                   )
+
 
 # def experiment_create(request):
 #     """
@@ -116,7 +115,7 @@ def experiment_detail(request, experiment_uuid):
         if status == 'provisioned':
             status = 'booting'  # for better user understanding
     else:
-        status = 'idle' # temporary, might want to change it
+        status = 'idle'  # temporary, might want to change it
 
     return render(request, 'experiment_detail.html',
                   {'experiment': experiment,
@@ -196,7 +195,9 @@ def experiment_initiate(request, experiment_uuid):
             return redirect('experiment_detail', experiment_uuid=experiment_uuid)
         else:
             logger.error('Need to pop up something to indicate "Retry later"')
-    return render(request, 'experiment_initiate.html', {'experiment': experiment, 'experimenter':experiment.experimenter.all(), 'experiment_reservations': experiment_reservations})
+    return render(request, 'experiment_initiate.html',
+                  {'experiment': experiment, 'experimenter': experiment.experimenter.all(),
+                   'experiment_reservations': experiment_reservations})
 
 
 def experiment_manifest(request, experiment_uuid):
@@ -214,7 +215,6 @@ def experiment_manifest(request, experiment_uuid):
         manifest = get_emulab_manifest(request, experiment)
     else:
         manifest = get_non_emulab_manifest(request, experiment)
-
 
     if manifest is not None:
         logger.warning(manifest)

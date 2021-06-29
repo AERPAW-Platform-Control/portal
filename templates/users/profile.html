@@ -16,9 +16,12 @@
                 <tr>
                     <td style="width: 25%">Display Name</td>
                     <td style="width: 75%;">
-                        <b>{{ user.display_name }}</b>
-                        <!-- TODO: add edit display_name -->
-                        {#                        <button class="message-btn btn btn-info" style="float: right;" disabled>Edit</button>#}
+                        <form action="#" method="post">
+                            {% csrf_token %}
+                            <input type="text" name="display_name" size="60" value="{{ user.display_name }}">
+                            <!-- TODO: add edit display_name -->
+                            <button class="message-btn btn btn-success" style="float: right;">Save</button>
+                        </form>
                     </td>
                 </tr>
                 <tr>

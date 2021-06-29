@@ -1,20 +1,37 @@
 # accounts/models.py
+
 import uuid
+from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from enum import Enum
+from django.utils import timezone
 
-class AerpawUserRoleChoice(Enum):   # A subclass of Enum
-    ADMIN = 'Admin'
-    PI = 'PI'
-    LEADEXPERIMENTER = 'Lead Experimenter'
-    EXPERIMENTER = 'Experimenter'
-    OBSERVERS = 'Observers'
+
+# class AerpawUserRoleChoice(Enum):  # A subclass of Enum
+#     ADMIN = 'Admin'
+#     PI = 'PI'
+#     LEADEXPERIMENTER = 'Lead Experimenter'
+#     EXPERIMENTER = 'Experimenter'
+#     OBSERVERS = 'Observers'
+#
+#     @classmethod
+#     def choices(cls):
+#         return [(key.value, key.name) for key in cls]
+
+
+class AerpawUserRoleChoice(Enum):  # A subclass of Enum
+    site_admin = 'is Administrator'
+    operator = 'is Operator'
+    project_manager = 'can Create Projects'
+    resource_manager = 'can Manage Resources'
+    user_manager = 'can Manager User Roles'
+    aerpaw_user = 'is AERPAW User'
 
     @classmethod
     def choices(cls):
-        return [(key.value, key.name) for key in cls]
+        return [(key.name, key.value) for key in cls]
+
 
 # Extends basic User model: https://docs.djangoproject.com/en/3.1/ref/contrib/auth/
 class AerpawUser(AbstractUser):
@@ -57,22 +74,22 @@ class AerpawUser(AbstractUser):
         return self.display_name
 
     def is_aerpaw_user(self):
-        return self.groups.filter(name='aerpaw-user').exists()
+        return self.groups.filter(name='aerpaw_user').exists()
 
     def is_operator(self):
         return self.groups.filter(name='operator').exists()
 
     def is_project_manager(self):
-        return self.groups.filter(name='project-manager').exists()
+        return self.groups.filter(name='project_manager').exists()
 
     def is_resource_manager(self):
-        return self.groups.filter(name='resource-manager').exists()
+        return self.groups.filter(name='resource_manager').exists()
 
     def is_user_manager(self):
-        return self.groups.filter(name='user-manager').exists()
+        return self.groups.filter(name='user_manager').exists()
 
     def is_site_admin(self):
-        return self.groups.filter(name='site-admin').exists()
+        return self.groups.filter(name='site_admin').exists()
 
 
 def is_PI(user):
@@ -81,7 +98,7 @@ def is_PI(user):
     return user.groups.filter(name='PI').exists()
 
 
-def is_project_member(user,project_group):
+def is_project_member(user, project_group):
     print(user)
     print(user.groups.all())
     return user.groups.filter(name=project_group).exists()
@@ -95,13 +112,40 @@ class AerpawUserSignup(models.Model):
     organization = models.CharField(max_length=255)
     description = models.TextField()
     userRole = models.CharField(
-      max_length=64,
-      choices=AerpawUserRoleChoice.choices(),
+        max_length=64,
+        choices=AerpawUserRoleChoice.choices(),
     )
     publickey = models.TextField(null=True)
 
     def __str__(self):
         return self.user.oidc_claim_email
+
+
+class AerpawRoleRequest(models.Model):
+    # User = get_user_model()
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    requested_by = models.ForeignKey(
+        AerpawUser, related_name='role_request_requested_by', on_delete=models.CASCADE, null=True, blank=True
+    )
+    purpose = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    is_completed = models.BooleanField(default=False)
+    notes = models.TextField()
+    requested_role = models.CharField(
+        max_length=64,
+        choices=AerpawUserRoleChoice.choices(),
+    )
+    created_by = models.ForeignKey(
+        AerpawUser, related_name='role_request_created_by', on_delete=models.CASCADE, null=True, blank=True
+    )
+    created_date = models.DateTimeField(default=timezone.now)
+    modified_by = models.ForeignKey(
+        AerpawUser, related_name='role_request_modified_by', on_delete=models.CASCADE, null=True, blank=True
+    )
+    modified_date = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.requested_by
 
 
 class AerpawUserCredential(models.Model):

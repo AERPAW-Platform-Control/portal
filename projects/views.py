@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
@@ -11,6 +12,7 @@ from .projects import create_new_project, get_project_list, update_existing_proj
 PI_message = "Please email the admin to become a PI first!"
 
 
+@login_required
 def projects(request):
     """
 

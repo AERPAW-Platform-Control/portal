@@ -21,6 +21,7 @@
                             <a href="{% url 'experiment_detail' experiment_uuid=experiment.uuid %}">
                                 {{ experiment.name }}
                             </a>
+                            : {{ experiment.description }}<br>
                         {% endfor %}
                     </td>
                     <td>
@@ -65,7 +66,7 @@
                     <td>Project Owners</td>
                     <td>
                         {% for owner in project_owners %}
-                            {{ owner.display_name }},
+                            {{ owner.display_name }}<br>
                         {% endfor %}
                     </td>
                     {% if is_pc or user.is_site_admin %}
@@ -81,7 +82,7 @@
                     <td>Project Members</td>
                     <td>
                         {% for member in project_members %}
-                            {{ member.display_name }},
+                            {{ member.display_name }}<br>
                         {% endfor %}
                     </td>
                     {% if is_pc or is_po or user.is_site_admin %}

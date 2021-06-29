@@ -7,7 +7,6 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-
 default_message = "You don't have the right priviledge to proceed, please contact the admin"
 
 
@@ -17,6 +16,7 @@ def user_passes_test(test_func, message=default_message):
     setting a message in case of no success. The test should be a callable
     that takes the user object and returns True if the user passes.
     """
+
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
@@ -24,7 +24,9 @@ def user_passes_test(test_func, message=default_message):
                 messages.error(request, message)
                 return HttpResponse(message)
             return view_func(request, *args, **kwargs)
+
         return _wrapped_view
+
     return decorator
 
 
@@ -42,12 +44,13 @@ def login_required_message(function=None, message=default_message):
     return actual_decorator
 
 
-def login_required_messsage_and_redirect(function=None, redirect_field_name=REDIRECT_FIELD_NAME, login_url=None, message=default_message):
-
+def login_required_messsage_and_redirect(function=None, redirect_field_name=REDIRECT_FIELD_NAME, login_url=None,
+                                         message=default_message):
     if function:
         return login_required_message(
             login_required(function, redirect_field_name, login_url),
             message
         )
 
-    return lambda deferred_function: login_required_message_and_redirect(deferred_function, redirect_field_name, login_url, message)
+    return lambda deferred_function: login_required_message_and_redirect(deferred_function, redirect_field_name,
+                                                                         login_url, message)

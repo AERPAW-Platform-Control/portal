@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
@@ -13,6 +14,7 @@ from .jenkins_api import start_cicd_environment, stop_cicd_environment, purge_ci
 from .models import Cicd, CicdHostInfo
 
 
+@login_required
 def cicd(request):
     """
 
