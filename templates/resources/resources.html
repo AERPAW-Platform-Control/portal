@@ -16,9 +16,11 @@
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
                 <h2>AERPAW Resources</h2>
+                {% if user.is_resource_manager %}
                 <button class="btn btn-success mr-2">
                     <a href="{% url 'resource_create' %}" class="unlink">Create New Resource</a>
                 </button>
+                {% endif %}
             </div>
             <div class="container py-4">
                 <div class="toolbar">

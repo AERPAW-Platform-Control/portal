@@ -171,19 +171,20 @@ def update_units(resource, updated_units, original_units, start_time, end_time, 
 
 
 def remove_units(resource, count, start_time, end_time, save=True):
-    remove = is_resource_available_time(resource, start_time, end_time)
-    if remove:
+    is_resource_available = is_resource_available_time(resource, start_time, end_time)
+    if is_resource_available or count < 0:
         #start_date = datetime.strptime(start_time,'%Y-%m-%d %H:%M:%S.%f%z')
         #end_date = datetime.strptime(end_time,'%Y-%m-%d %H:%M:%S.%f%z')
         #utc=pytz.UTC
         count_date = timezone.now() + timezone.timedelta(hours=2)
         #count_date = count_date.replace(tzinfo=utc)
+
         if start_time <= count_date:
             reserved_units = get_reserved_units(resource,start_time,end_time)
             resource.availableUnits = resource.units - reserved_units - count
         if save == True:
             resource.save()
-    return remove
+    return True
 
 
 def import_cloud_resources(request):
