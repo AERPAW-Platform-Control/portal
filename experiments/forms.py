@@ -6,15 +6,23 @@ from accounts.models import AerpawUser
 from projects.models import Project
 from reservations.models import Reservation
 from profiles.models import Profile
-from .models import Experiment,ResourceStageRequestChoice,StageChoice
+from .models import Experiment, UserStageChoice, StageChoice
 
 
 class ExperimentCreateForm(forms.ModelForm):
+    profile = forms.ModelChoiceField(
+        queryset=Profile.objects.order_by('name'),
+        required=True,
+        widget=forms.Select(),
+        label='Experiment Definition',
+    )
+
     class Meta:
         model = Experiment
         fields = [
             'name',
             'description',
+            'profile'
         ]
 
 
@@ -56,8 +64,6 @@ class ExperimentUpdateExperimentersForm(forms.ModelForm):
         widget=FilteredSelectMultiple("Experimenters", is_stacked=False),
         required=False
     )
-
-
 
 
 # class ExperimentCreateForm(forms.ModelForm):
@@ -143,6 +149,7 @@ class ExperimentUpdateForm(forms.ModelForm):
         label='Experiment Description',
     )
 
+    '''
     experimenter = forms.ModelChoiceField(
         queryset=AerpawUser.objects.order_by('oidc_claim_name'),
         required=True,
@@ -159,7 +166,7 @@ class ExperimentUpdateForm(forms.ModelForm):
     )
 
     stage = forms.ChoiceField(
-        choices=ResourceStageRequestChoice.choices(),
+        choices=UserStageChoice.choices(),
         required=True,
         widget=forms.Select(),
         label='Stage',
@@ -169,19 +176,63 @@ class ExperimentUpdateForm(forms.ModelForm):
         queryset=Profile.objects.order_by('name'),
         required=False,
         widget=forms.Select(),
-        label='Profile',
+        label='Experiment Definition',
     )
+    '''
 
     class Meta:
         model = Experiment
         fields = (
             'name',
             'description',
-            'experimenter',
-            'modified_by',
-            'modified_date',
+        )
+
+
+class ExperimentUpdateByOpsForm(forms.ModelForm):
+
+    stage = forms.ChoiceField(
+        choices=StageChoice.choices(),
+        required=True,
+        widget=forms.Select(),
+        label='Mode',
+    )
+
+    state = forms.ChoiceField(
+        choices=Experiment.STATE_CHOICES,
+        required=True,
+        widget=forms.Select(),
+        label='state',
+    )
+
+    message = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='Experiment Notification',
+    )
+
+    class Meta:
+        model = Experiment
+        fields = (
+            'stage',
+            'state',
+            'message',
+        )
+
+
+class ExperimentSubmitForm(forms.ModelForm):
+    stage = forms.ChoiceField(
+        choices=UserStageChoice.choices(),
+        required=True,
+        widget=forms.Select(),
+        label='Stage',
+    )
+
+    class Meta:
+        model = Experiment
+        fields = (
             'stage',
         )
+
 
 class ExperimentAdminForm(forms.ModelForm):
     name = forms.CharField(
@@ -211,7 +262,7 @@ class ExperimentAdminForm(forms.ModelForm):
     )
 
     stage = forms.ChoiceField(
-        choices=ResourceStageRequestChoice.choices(),
+        choices=StageChoice.choices(),
         required=True,
         widget=forms.Select(),
         label='Stage',

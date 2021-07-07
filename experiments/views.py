@@ -5,8 +5,9 @@ from uuid import UUID
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
+from .forms import *
 from .experiments import *
-from .forms import ExperimentCreateForm, ExperimentUpdateForm, ExperimentUpdateExperimentersForm
+import threading
 
 
 @login_required
@@ -29,7 +30,8 @@ def experiment_create(request):
     if request.method == "POST":
         form = ExperimentCreateForm(request.POST)
         if form.is_valid():
-            experiment_uuid = create_new_experiment(request, form, request.session.get('project_id'))
+            experiment_uuid = create_new_experiment(request, form,
+                                                    request.session.get('project_id'))
             return redirect('experiment_detail', experiment_uuid=experiment_uuid)
     else:
         form = ExperimentCreateForm()
@@ -60,7 +62,8 @@ def experiment_update_experimenters(request, experiment_uuid):
         form = ExperimentUpdateExperimentersForm(instance=experiment)
     return render(request, 'experiment_update_experimenters.html',
                   {
-                      'form': form, 'experiment_uuid': str(experiment_uuid), 'experiment_name': experiment.name}
+                      'form': form, 'experiment_uuid': str(experiment_uuid),
+                      'experiment_name': experiment.name}
                   )
 
 
@@ -108,19 +111,24 @@ def experiment_detail(request, experiment_uuid):
     request.session['experiment_id'] = experiment.id
 
     status = ''
-    if experiment.stage.upper() == 'DEVELOPMENT':
+
+    if is_emulab_stage(experiment.stage):
         status = query_emulab_instance_status(request, experiment)
         # the status can be any of following:
         # 'created', 'provisioning', 'provisioned', 'ready', 'failed', 'teriminating', 'not_started'
         if status == 'provisioned':
             status = 'booting'  # for better user understanding
+    # elif experiment.state is Experiment.STATE_SUBMIT and 'Req' not in experiment.stage:
+    #    # The operator approved and changed the state, set state to READY
+    #    experiment.ready()
+    #    experiment.save()
     else:
         status = 'idle'  # temporary, might want to change it
 
     return render(request, 'experiment_detail.html',
                   {'experiment': experiment,
                    'experimenter': experiment.experimenter.all(),
-                   'experiment_status': status,
+                   'experiment_status': Experiment.STATE_CHOICES[experiment.state][1],
                    'reservations': experiment_reservations.all(),
                    'is_creator': is_creator, 'is_exp': is_exp}
                   )
@@ -134,21 +142,76 @@ def experiment_update(request, experiment_uuid):
     :return:
     """
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
-    stage = experiment.stage
+    prev_stage = experiment.stage
+    prev_state = experiment.state
     if request.method == "POST":
         form = ExperimentUpdateForm(request.POST, instance=experiment)
         if form.is_valid():
             experiment = form.save(commit=False)
-            experiment_uuid = update_existing_experiment(request, experiment, form)
-            new_stage = experiment.stage
-
-            if stage != new_stage:
-                experiment.stage = new_stage
-                send_exepriment_update_email(experiment)
+            experiment_uuid = update_existing_experiment(request, experiment, form, prev_stage,
+                                                         prev_state)
             return redirect('experiment_detail', experiment_uuid=str(experiment.uuid))
-    else:
-        form = ExperimentUpdateForm(instance=experiment)
 
+    form = ExperimentUpdateForm(instance=experiment)
+    return render(request, 'experiment_update.html',
+                  {
+                      'form': form, 'experiment_uuid': str(experiment_uuid),
+                      'experiment_name': experiment.name}
+                  )
+
+
+def experiment_update_by_ops(request, experiment_uuid):
+    """
+    This temporary code will need some update after GA
+    :param request:
+    :param experiment_uuid:
+    :return:
+    """
+    experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
+    prev_stage = experiment.stage
+    prev_state = experiment.state
+    if request.method == "POST":
+        form = ExperimentUpdateByOpsForm(request.POST, instance=experiment)
+        if form.is_valid():
+            experiment = form.save(commit=False)
+            experiment_uuid = update_existing_experiment(request, experiment, form, prev_stage,
+                                                         prev_state)
+            if experiment.message is not None and experiment.message != "":
+                subject = 'Aerpaw Experiment Notification: {}'.format(experiment.uuid)
+                email_message = "[{}]\n\n".format(subject) \
+                               + "Experiment Name: {}\n".format(str(experiment)) \
+                               + "Project: {}\n\n".format(experiment.project) \
+                               + "Notification/Message:\n{}\n".format(experiment.message)
+                send_email_to_user(subject, email_message, experiment.created_by)
+            return redirect('experiment_detail', experiment_uuid=str(experiment.uuid))
+
+    form = ExperimentUpdateByOpsForm(instance=experiment)
+    return render(request, 'experiment_update.html',
+                  {
+                      'form': form, 'experiment_uuid': str(experiment_uuid),
+                      'experiment_name': experiment.name}
+                  )
+
+
+def experiment_submit(request, experiment_uuid):
+    """
+    Submit = update experiment stage from development to Testbed/(Sandbox?)
+
+    :param request:
+    :param experiment_uuid:
+    :return:
+    """
+    experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
+    prev_stage = experiment.stage
+    prev_state = experiment.state
+    if request.method == "POST":
+        form = ExperimentSubmitForm(request.POST, instance=experiment)
+        if form.is_valid():
+            experiment = form.save(commit=False)
+            update_existing_experiment(request, experiment, form, prev_stage, prev_state)
+            return redirect('experiment_detail', experiment_uuid=str(experiment.uuid))
+
+    form = ExperimentSubmitForm(instance=experiment)
     return render(request, 'experiment_update.html',
                   {
                       'form': form, 'experiment_uuid': str(experiment_uuid),
@@ -185,16 +248,50 @@ def experiment_initiate(request, experiment_uuid):
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
     experiment_reservations = experiment.reservation_of_experiment
 
-    if not is_emulab_profile(experiment.stage):
-        return experiment_manifest(request, experiment.uuid)
-
     if request.method == "POST":
-        is_success = initiate_emulab_instance(request, experiment)
-        if is_success:
-            status = query_emulab_instance_status(request, experiment)
+        if experiment.can_initiate():
+            # we are going to initiate the development
+            experiment.stage = 'Development'
+            experiment.save()
+        elif experiment.can_terminate():
+            # terminate
+            experiment_state_change(request, experiment, "terminating")
+            experiment.stage = 'Idle'
+            experiment.save()
             return redirect('experiment_detail', experiment_uuid=experiment_uuid)
         else:
-            logger.error('Need to pop up something to indicate "Retry later"')
+            logger.error("wrong state!")
+            return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+
+        if not is_emulab_stage(experiment.stage):
+            # should check reservation
+            # ...
+            session_req = generate_experiment_session_request(request, experiment)
+            if session_req is None:
+                return render(request, 'experiment_initiate.html', {'experiment': experiment,
+                                                                    'experimenter': experiment.experimenter.all(),
+                                                                    'experiment_reservations': experiment_reservations,
+                                                                    'msg': '* Please check the your experiment definition!'})
+
+            if experiment.state < Experiment.STATE_DEPLOYING:  # and if reservation is_valid
+                experiment_state_change(request, experiment, "ready")
+            else:
+                # should do something to tell node agent to terminate experiment
+                # ...
+                experiment_state_change(request, experiment, "not_started")
+            return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+
+        else:
+            is_success = initiate_emulab_instance(request, experiment)
+            if is_success:
+                status = query_emulab_instance_status(request, experiment)
+                # add a thread here
+                # t = threading.Thread(target=bg_deploy_emulab,args=(request, experiment), daemon=True)
+                # t.setDaemon(True)
+                # t.start()
+                return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+            else:
+                logger.error('Need to pop up something to indicate "Retry later"')
     return render(request, 'experiment_initiate.html',
                   {'experiment': experiment, 'experimenter': experiment.experimenter.all(),
                    'experiment_reservations': experiment_reservations})
@@ -211,18 +308,25 @@ def experiment_manifest(request, experiment_uuid):
     experiment = get_object_or_404(Experiment, uuid=UUID(str(experiment_uuid)))
 
     manifest = None
-    if experiment.stage.upper() == 'DEVELOPMENT':
+    user_manifest = ''
+    if is_emulab_stage(experiment.stage):
         manifest = get_emulab_manifest(request, experiment)
     else:
-        manifest = get_non_emulab_manifest(request, experiment)
+        manifest = generate_experiment_session_request(request, experiment)
+
+    if (experiment.stage == "Development" and experiment.state == Experiment.STATE_DEPLOYED) \
+            or (experiment.stage == "Idle" and experiment.state == Experiment.STATE_IDLE):
+        user_manifest = experiment.message
 
     if manifest is not None:
-        logger.warning(manifest)
         return render(request, 'experiment_manifest.html',
                       {'experiment': experiment,
-                       'rspec': manifest.rspec,
-                       'vnodes': manifest.vnodes})
+                       'manifest': manifest,
+                       'profile': experiment.profile.profile,
+                       'user_manifest': user_manifest})
     else:
-        logger.error(
-            'not emulab experiment or not ready, temporary redirect back, need better handling')
-        return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+        return render(request, 'experiment_manifest.html',
+                      {'experiment': experiment,
+                       'manifest': "",
+                       'profile': experiment.profile.profile,
+                       'user_manifest': user_manifest})

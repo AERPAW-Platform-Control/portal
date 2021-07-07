@@ -88,7 +88,7 @@ def delete_existing_reservation(request, reservation):
     :return:
     """
     try:
-        update_units(reservation.resource,0, int(reservation.units),reservation.start_date,reservation.end_date)
+        update_units(reservation.resource, 0, int(reservation.units), reservation.start_date, reservation.end_date)
         reservation.delete()
         return True
     except Exception as e:

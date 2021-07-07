@@ -5,9 +5,12 @@ from django.utils import timezone
 from .models import Profile
 from accounts.models import AerpawUser
 from projects.models import Project
+from experiments import experiments
+from resources.models import Resource
 import aerpawgw_client
 from aerpawgw_client.rest import ApiException
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -36,15 +39,23 @@ def create_new_profile(request, form):
         print(e)
         profile.profile = None
 
+    if parse_profile(request, profile.profile) is None:
+        logger.warning("definition format not correct")
+        return None
+
     profile.created_by = request.user
     profile.created_date = timezone.now()
     profile.project = Project.objects.get(id=int(form.data.getlist('project')[0]))
-    profile.stage = form.data.getlist('stage')[0]
+    #profile.stage = form.data.getlist('stage')[0]
 
+    '''
+    # user doesn't care about emulab profile.
+    # we change design to always use the default 1 node profie in emulab
     # not every profile need to be sent to emulab,
     # now in is_emulab_profile(), using Stage 'DEVELOPMENT' to see if it's for emulab
-    if is_emulab_profile(profile.stage):
+    if is_emulab_profile(profile):
         create_new_emulab_profile(request, profile)
+    '''
 
     profile.save()
     try:
@@ -82,9 +93,13 @@ def update_existing_profile(request, profile, form):
     profile.modified_by = request.user
     profile.modified_date = timezone.now()
 
-    if is_emulab_profile(profile.stage):
-        delete_emulab_profile(request, profile)
-        create_new_emulab_profile(request, profile)
+    if parse_profile(request, profile.profile) is None:
+        logger.warning("definition format not correct")
+        return None
+
+    #if is_emulab_profile(profile):
+    #    delete_emulab_profile(request, profile)
+    #    create_new_emulab_profile(request, profile)
 
     profile.save()
     return str(profile.uuid)
@@ -98,8 +113,8 @@ def delete_existing_profile(request, profile):
     :return:
     """
     try:
-        if is_emulab_profile(profile.stage):
-            delete_emulab_profile(request, profile)
+        #if is_emulab_profile(profile):
+        #    delete_emulab_profile(request, profile)
         profile.delete()
         return True
     except Exception as e:
@@ -120,7 +135,44 @@ def get_profile_list(request):
     return profiles
 
 
-def is_emulab_profile(stage):
+def parse_profile(request, experiment_definition):
+    """
+    Verify if resource definition is valid and return the resources as dictionary
+    Currently the resource definition is provided by user with raw json file.
+
+    :param request:
+    :param experiment:
+    """
+    try:
+        logger.info(experiment_definition)
+        resources=json.loads(experiment_definition)
+
+        if len(resources) < 1:
+            raise Exception('Empty definition')
+        for reqnode in resources:
+            if 'idx' not in reqnode.keys() \
+                    or 'name' not in reqnode.keys() \
+                    or 'hardware_type' not in reqnode.keys() \
+                    or ('component_id' not in reqnode.keys() and "vehicle" not in reqnode.keys()):
+                raise Exception('lacking necessary attribute(s)')
+
+            if 'component_id' in reqnode.keys():
+                resource = Resource.objects.get(resourceType=reqnode['hardware_type'], name=reqnode['component_id'])
+            elif 'vehicle' in reqnode.keys():
+                resource = Resource.objects.get(resourceType=reqnode['hardware_type'], name=reqnode['vehicle'])
+            else:
+                raise Exception("lacking component_id or vehicle in definition")
+    except Resource.DoesNotExist:
+        logger.error("!Not able to find {}".format(reqnode))
+        return None
+    except Exception as e:
+        logger.error(e)
+        return None
+    return resources
+
+
+def is_emulab_stage(stage):
+    return False
     # not every profile need to be sent to emulab,
     # first check if we have AERPAWGW env setup,
     # and check the Stage 'DEVELOPMENT' to see if it's for emulab
@@ -128,7 +180,14 @@ def is_emulab_profile(stage):
             or not os.getenv('AERPAWGW_PORT') \
             or not os.getenv('AERPAWGW_VERSION'):
         return False
-    elif stage.upper() == 'DEVELOPMENT':
+    elif stage.upper() == 'DEVELOPMENT' or stage.upper() == 'EMULATION':
+        return True
+    else:
+        return False
+
+
+def is_emulab_profile(profile):
+    if not profile.profile.startswith('[{') and is_emulab_stage(profile.stage):
         return True
     else:
         return False
@@ -143,14 +202,14 @@ def query_emulab_profile(request, emulab_profile_name):
     :return emulab_profile:
     """
     api_instance = aerpawgw_client.ProfileApi()
-    print(emulab_profile_name)
+    logger.info(emulab_profile_name)
     try:
         # query specific profile
         emulab_profile = api_instance.query_profile(profile=emulab_profile_name)
-        print(emulab_profile)
+        logger.info(emulab_profile)
         return emulab_profile
     except ApiException as e:
-        print("Exception when calling ProfileApi->query_profile: %s\n" % e)
+        logger.error("Exception when calling ProfileApi->query_profile: %s\n" % e)
         return None
 
 
@@ -170,7 +229,6 @@ def create_new_emulab_profile(request, profile):
     logger.debug(body)
     try:
         api_response = api_instance.create_profile(body)
-        print(api_response)
     except ApiException as e:
         raise Exception("Exception when calling Gateway->create_profile: %s\n" % e)
 
@@ -202,7 +260,7 @@ def delete_emulab_profile(request, profile, name_to_delete=None):
         # delete profile
         api_instance.delete_profile(emulab_profile_name)
     except ApiException as e:
-        print("Exception when calling ProfileApi->delete_profile: %s\n" % e)
+        logger.error("Exception when calling ProfileApi->delete_profile: %s\n" % e)
 
 
 def get_emulab_profile_name(projectname, profilename):

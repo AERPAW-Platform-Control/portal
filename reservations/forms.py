@@ -18,7 +18,8 @@ class ReservationCreateForm(forms.ModelForm):
         self.experiment=qs.first()
         self.stage=self.experiment.stage
         super(ReservationCreateForm,self).__init__(*args,**kwargs)
-        qs = Resource.objects.filter(stage=self.stage)
+        #qs = Resource.objects.filter(stage=self.stage)
+        qs = Resource.objects.order_by('name')
         if qs:
             self.fields['resource'].queryset = qs
 
@@ -30,11 +31,11 @@ class ReservationCreateForm(forms.ModelForm):
     )
 
     description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        widget=forms.Textarea(attrs={'rows': 2, 'cols': 60}),
         required=False,
-        label='Resource Description',
+        label='Description(Optional)',
     )
-    
+
     resource = forms.ModelChoiceField(
         queryset=Resource.objects.none(),
         required=True,
@@ -51,13 +52,13 @@ class ReservationCreateForm(forms.ModelForm):
 
     start_date = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': timezone.now()}),
-        initial=timezone.now, 
+        initial=timezone.now,
         required=True,
     )
 
     end_date = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': one_day_hence()}),
-        initial=one_day_hence, 
+        initial=one_day_hence,
         required=True,
     )
 
@@ -71,7 +72,7 @@ class ReservationCreateForm(forms.ModelForm):
             'start_date',
             'end_date',
         )
-    
+
     def clean(self, *args, **kwargs):
         cleaned_data = super().clean(*args, **kwargs)
 
@@ -122,14 +123,14 @@ class ReservationChangeForm(forms.ModelForm):
     start_date = forms.DateTimeField(
         input_formats=['%Y-%m-%d %H:%M:%S.%f%z'],
         widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': timezone.now()}),
-        initial=timezone.now, 
+        initial=timezone.now,
         required=True,
     )
 
     end_date = forms.DateTimeField(
         input_formats=['%Y-%m-%d %H:%M:%S.%f%z'],
         widget=forms.DateTimeInput(attrs={'class':'datetimepicker', 'value': one_day_hence()}),
-        initial=one_day_hence, 
+        initial=one_day_hence,
         required=True,
     )
 

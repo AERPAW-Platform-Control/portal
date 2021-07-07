@@ -14,6 +14,12 @@ class ProfileCreateForm(forms.ModelForm):
         label='Project',
     )
 
+    profile = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='Definition',
+    )
+
     class Meta:
         model = Profile
         fields = (
@@ -21,9 +27,9 @@ class ProfileCreateForm(forms.ModelForm):
             'description',
             'project',
             'profile',
-            'created_by',
-            'created_date',
-            'stage',
+            #'created_by',
+            #'created_date',
+            #'stage',
         )
 
     def clean_title(self):
@@ -41,7 +47,7 @@ class ProfileUpdateForm(forms.ModelForm):
     description = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
-        label='Profile Description',
+        label='Description',
     )
 
     project = forms.ModelChoiceField(
@@ -55,7 +61,7 @@ class ProfileUpdateForm(forms.ModelForm):
     profile = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
-        label='Profile Script',
+        label='Definition',
     )
 
     class Meta:
@@ -65,7 +71,7 @@ class ProfileUpdateForm(forms.ModelForm):
             'description',
             'project',
             'profile',
-            'modified_by',
-            'modified_date',
-            'stage',
+            #'modified_by',
+            #'modified_date',
+            #'stage',
         )
