@@ -79,7 +79,7 @@ def resources(request):
                   })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager)
 def resource_create(request):
     """
 
@@ -108,7 +108,7 @@ def resource_detail(request, resource_uuid):
     return render(request, 'resource_detail.html', {'resource': resource, 'reservations': resource_reservations.all()})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager)
 def resource_update(request, resource_uuid):
     """
 
@@ -131,6 +131,7 @@ def resource_update(request, resource_uuid):
                   )
 
 
+@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager)
 def resource_delete(request, resource_uuid):
     """
 
