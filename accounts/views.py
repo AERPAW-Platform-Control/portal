@@ -97,21 +97,20 @@ def credential(request):
             args = "ssh-keygen -q -t rsa -N '' -C {} -f {}".format(request.user.username,
                                                                    keyfile).split()
             args[5] = ''  # make passphrase empty (the parameter for -N)
-            ret = subprocess.run(args, check=True)
-            # print(ret)
             try:
+                output = subprocess.run(args, check=False, capture_output=True)
                 with ZipFile(os.path.join(tempfile.gettempdir(), 'aerpaw_id_rsa.zip'),
                              'w') as myzip:
                     myzip.write(keyfile + '.pub', arcname='aerpaw_id_rsa.pub')
                     myzip.write(keyfile, arcname='aerpaw_id_rsa')
-            except:
-                print('something wrong with zipfile')
-
-            os.unlink(keyfile)
-            os.unlink(keyfile + '.pub')
-            return FileResponse(
-                open(os.path.join(tempfile.gettempdir(), 'aerpaw_id_rsa.zip'), 'rb'),
-                as_attachment=True)
+                os.unlink(keyfile)
+                os.unlink(keyfile + '.pub')
+                return FileResponse(
+                    open(os.path.join(tempfile.gettempdir(), 'aerpaw_id_rsa.zip'), 'rb'),
+                    as_attachment=True)
+            except Exception as e:
+                print(output)
+                print(e)
     else:
         form = AerpawUserCredentialForm()
     return render(request, 'credential.html', {'form': form})
