@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated and is_creator or is_exp or user.is_site_admin %}
+    {% if user.is_authenticated and is_creator or is_exp or user.is_site_admin or user.is_operator %}
         <div class="container">
             <h2>{{ experiment.name }}</h2>
             <table class="table table-striped table-bordered my-4">
