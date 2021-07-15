@@ -224,7 +224,7 @@ class ExperimentSubmitForm(forms.ModelForm):
         choices=UserStageChoice.choices(),
         required=True,
         widget=forms.Select(),
-        label='Stage',
+        label='Submit to',
     )
 
     class Meta:
