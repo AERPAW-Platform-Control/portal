@@ -15,13 +15,14 @@
         </head>
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
-                <h2>AERPAW Resources</h2>
+                <h2>AERPAW Platform Resources</h2>
                 {% if user.is_resource_manager or user.is_superuser %}
                 <button class="btn btn-success mr-2">
                     <a href="{% url 'resource_create' %}" class="unlink">Create New Resource</a>
                 </button>
                 {% endif %}
             </div>
+            {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
             <div class="container py-4">
                 <div class="toolbar">
                     <div class="input-group mb-3 toolbar-dropdown">
@@ -38,15 +39,16 @@
                 </div>
                 <div id="main" style="width: 1000px;height:400px;" class="mt-4"></div>
             </div>
+            {% endif %}
             <table class="table table-striped table-bordered mt-4">
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Resource Type</th>
-                    <th>Units</th>
-                    <th>Available Units</th>
                     <th>Location</th>
+                    <th>Units</th>
                     {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
+                    <th>Available Units</th>
                     <th>UUID</th>
                     <th>Stage</th>
                     <th>Admin</th>
@@ -64,10 +66,10 @@
                         </td>
                         <td>{{ resource.description }}</td>
                         <td>{{ resource.resourceType }}</td>
-                        <td>{{ resource.units }}</td>
-                        <td>{{ resource.availableUnits }}</td>
                         <td>{{ resource.location }}</td>
+                        <td>{{ resource.units }}</td>
                         {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
+                        <td>{{ resource.availableUnits }}</td>
                         <td>{{ resource.uuid }}</td>
                         <td>{{ resource.stage }}</td>
                         <td>{{ resource.admin }}</td>
