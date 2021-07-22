@@ -47,11 +47,17 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'accounts',  # custom user accounts
-    'projects',  # aerpaw projects
+    'django.contrib.staticfiles',    
     'crispy_forms',  # django-crispy-forms: https://django-crispy-forms.readthedocs.io/en/latest/dj
     'bootstrap4',  # django-bootstrap4: https://django-bootstrap4.readthedocs.io/en/latest/quickstart.html
+    'accounts',  # custom user accounts
+    'resources',  # aerpaw resources
+    'reservations',  # aerpaw reservations
+    'experiments',  # aerpaw experiments
+    'projects',  # aerpaw projects
+    'profiles',  # aerpaw profiles
+    'cicd',  # aerpaw cicd
+    'user_groups',  # user_groups
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -81,6 +87,12 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/base'),
             os.path.join(BASE_DIR, 'templates/projects'),
             os.path.join(BASE_DIR, 'templates/users'),
+            os.path.join(BASE_DIR, 'templates/experiments'),
+            os.path.join(BASE_DIR, 'templates/reservations'),
+            os.path.join(BASE_DIR, 'templates/resources'),
+            os.path.join(BASE_DIR, 'templates/profiles'),
+            os.path.join(BASE_DIR, 'templates/cicd'),
+            os.path.join(BASE_DIR, 'templates/manage'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -171,13 +183,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 # placeholder for future static imports
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'base/static'),
 )
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default Django logging is WARNINGS+ to console
@@ -200,3 +212,16 @@ LOGGING = {
 
 # Auth user model (custom user account)
 AUTH_USER_MODEL = 'accounts.AerpawUser'
+
+# AERPAW Email 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_ADMIN_USER = os.getenv('EMAIL_ADMIN_USER')
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+# account for Django 3.2 (Warning models.W042)
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

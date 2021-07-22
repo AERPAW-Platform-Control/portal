@@ -17,35 +17,63 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             {% if user.is_authenticated %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'projects' %}">Projects</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'home' %}">Resources</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="{% url 'home' %}" id="navbarDropdown" role="button" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
-                    Experiments
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="{% url 'home' %}">Workspace</a>
-                    <a class="dropdown-item" href="{% url 'home' %}">Monitoring</a>
-                </div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'home' %}">User Profile</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-            </li>
-            {% else %}
-            <ul class="navbar-nav ml-auto ns-navbar pull-right">
-                <li class="nav-item {{ login_page }}">
-                    <a class="nav-link" href="{% url 'login' %}">
-                        <i class="fa fa-fw fa-sign-in"></i> Login</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'projects' %}">Projects</a>
                 </li>
-            </ul>
+                <!-- TODO: expose CI/CD link only to ADMIN or OPERATOR level users -->
+                {% if user.is_resource_manager or user.is_site_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>
+                    </li>
+                {% endif %}
+                <!-- TODO: end of todo -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'resources' %}">Resources</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        Experiments
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'experiments' %}">Workspace</a>
+                        <a class="dropdown-item" href="{% url 'profiles' %}">Experiment Definition</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        Accounts
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{% url 'profile' %}">User Profile</a>
+                        <a class="dropdown-item" href="{% url 'request_roles' %}">Request Roles</a>
+                        {#                        <a class="dropdown-item" href="{% url 'signup' %}">User Signup</a>#}
+                        <a class="dropdown-item" href="{% url 'credential' %}">Credential</a>
+                    </div>
+                </li>
+                {% if user.is_user_manager or user.is_site_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false">
+                            User Management
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{% url 'user_groups' %}">All User Roles</a>
+                            <a class="dropdown-item" href="{% url 'user_requests' %}">Role Requests</a>
+                        </div>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout: {{ user.display_name }}</a>
+                </li>
+            {% else %}
+                <ul class="navbar-nav ml-auto ns-navbar pull-right">
+                    <li class="nav-item {{ login_page }}">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="fa fa-fw fa-sign-in"></i> Login</a>
+                    </li>
+                </ul>
             {% endif %}
         </ul>
     </div>

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Update: {{ resource_name }}
+{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h2>Update Resource</h2>
+            <form method="POST" class="form-group">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="btn btn-success mr-2" type="submit" value="Save"/>
+                <button class="btn btn-secondary mr-2">
+                    <a href="{% url 'resource_detail' resource_uuid=resource_uuid %}" class="unlink">Cancel</a>
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in or are not authorized to view this page</p>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,79 +1,87 @@
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from accounts.models import AerpawUser
 from .models import Project
 
 
 class ProjectCreateForm(forms.ModelForm):
-    name = forms.CharField(
-        widget=forms.TextInput(attrs={'size': 60}),
-        required=True,
-        label='Project Name',
-    )
-
-    description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
-        required=False,
-        label='Project Description',
-    )
-
-    principal_investigator = forms.ModelChoiceField(
-        queryset=AerpawUser.objects.order_by('oidc_claim_name'),
-        required=True,
-        initial=0,
-        widget=forms.Select(),
-        label='Principal Investigator',
-    )
-
-    project_members = forms.ModelMultipleChoiceField(
-        queryset=AerpawUser.objects.order_by('oidc_claim_name'),
-        required=False,
-        widget=forms.SelectMultiple(),
-        label='Project Members',
-    )
-
     class Meta:
         model = Project
-        fields = (
+        fields = [
             'name',
             'description',
-            'principal_investigator',
-            'project_members',
-        )
+        ]
 
 
 class ProjectUpdateForm(forms.ModelForm):
-    name = forms.CharField(
-        widget=forms.TextInput(attrs={'size': 60}),
-        required=True,
-    )
-
-    description = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
-        required=False,
-        label='Project Description',
-    )
-
-    principal_investigator = forms.ModelChoiceField(
-        queryset=AerpawUser.objects.order_by('oidc_claim_name'),
-        required=True,
-        initial=0,
-        widget=forms.Select(),
-        label='Principal Investigator',
-    )
-
-    project_members = forms.ModelMultipleChoiceField(
-        queryset=AerpawUser.objects.order_by('oidc_claim_name'),
-        required=False,
-        widget=forms.SelectMultiple(),
-        label='Project Members',
-    )
-
     class Meta:
         model = Project
         fields = (
             'name',
-            'description',
-            'principal_investigator',
-            'project_members',
+            'description'
         )
+
+
+class ProjectUpdateMembersForm(forms.ModelForm):
+    project_members = forms.ModelMultipleChoiceField(
+        queryset=AerpawUser.objects.all().exclude(username='admin'),
+        widget=FilteredSelectMultiple("Members", is_stacked=False),
+        required=False
+    )
+
+    class Media:
+        extend = False
+        css = {
+            'all': [
+                'admin/css/widgets.css'
+            ]
+        }
+        js = (
+            'js/django_global.js',
+            'admin/js/jquery.init.js',
+            'admin/js/core.js',
+            'admin/js/prepopulate_init.js',
+            'admin/js/prepopulate.js',
+            'admin/js/SelectBox.js',
+            'admin/js/SelectFilter2.js',
+            'admin/js/admin/RelatedObjectLookups.js',
+        )
+
+    class Meta:
+        model = Project
+        fields = [
+            'project_members'
+        ]
+
+
+class ProjectUpdateOwnersForm(forms.ModelForm):
+    project_owners = forms.ModelMultipleChoiceField(
+        queryset=AerpawUser.objects.all().exclude(username='admin'),
+        widget=FilteredSelectMultiple("Members", is_stacked=False),
+        required=False
+    )
+
+    class Media:
+        extend = False
+        css = {
+            'all': [
+                'admin/css/widgets.css'
+            ]
+        }
+        js = (
+            'js/django_global.js',
+            'admin/js/jquery.init.js',
+            'admin/js/core.js',
+            'admin/js/prepopulate_init.js',
+            'admin/js/prepopulate.js',
+            'admin/js/SelectBox.js',
+            'admin/js/SelectFilter2.js',
+            'admin/js/admin/RelatedObjectLookups.js',
+        )
+
+    class Meta:
+        model = Project
+        fields = [
+            'project_owners'
+        ]

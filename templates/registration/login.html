@@ -3,20 +3,20 @@
 {% block title %}Log In{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-<p>Current user: {{ user.email }}</p>
-<form action="{% url 'oidc_logout' %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="logout">
-</form>
-{% else %}
-<br/>
-<p>
-    This site uses CILogon to authenticate user identity:
-    <a href="{% url 'oidc_authentication_init' %}">
-        <img style="border-style:none; vertical-align:middle"
-             src="https://cilogon.org/images/cilogon-logon-48-w.png"
-             alt=""></a>
-</p>
-{% endif %}
+    {% if user.is_authenticated %}
+        <p>Current user: {{ user.email }}</p>
+        <form action="{% url 'oidc_logout' %}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="logout">
+        </form>
+    {% else %}
+        <br/>
+        <p>
+            This site uses CILogon to authenticate user identity:
+            <a href="{% url 'oidc_authentication_init' %}">
+                <img style="border-style:none; vertical-align:middle"
+                     src="https://cilogon.org/images/cilogon-logon-48-w.png"
+                     alt=""></a>
+        </p>
+    {% endif %}
 {% endblock %}
