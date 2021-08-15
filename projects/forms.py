@@ -4,6 +4,11 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from accounts.models import AerpawUser
 from .models import Project
 
+JOIN_CHOICES = (
+        ("1", "Project Member"),
+        ("2", "Project Owner"),
+    )
+
 
 class ProjectCreateForm(forms.ModelForm):
     class Meta:
@@ -11,6 +16,7 @@ class ProjectCreateForm(forms.ModelForm):
         fields = [
             'name',
             'description',
+            'is_public'
         ]
 
 
@@ -19,8 +25,17 @@ class ProjectUpdateForm(forms.ModelForm):
         model = Project
         fields = (
             'name',
-            'description'
+            'description',
+            'is_public'
         )
+
+
+class ProjectJoinForm(forms.Form):
+    member_type = forms.ChoiceField(
+        choices=JOIN_CHOICES,
+        label='Request to be a'
+    )
+    message = forms.CharField(widget=forms.Textarea, required=True)
 
 
 class ProjectUpdateMembersForm(forms.ModelForm):

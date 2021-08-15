@@ -15,6 +15,10 @@
                     <td>{{ project.description }}</td>
                 </tr>
                 <tr>
+                    <td>Is Public?</td>
+                    <td>{{ project.is_public }}</td>
+                </tr>
+                <tr>
                     <td>Experiments</td>
                     <td>
                         {% for experiment in experiments %}
@@ -32,32 +36,33 @@
                         </button>
                     </td>
                 </tr>
-                <tr>
-                    <td>CI/CD</td>
-
-                    <td>
-                        {% if cicd.name %}
-                            <a href="{% url 'cicd_detail' cicd.uuid %}" class="unlink" style="color: dodgerblue">
-                            {{ cicd.name }}
-                        {% else %}
-                            Not Created
-                        {% endif %}
-                        </a>
-                    </td>
-
-                    {% if not cicd.name %}
-                        {% if is_pc or is_po or is_site_admin %}
-                            <td>
-                                <button class="btn btn-success mr-2">
-                                    <a href="{% url 'cicd_create' %}?project_uuid={{ project.uuid }}"
-                                       class="unlink">
-                                        Create CI/CD
-                                    </a>
-                                </button>
-                            </td>
-                        {% endif %}
-                    {% endif %}
-                </tr>
+                <!-- RM_CICD -->
+{#                <tr>#}
+{#                    <td>CI/CD</td>#}
+{##}
+{#                    <td>#}
+{#                        {% if cicd.name %}#}
+{#                            <a href="{% url 'cicd_detail' cicd.uuid %}" class="unlink" style="color: dodgerblue">#}
+{#                            {{ cicd.name }}#}
+{#                        {% else %}#}
+{#                            Not Created#}
+{#                        {% endif %}#}
+{#                        </a>#}
+{#                    </td>#}
+{##}
+{#                    {% if not cicd.name %}#}
+{#                        {% if is_pc or is_po or is_site_admin %}#}
+{#                            <td>#}
+{#                                <button class="btn btn-success mr-2">#}
+{#                                    <a href="{% url 'cicd_create' %}?project_uuid={{ project.uuid }}"#}
+{#                                       class="unlink">#}
+{#                                        Create CI/CD#}
+{#                                    </a>#}
+{#                                </button>#}
+{#                            </td>#}
+{#                        {% endif %}#}
+{#                    {% endif %}#}
+{#                </tr>#}
                 <tr>
                     <td>Project Creator</td>
                     <td>{{ project.project_creator }}</td>

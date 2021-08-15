@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'experiments',  # aerpaw experiments
     'projects',  # aerpaw projects
     'profiles',  # aerpaw profiles
-    'cicd',  # aerpaw cicd
+    # 'cicd',  # aerpaw cicd (RM_CICD: Deactivate until further notice 8/15/2021)
     'user_groups',  # user_groups
 ]
 
@@ -212,6 +212,9 @@ LOGGING = {
 
 # Auth user model (custom user account)
 AUTH_USER_MODEL = 'accounts.AerpawUser'
+
+# Django running behind Nginx reverse proxy
+USE_X_FORWARDED_HOST = True
 
 # AERPAW Email 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

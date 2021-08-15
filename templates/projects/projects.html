@@ -49,27 +49,29 @@
                     <th>Last Modified</th>
                 </tr>
                 {% for project in other_projects %}
-                    <tr>
-                        <td>
-                            {% if user.is_superuser or user.is_site_admin %}
-                                <a href="{% url 'project_detail' project_uuid=project.uuid %}">
+                    {% if project.is_public or user.is_superuser or user.is_site_admin %}
+                        <tr>
+                            <td>
+                                {% if user.is_superuser or user.is_site_admin %}
+                                    <a href="{% url 'project_detail' project_uuid=project.uuid %}">
+                                        {{ project.name }}
+                                    </a>
+                                {% else %}
                                     {{ project.name }}
-                                </a>
-                            {% else %}
-                                {{ project.name }}
-                            {% endif %}
-                        </td>
-                        <td>{{ project.description }}</td>
-                        <td>{{ project.project_creator }}</td>
-                        <td>{{ project.created_date }}</td>
-                        <td>{{ project.modified_date }}</td>
-                        <td>
-                            <!-- TODO: add request to join code -->
-                            <button class="btn btn-info mr-2" disabled>
-                                <a href="#" class="unlink">Join</a>
-                            </button>
-                        </td>
-                    </tr>
+                                {% endif %}
+                            </td>
+                            <td>{{ project.description }}</td>
+                            <td>{{ project.project_creator }}</td>
+                            <td>{{ project.created_date }}</td>
+                            <td>{{ project.modified_date }}</td>
+                            <td>
+                                <!-- TODO: add request to join code -->
+                                <button class="btn btn-info mr-2">
+                                    <a href="{% url 'project_join' project_uuid=project.uuid %}" class="unlink">Join</a>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
             </table>
         </div>
