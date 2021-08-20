@@ -20,9 +20,15 @@ def create_new_project(request, form):
     project.name = form.data.getlist('name')[0]
     try:
         project.description = form.data.getlist('description')[0]
-    except ValueError as e:
+    except IndexError as e:
         print(e)
         project.description = None
+    try:
+        if form.data.getlist('is_public')[0]:
+            project.is_public = True
+    except IndexError as e:
+        print(e)
+        project.is_public = False
 
     project.project_creator = request.user
     project.created_by = request.user
@@ -102,9 +108,15 @@ def update_existing_project(request, project, form):
     project.name = form.data.getlist('name')[0]
     try:
         project.description = form.data.getlist('description')[0]
-    except ValueError as e:
+    except IndexError as e:
         print(e)
         project.description = None
+    try:
+        if form.data.getlist('is_public')[0]:
+            project.is_public = True
+    except IndexError as e:
+        print(e)
+        project.is_public = False
 
     project.save()
 

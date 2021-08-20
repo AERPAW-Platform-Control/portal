@@ -12,9 +12,13 @@
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
+                <p>
+                    NOTE: Projects default to being <b>private</b> unless "Is public" is marked
+        </p>
                 <input class="btn btn-success mr-2" type="submit" value="Save"/>
                 <button class="btn btn-secondary" onclick="history.back();">Cancel</button>
             </form>
+
         </div>
     {% else %}
         <div class="container">
