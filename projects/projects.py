@@ -132,7 +132,6 @@ def get_project_list(request):
     :param request:
     :return:
     """
-    print(request.user)
     my_projects = Project.objects.filter(
         Q(project_creator=request.user) |
         Q(project_owners__in=[request.user]) |

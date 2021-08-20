@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -8,6 +8,7 @@ from django.utils import timezone
 from .forms import ProjectCreateForm, ProjectUpdateForm, ProjectUpdateMembersForm, ProjectUpdateOwnersForm, \
     ProjectJoinForm, JOIN_CHOICES
 from .models import Project
+from usercomms.models import Usercomms
 from .projects import create_new_project, get_project_list, update_existing_project, delete_existing_project
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -91,16 +92,49 @@ def project_join(request, project_uuid):
     else:
         form = ProjectJoinForm(request.POST)
         if form.is_valid():
-            project_url = 'https://' + str(request.get_host()) + '/projects/' + str(project_uuid)
-            email_subject = '[AERPAW] Request to join project ' + str(project.name) + ' as ' + \
-                      str(dict(JOIN_CHOICES)[form.data['member_type']])
-            email_from = settings.EMAIL_HOST_USER
+            email_uuid = uuid4()
+            reference_url = 'https://' + str(request.get_host()) + '/projects/' + str(project_uuid)
+            member_type = str(dict(JOIN_CHOICES)[form.data['member_type']])
+            reference_note = 'Join project ' + str(project.name) + ' as ' + member_type
+            subject = '[AERPAW] Request to join project ' + str(project.name) + ' as ' + member_type
+            email_sender = settings.EMAIL_HOST_USER
             email_body = 'FROM: ' + request.user.display_name + \
-                         '\r\n\r\nURL: ' + project_url + \
+                         '\r\nREQUEST: ' + reference_note + \
+                         '\r\n\r\nURL: ' + reference_url + \
                          '\r\n\r\nMESSAGE: ' + form.cleaned_data['message']
-            email_recipients = ['mjstealey@gmail.com']
+            body = 'FROM: ' + request.user.display_name + \
+                   '\r\nREQUEST: Join project ' + str(project.name) + ' as ' + member_type + \
+                   '\r\n\r\nMESSAGE: ' + form.cleaned_data['message']
+            receivers = [project.project_creator]
+            receivers_email = [project.project_creator.email]
+            project_owners = project.project_owners.order_by('username')
+            for po in project_owners:
+                receivers.append(po)
+                receivers_email.append(po.email)
+            receivers = list(set(receivers))
+            receivers_email = list(set(receivers_email))
             try:
-                send_mail(email_subject, email_body, email_from, email_recipients)
+                send_mail(subject, email_body, email_sender, receivers_email)
+                # Sender
+                created_by = request.user
+                created_date = timezone.now()
+                uc = Usercomms( uuid=email_uuid, subject=subject, body=body, sender=created_by,
+                                reference_url=None, reference_note=None, reference_user=created_by,
+                                created_by=created_by, created_date=created_date)
+                uc.save()
+                for rc in receivers:
+                    uc.receivers.add(rc)
+                uc.save()
+                # Receivers
+                for rc in receivers:
+                    uc = Usercomms(uuid=email_uuid, subject=subject, body=email_body, sender=created_by,
+                                   reference_url=reference_url, reference_note=reference_note, reference_user=rc,
+                                   created_by=created_by, created_date=created_date)
+                    uc.save()
+                    for inner_rc in receivers:
+                        uc.receivers.add(inner_rc)
+                    uc.save()
+
                 messages.info(request, 'Success! Request to join project: ' + str(project.name) + ' has been sent')
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')

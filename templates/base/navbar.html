@@ -43,10 +43,11 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false">
-                        Accounts
+                        Account
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url 'profile' %}">User Profile</a>
+                        <a class="dropdown-item" href="{% url 'usercomms' %}">Messages</a>
                         <a class="dropdown-item" href="{% url 'request_roles' %}">Request Roles</a>
                         {#                        <a class="dropdown-item" href="{% url 'signup' %}">User Signup</a>#}
                         <a class="dropdown-item" href="{% url 'credential' %}">Credential</a>

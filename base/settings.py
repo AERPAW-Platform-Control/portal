@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'profiles',  # aerpaw profiles
     # 'cicd',  # aerpaw cicd (RM_CICD: Deactivate until further notice 8/15/2021)
     'user_groups',  # user_groups
+    'usercomms',  # aerpaw user communications
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -91,8 +92,9 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/reservations'),
             os.path.join(BASE_DIR, 'templates/resources'),
             os.path.join(BASE_DIR, 'templates/profiles'),
-            os.path.join(BASE_DIR, 'templates/cicd'),
+            # os.path.join(BASE_DIR, 'templates/cicd'),
             os.path.join(BASE_DIR, 'templates/manage'),
+            os.path.join(BASE_DIR, 'templates/usercomms'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
