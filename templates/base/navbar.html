@@ -20,13 +20,13 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'projects' %}">Projects</a>
                 </li>
-                <!-- TODO: expose CI/CD link only to ADMIN or OPERATOR level users -->
-                {% if user.is_resource_manager or user.is_site_admin %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>
-                    </li>
-                {% endif %}
-                <!-- TODO: end of todo -->
+                <!-- RM_CICD -->
+{#                {% if user.is_resource_manager or user.is_site_admin %}#}
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>#}
+{#                    </li>#}
+{#                {% endif %}#}
+                <!-- RM_CICD -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'resources' %}">Resources</a>
                 </li>
@@ -43,10 +43,11 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false">
-                        Accounts
+                        Account
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{% url 'profile' %}">User Profile</a>
+                        <a class="dropdown-item" href="{% url 'usercomms' %}">Messages</a>
                         <a class="dropdown-item" href="{% url 'request_roles' %}">Request Roles</a>
                         {#                        <a class="dropdown-item" href="{% url 'signup' %}">User Signup</a>#}
                         <a class="dropdown-item" href="{% url 'credential' %}">Credential</a>

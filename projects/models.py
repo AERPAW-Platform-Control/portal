@@ -25,6 +25,7 @@ class Project(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField()
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    is_public = models.BooleanField(default=False)
     project_creator = models.ForeignKey(
         AerpawUser, related_name='project_creator', on_delete=models.CASCADE
     )
