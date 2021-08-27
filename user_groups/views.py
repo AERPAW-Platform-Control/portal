@@ -12,6 +12,7 @@ from django.utils import timezone
 from accounts.models import AerpawUser, AerpawRoleRequest
 from usercomms.models import Usercomms
 from .templatetags.user_groups import role_name
+from usercomms.usercomms import portal_mail
 
 
 @login_required
@@ -71,48 +72,26 @@ def user_requests(request):
         role_request.is_completed = True
         role_request.save()
         # TODO: email
-        email_uuid = uuid4()
-        reference_note = 'Add role ' + r_name
-        reference_url = 'https://' + str(request.get_host()) + '/manage/user_requests'
         if is_approved:
-            subject = '[AERPAW] Request to add role ' + r_name + ' is APPROVED'
+            subject = '[AERPAW] User: ' + user_obj.display_name + ' requested role: ' + r_name + ' has been APPROVED'
         else:
-            subject = '[AERPAW] Request to add role ' + r_name + ' is DENIED'
-        email_sender = settings.EMAIL_HOST_USER
-        body = 'FROM: ' + request.user.display_name + \
-               '\r\nREQUEST: ' + reference_note + \
-               '\r\n\r\nMESSAGE: ' + notes
-        email_body = 'FROM: ' + request.user.display_name + \
-                     '\r\nREQUEST: ' + reference_note + \
-                     '\r\n\r\nURL: ' + reference_url + \
-                     '\r\n\r\nMESSAGE: ' + notes
+            subject = '[AERPAW] User: ' + user_obj.display_name + ' requested role: ' + r_name + ' has been DENIED'
+        body_message = notes
+        sender = AerpawUser.objects.get(id=request.user.id)
         receivers = [user_obj]
-        receivers_email = [user_obj.email]
+        user_managers = AerpawUser.objects.filter(groups__name='user_manager')
+        for um in user_managers:
+            receivers.append(um)
+        receivers.remove(sender)
+        reference_note = 'Add role ' + r_name
+        reference_url = None
         try:
-            send_mail(subject, body, email_sender, receivers_email)
-            # Sender
-            created_by = request.user
-            created_date = timezone.now()
-            uc = Usercomms(uuid=email_uuid, subject=subject, body=email_body, sender=created_by,
-                           reference_url=None, reference_note=None, reference_user=created_by,
-                           created_by=created_by, created_date=created_date)
-            uc.save()
-            for rc in receivers:
-                uc.receivers.add(rc)
-            uc.save()
-            # Receivers
-            for rc in receivers:
-                uc = Usercomms(uuid=email_uuid, subject=subject, body=body, sender=created_by,
-                               reference_url=reference_url, reference_note=reference_note, reference_user=rc,
-                               created_by=created_by, created_date=created_date)
-                uc.save()
-                for inner_rc in receivers:
-                    uc.receivers.add(inner_rc)
-                uc.save()
+            portal_mail(subject=subject, body_message=body_message, sender=sender, receivers=receivers,
+                        reference_note=reference_note, reference_url=reference_url)
             if is_approved:
-                messages.info(request, 'Success! Role request: ' + r_name + ' has been APPROVED')
+                messages.info(request, 'Success! APPROVED: Request to add role: ' + r_name + ' has been sent')
             else:
-                messages.info(request, 'Success! Role request: ' + r_name + ' has been DENIED')
+                messages.info(request, 'Success! DENIED: Request to add role: ' + r_name + ' has been sent')
         except BadHeaderError:
             return HttpResponse('Invalid header found.')
 

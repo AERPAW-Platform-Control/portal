@@ -52,3 +52,29 @@ class Project(models.Model):
 
     def __str__(self):
         return u'{0}'.format(self.name)
+
+
+class ProjectMembershipRequest(models.Model):
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    project_uuid = models.CharField(max_length=255)
+    requested_by = models.ForeignKey(
+        AerpawUser, related_name='project_membership_requested_by', on_delete=models.CASCADE, null=True, blank=True
+    )
+    message = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    is_completed = models.BooleanField(default=False)
+    notes = models.TextField()
+    member_type = models.CharField(
+        max_length=64,
+    )
+    created_by = models.ForeignKey(
+        AerpawUser, related_name='project_membership_request_created_by', on_delete=models.CASCADE, null=True, blank=True
+    )
+    created_date = models.DateTimeField(default=timezone.now)
+    modified_by = models.ForeignKey(
+        AerpawUser, related_name='project_membership_request_modified_by', on_delete=models.CASCADE, null=True, blank=True
+    )
+    modified_date = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.requested_by

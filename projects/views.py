@@ -1,20 +1,21 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
+from django.core.mail import BadHeaderError
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
 from django.utils import timezone
 
+from accounts.models import AerpawUser
+from usercomms.usercomms import portal_mail
 # from cicd.models import Cicd
 from .forms import ProjectCreateForm, ProjectUpdateForm, ProjectUpdateMembersForm, ProjectUpdateOwnersForm, \
     ProjectJoinForm, JOIN_CHOICES
-from .models import Project
-from usercomms.models import Usercomms
-from .projects import create_new_project, get_project_list, update_existing_project, delete_existing_project
-from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
-from django.conf import settings
-from django.contrib import messages
+from .models import Project, ProjectMembershipRequest
+from .projects import create_new_project, get_project_list, update_existing_project, delete_existing_project, \
+    create_new_project_membership_request
 
 PI_message = "Please email the admin to become a PI first!"
 
@@ -56,6 +57,56 @@ def project_detail(request, project_uuid):
     """
     # get project
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
+    # check for project join request approval / denial
+    if request.method == "POST":
+        for key in request.POST.keys():
+            if not key == 'csrfmiddlewaretoken':
+                parse_key = key.rsplit('_', 1)
+                if parse_key[0] != 'notes':
+                    member_type = parse_key[0]
+                    proj_mem_request = ProjectMembershipRequest.objects.get(id=int(parse_key[1]))
+                    notes = request.POST.get('notes_' + str(parse_key[1]))
+                    if request.POST.get(key) == 'Approve':
+                        is_approved = True
+                    else:
+                        is_approved = False
+        # get user_obj
+        user_obj = AerpawUser.objects.get(id=int(proj_mem_request.requested_by_id))
+        if str(is_approved) == 'True':
+            if member_type == 'MEMBER':
+                project.project_members.add(user_obj)
+            elif member_type == 'OWNER':
+                project.project_owners.add(user_obj)
+        else:
+            if member_type == 'MEMBER':
+                project.project_members.remove(user_obj)
+            elif member_type == 'OWNER':
+                project.project_owners.remove(user_obj)
+        project.save()
+        proj_mem_request.notes = notes
+        proj_mem_request.is_approved = is_approved
+        proj_mem_request.is_completed = True
+        proj_mem_request.save()
+        if is_approved:
+            subject = '[AERPAW] User: ' + user_obj.display_name + ' request to join project: ' + project.name + ' has been APPROVED'
+            reference_url = 'https://' + str(request.get_host()) + '/projects/' + str(project_uuid)
+        else:
+            subject = '[AERPAW] User: ' + user_obj.display_name + ' request to join project: ' + project.name + ' has been DENIED'
+            reference_url = None
+        body_message = notes
+        sender = AerpawUser.objects.get(id=request.user.id)
+        receivers = [user_obj]
+        reference_note = 'Join project ' + project.name + ' as ' + member_type
+        try:
+            portal_mail(subject=subject, body_message=body_message, sender=sender, receivers=receivers,
+                        reference_note=reference_note, reference_url=reference_url)
+            if is_approved:
+                messages.info(request, 'Success! APPROVED: Request to join project: ' + project.name + ' has been sent')
+            else:
+                messages.info(request, 'Success! DENIED: Request to join project: ' + project.name + ' has been sent')
+        except BadHeaderError:
+            return HttpResponse('Invalid header found.')
+
     # set user permissions
     is_pc = (project.project_creator == request.user)
     is_po = (request.user in project.project_owners.all())
@@ -71,10 +122,11 @@ def project_detail(request, project_uuid):
     project_members = project.project_members.order_by('username')
     project_owners = project.project_owners.order_by('username')
     project_experiments = project.experiment_of_project
-    # TODO: update ci/cd links
+    project_requests = ProjectMembershipRequest.objects.filter(project_uuid=project_uuid, is_completed=False).order_by(
+        '-created_date')
     return render(request, 'project_detail.html',
                   {'project': project, 'project_members': project_members, 'project_owners': project_owners,
-                   'is_pc': is_pc, 'is_po': is_po, 'is_pm': is_pm,
+                   'is_pc': is_pc, 'is_po': is_po, 'is_pm': is_pm, 'project_requests': project_requests,
                    'experiments': project_experiments.all()})
 
 
@@ -92,49 +144,25 @@ def project_join(request, project_uuid):
     else:
         form = ProjectJoinForm(request.POST)
         if form.is_valid():
-            email_uuid = uuid4()
+            sender = get_object_or_404(AerpawUser, id=request.user.id)
             reference_url = 'https://' + str(request.get_host()) + '/projects/' + str(project_uuid)
-            member_type = str(dict(JOIN_CHOICES)[form.data['member_type']])
+            if str(dict(JOIN_CHOICES)[form.data['member_type']]) == 'Project Member':
+                member_type = 'MEMBER'
+            else:
+                member_type = 'OWNER'
+            body_message = form.cleaned_data['message']
             reference_note = 'Join project ' + str(project.name) + ' as ' + member_type
-            subject = '[AERPAW] Request to join project ' + str(project.name) + ' as ' + member_type
-            email_sender = settings.EMAIL_HOST_USER
-            email_body = 'FROM: ' + request.user.display_name + \
-                         '\r\nREQUEST: ' + reference_note + \
-                         '\r\n\r\nURL: ' + reference_url + \
-                         '\r\n\r\nMESSAGE: ' + form.cleaned_data['message']
-            body = 'FROM: ' + request.user.display_name + \
-                   '\r\nREQUEST: Join project ' + str(project.name) + ' as ' + member_type + \
-                   '\r\n\r\nMESSAGE: ' + form.cleaned_data['message']
+            subject = '[AERPAW] User: ' + sender.display_name + ' has requested to join project: ' + \
+                      project.name + ' as ' + member_type
             receivers = [project.project_creator]
-            receivers_email = [project.project_creator.email]
             project_owners = project.project_owners.order_by('username')
             for po in project_owners:
                 receivers.append(po)
-                receivers_email.append(po.email)
             receivers = list(set(receivers))
-            receivers_email = list(set(receivers_email))
             try:
-                send_mail(subject, email_body, email_sender, receivers_email)
-                # Sender
-                created_by = request.user
-                created_date = timezone.now()
-                uc = Usercomms( uuid=email_uuid, subject=subject, body=body, sender=created_by,
-                                reference_url=None, reference_note=None, reference_user=created_by,
-                                created_by=created_by, created_date=created_date)
-                uc.save()
-                for rc in receivers:
-                    uc.receivers.add(rc)
-                uc.save()
-                # Receivers
-                for rc in receivers:
-                    uc = Usercomms(uuid=email_uuid, subject=subject, body=email_body, sender=created_by,
-                                   reference_url=reference_url, reference_note=reference_note, reference_user=rc,
-                                   created_by=created_by, created_date=created_date)
-                    uc.save()
-                    for inner_rc in receivers:
-                        uc.receivers.add(inner_rc)
-                    uc.save()
-
+                create_new_project_membership_request(request, project_uuid, member_type, body_message)
+                portal_mail(subject=subject, body_message=body_message, sender=sender, receivers=receivers,
+                            reference_note=reference_note, reference_url=reference_url)
                 messages.info(request, 'Success! Request to join project: ' + str(project.name) + ' has been sent')
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
@@ -172,17 +200,46 @@ def project_update_members(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
-
+    project_members_orig = list(project.project_members.all())
     if request.method == "POST":
         form = ProjectUpdateMembersForm(request.POST, instance=project)
         if form.is_valid():
-            project_members = form.cleaned_data.get('project_members')
-            project.project_members.through.objects.filter(project_id=project.id).delete()
-            for member in project_members:
+            project_members = list(form.cleaned_data.get('project_members'))
+            project_members_added = list(set(project_members).difference(set(project_members_orig)))
+            project_members_removed = list(set(project_members_orig).difference(set(project_members)))
+            # update members
+            for member in project_members_added:
                 project.project_members.add(member)
+            for member in project_members_removed:
+                project.project_members.remove(member)
             project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
+            # send usercomms
+            sender = get_object_or_404(AerpawUser, id=request.user.id)
+            reference_url = 'https://' + str(request.get_host()) + '/projects/' + str(project_uuid)
+            try:
+                if project_members_added:
+                    reference_note = 'Added to project ' + str(project.name) + ' as MEMBER'
+                    subject = '[AERPAW] User: ' + sender.display_name + ' has ADDED you to project: ' + \
+                              project.name + ' as MEMBER'
+                    body_message = 'A project owner has added you to ' + project.name + \
+                                   '. If you believe this to be in error please contact the project owner direclty'
+                    portal_mail(subject=subject, body_message=body_message, sender=sender,
+                                receivers=project_members_added,
+                                reference_note=reference_note, reference_url=reference_url)
+                if project_members_removed:
+                    reference_note = 'Removed from project ' + str(project.name) + ' as MEMBER'
+                    subject = '[AERPAW] User: ' + sender.display_name + ' has REMOVED you from project: ' + \
+                              project.name + ' as MEMBER'
+                    body_message = 'A project owner has removed you from ' + project.name + \
+                                   '. If you believe this to be in error please contact the project owner directly'
+                    portal_mail(subject=subject, body_message=body_message, sender=sender,
+                                receivers=project_members_removed,
+                                reference_note=reference_note, reference_url=None)
+                messages.info(request, 'Success! MEMBER changes for project: ' + str(project.name) + ' has been sent')
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
             return redirect('project_detail', project_uuid=str(project.uuid))
     else:
         form = ProjectUpdateMembersForm(instance=project)
@@ -200,17 +257,46 @@ def project_update_owners(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
-
+    project_owners_orig = list(project.project_owners.all())
     if request.method == "POST":
         form = ProjectUpdateOwnersForm(request.POST, instance=project)
         if form.is_valid():
-            project_owners = form.cleaned_data.get('project_owners')
-            project.project_owners.through.objects.filter(project_id=project.id).delete()
-            for member in project_owners:
-                project.project_owners.add(member)
+            project_owners = list(form.cleaned_data.get('project_owners'))
+            project_owners_added = list(set(project_owners).difference(set(project_owners_orig)))
+            project_owners_removed = list(set(project_owners_orig).difference(set(project_owners)))
+            # update members
+            for owner in project_owners_added:
+                project.project_owners.add(owner)
+            for owner in project_owners_removed:
+                project.project_owners.remove(owner)
             project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
+            # send usercomms
+            sender = get_object_or_404(AerpawUser, id=request.user.id)
+            reference_url = 'https://' + str(request.get_host()) + '/projects/' + str(project_uuid)
+            try:
+                if project_owners_added:
+                    reference_note = 'Added to project ' + str(project.name) + ' as OWNER'
+                    subject = '[AERPAW] User: ' + sender.display_name + ' has ADDED you to project: ' + \
+                              project.name + ' as OWNER'
+                    body_message = 'A project owner has added you to ' + project.name + \
+                                   '. If you believe this to be in error please contact the project owner direclty'
+                    portal_mail(subject=subject, body_message=body_message, sender=sender,
+                                receivers=project_owners_added,
+                                reference_note=reference_note, reference_url=reference_url)
+                if project_owners_removed:
+                    reference_note = 'Removed from project ' + str(project.name) + ' as OWNER'
+                    subject = '[AERPAW] User: ' + sender.display_name + ' has REMOVED you from project: ' + \
+                              project.name + ' as OWNER'
+                    body_message = 'A project owner has removed you from ' + project.name + \
+                                   '. If you believe this to be in error please contact the project owner directly'
+                    portal_mail(subject=subject, body_message=body_message, sender=sender,
+                                receivers=project_owners_removed,
+                                reference_note=reference_note, reference_url=None)
+                messages.info(request, 'Success! OWNER changes for project: ' + str(project.name) + ' has been sent')
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
             return redirect('project_detail', project_uuid=str(project.uuid))
     else:
         form = ProjectUpdateOwnersForm(instance=project)

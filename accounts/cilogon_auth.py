@@ -1,7 +1,15 @@
 import unicodedata
+from uuid import uuid4
 
+from django.conf import settings
+from django.core.mail import send_mail, BadHeaderError
+from django.http import HttpResponse
+from django.utils import timezone
+from usercomms.usercomms import portal_mail
+from usercomms.models import Usercomms
 from django.contrib.auth.models import Group
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+from django.contrib import messages
 
 
 def generate_username(oidc_claim_email):
@@ -64,6 +72,28 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         aug = Group.objects.get(name='aerpaw_user')
         user.groups.add(aug)
         user.save()
+
+        # send welcome email and set initial usercomm message
+        sender = settings.EMAIL_HOST_USER
+        reference_url = 'https://' + str(self.request.get_host()) + '/accounts/profile'
+        body_message = """
+Welcome to the AERPAW Portal
+        
+User manuals, tutorials, and other relevant documentation can be found at the following links; 
+please refer to relevant instructions before attempting to use this Portal.
+- AERPAW main website: https://www.aerpaw.org
+- AERPAW wiki: https://sites.google.com/ncsu.edu/aerpaw-wiki
+- AERPAW Use Policy: https://www.aerpaw.org
+"""
+        reference_note = 'New user signup for: ' + user.display_name
+        subject = '[AERPAW] Welcome ' + user.display_name + ' to the AERPAW portal!'
+        receivers = [user]
+        try:
+            portal_mail(subject=subject, body_message=body_message, sender=sender, receivers=receivers,
+                        reference_note=reference_note, reference_url=reference_url)
+            messages.info(self.request, 'Success! Welcome email to user: ' + user.display_name + ' has been sent')
+        except BadHeaderError:
+            return HttpResponse('Invalid header found.')
 
         return user
 
