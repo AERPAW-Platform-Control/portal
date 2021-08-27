@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated and user.is_user_manager or user.is_site_admin %}
+    {% if user.is_authenticated and user.is_site_admin %}
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
                 <h2>User Role Management</h2>

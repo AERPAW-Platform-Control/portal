@@ -21,11 +21,11 @@
                     <a class="nav-link" href="{% url 'projects' %}">Projects</a>
                 </li>
                 <!-- RM_CICD -->
-{#                {% if user.is_resource_manager or user.is_site_admin %}#}
-{#                    <li class="nav-item">#}
-{#                        <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>#}
-{#                    </li>#}
-{#                {% endif %}#}
+                {#                {% if user.is_resource_manager or user.is_site_admin %}#}
+                {#                    <li class="nav-item">#}
+                {#                        <a class="nav-link" href="{% url 'cicd' %}">CI/CD</a>#}
+                {#                    </li>#}
+                {#                {% endif %}#}
                 <!-- RM_CICD -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'resources' %}">Resources</a>
@@ -60,7 +60,9 @@
                             User Management
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{% url 'user_groups' %}">All User Roles</a>
+                            {% if user.is_site_admin %}
+                                <a class="dropdown-item" href="{% url 'user_groups' %}">All User Roles</a>
+                            {% endif %}
                             <a class="dropdown-item" href="{% url 'user_requests' %}">Role Requests</a>
                         </div>
                     </li>
