@@ -1,15 +1,13 @@
 import unicodedata
-from uuid import uuid4
 
 from django.conf import settings
-from django.core.mail import send_mail, BadHeaderError
-from django.http import HttpResponse
-from django.utils import timezone
-from usercomms.usercomms import portal_mail
-from usercomms.models import Usercomms
-from django.contrib.auth.models import Group
-from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from django.contrib import messages
+from django.contrib.auth.models import Group
+from django.core.mail import BadHeaderError
+from django.http import HttpResponse
+from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+
+from usercomms.usercomms import portal_mail
 
 
 def generate_username(oidc_claim_email):
@@ -83,7 +81,7 @@ User manuals, tutorials, and other relevant documentation can be found at the fo
 please refer to relevant instructions before attempting to use this Portal.
 - AERPAW main website: https://www.aerpaw.org
 - AERPAW wiki: https://sites.google.com/ncsu.edu/aerpaw-wiki
-- AERPAW Use Policy: https://www.aerpaw.org
+- AERPAW Acceptable Use Policy: https://sites.google.com/ncsu.edu/aerpaw-wiki/aerpaw-user-manual/2-experiment-web-portal/acceptable-use-policy-aup
 """
         reference_note = 'New user signup for: ' + user.display_name
         subject = '[AERPAW] Welcome ' + user.display_name + ' to the AERPAW portal!'
