@@ -144,8 +144,9 @@ class Experiment(models.Model):
     def idle(self):
         logger.warning("[{}] Experiment.state : {} -> {}".format(self.name, self.state, Experiment.STATE_IDLE))
 
-    deployment_bn = models.IntegerField(blank=True, null=True)
+    deployment_bn = models.IntegerField(blank=True, null=True) # not being used
     message = models.TextField(blank=True, null=True) # message from system/ops
+    submit_notes = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = 'AERPAW Experiment'

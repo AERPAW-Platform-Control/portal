@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 
+from usercomms.usercomms import portal_mail
 from .models import Experiment
 from profiles.profiles import *
 from resources.resources import *
@@ -143,25 +144,6 @@ def update_existing_experiment(request, experiment, form, prev_stage, prev_state
     return str(experiment.uuid)
 
 
-def send_email_to_admin(subject, message):
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [settings.EMAIL_ADMIN_USER]
-    operators = list(AerpawUser.objects.filter(groups__name='operator'))
-    for operator in operators:
-        recipient_list.append(operator.email)
-    logger.warning("send_email:\n" + subject)
-    logger.warning(message)
-    send_mail(subject, message, email_from, recipient_list)
-
-
-def send_email_to_user(subject, message, user):
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [user.email]
-    logger.warning("send_email to {}: {}\n".format(user.email, subject))
-    logger.warning(message)
-    send_mail(subject, message, email_from, recipient_list)
-
-
 def send_request_to_testbed(request, experiment):
     if is_emulab_stage(experiment.stage):
         return  # do nothing, this function is not for emulab
@@ -181,11 +163,21 @@ def send_request_to_testbed(request, experiment):
                   + "Experiment Name: {}\n".format(str(experiment)) \
                   + "Project: {}\n".format(experiment.project) \
                   + "User: {}\n\n".format(request.user.username)
+        if action == 'SUBMIT':
+            message += "Testbed Experiment Description: {}\n\n".format(experiment.submit_notes)
         if action == 'START' or action == 'SUBMIT':
             session_req = generate_experiment_session_request(request, experiment)
             message += "Experiment {} Session Request:\n{}\n".format(experiment.stage, session_req)
-        send_email_to_admin(subject, message)
 
+        receivers = []
+        operators = list(AerpawUser.objects.filter(groups__name='operator'))
+        for operator in operators:
+            receivers.append(operator)
+        logger.warning("send_email:\n" + subject)
+        logger.warning(message)
+        portal_mail(subject=subject, body_message=message, sender=request.user,
+                        receivers=receivers,
+                        reference_note=None, reference_url=None)
 
 def update_experiment_reservations(experiment, experiment_reservation_id_list):
     """

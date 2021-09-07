@@ -227,10 +227,18 @@ class ExperimentSubmitForm(forms.ModelForm):
         label='Submit to',
     )
 
+    submit_notes = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='Testbed Experiment Description\n',
+        #help_text='\nsuch as "The drone will take off at an altitude of 50m and then go west 300m, then return to launch and land."'
+    )
+
     class Meta:
         model = Experiment
         fields = (
             'stage',
+            'submit_notes'
         )
 
 

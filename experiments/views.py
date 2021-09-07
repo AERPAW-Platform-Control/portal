@@ -5,6 +5,7 @@ from uuid import UUID
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
+from usercomms.usercomms import portal_mail
 from .forms import *
 from .experiments import *
 import threading
@@ -173,6 +174,7 @@ def experiment_update_by_ops(request, experiment_uuid):
     if request.method == "POST":
         form = ExperimentUpdateByOpsForm(request.POST, instance=experiment)
         if form.is_valid():
+            experimenter = experiment.created_by # save first, otherwise soon overwritten
             experiment = form.save(commit=False)
             experiment_uuid = update_existing_experiment(request, experiment, form, prev_stage,
                                                          prev_state)
@@ -182,7 +184,14 @@ def experiment_update_by_ops(request, experiment_uuid):
                                + "Experiment Name: {}\n".format(str(experiment)) \
                                + "Project: {}\n\n".format(experiment.project) \
                                + "Notification/Message:\n{}\n".format(experiment.message)
-                send_email_to_user(subject, email_message, experiment.created_by)
+                receivers = [experimenter]
+                logger.warning("send_email:\n" + subject)
+                logger.warning(email_message)
+                logger.warning("receivers = {}\n".format(receivers))
+                portal_mail(subject=subject, body_message=email_message, sender=request.user,
+                                receivers=receivers,
+                                reference_note=None, reference_url=None)
+
             return redirect('experiment_detail', experiment_uuid=str(experiment.uuid))
 
     form = ExperimentUpdateByOpsForm(instance=experiment)
@@ -239,7 +248,7 @@ def experiment_delete(request, experiment_uuid):
 
 def experiment_initiate(request, experiment_uuid):
     """
-    render experiment initiate/stop page for the experiment
+    handles experiment initiate OR terminate depending on its state
 
     :param request:
     :param experiment_uuid:
@@ -254,7 +263,7 @@ def experiment_initiate(request, experiment_uuid):
             experiment.stage = 'Development'
             experiment.save()
         elif experiment.can_terminate():
-            # terminate
+            # we are going to terminate the development
             experiment_state_change(request, experiment, "terminating")
             experiment.stage = 'Idle'
             experiment.save()
