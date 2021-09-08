@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated and user.is_site_admin %}
+    {% if user.is_authenticated and user.is_aerpaw_user and user.is_user_manager or user.is_site_admin %}
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
                 <h2>User Role Management</h2>
@@ -19,10 +19,14 @@
                         <th>Email</th>
                         <th>is AERPAW User</th>
                         <th>can Create Projects</th>
-                        <th>can Manage Resources</th>
-                        <th>can Manage User Roles</th>
-                        <th>is Operator</th>
-                        <th>is Administrator</th>
+                        {% if user.is_site_admin %}
+                            <th>can Manage Resources</th>
+                            <th>can Manage User Roles</th>
+                            <th>is Operator</th>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            <th>is Administrator</th>
+                        {% endif %}
                     </tr>
                     {% for u in all_users %}
                         <tr>
@@ -47,42 +51,46 @@
                                        {% endif %}
                                 name="project_manager_{{ u.id }}" value={{ u.is_project_manager }}>
                             </td>
-                            <td style="text-align: center">
-                                <input type="submit"
-                                       class={% if u.is_resource_manager %}
-                                           "btn btn-success mr-2"
-                                       {% else %}
-                                           "btn btn-danger mr-2"
-                                       {% endif %}
-                                name="resource_manager_{{ u.id }}" value={{ u.is_resource_manager }}>
-                            </td>
-                            <td style="text-align: center">
-                                <input type="submit"
-                                       class={% if u.is_user_manager %}
-                                           "btn btn-success mr-2"
-                                       {% else %}
-                                           "btn btn-danger mr-2"
-                                       {% endif %}
-                                name="user_manager_{{ u.id }}" value={{ u.is_user_manager }}>
-                            </td>
-                            <td style="text-align: center">
-                                <input type="submit"
-                                       class={% if u.is_operator %}
-                                           "btn btn-success mr-2"
-                                       {% else %}
-                                           "btn btn-danger mr-2"
-                                       {% endif %}
-                                name="operator_{{ u.id }}" value={{ u.is_operator }}>
-                            </td>
-                            <td style="text-align: center">
-                                <input type="submit"
-                                       class={% if u.is_site_admin %}
-                                           "btn btn-success mr-2"
-                                       {% else %}
-                                           "btn btn-danger mr-2"
-                                       {% endif %}
-                                name="site_admin_{{ u.id }}" value={{ u.is_site_admin }}>
-                            </td>
+                            {% if user.is_site_admin %}
+                                <td style="text-align: center">
+                                    <input type="submit"
+                                           class={% if u.is_resource_manager %}
+                                               "btn btn-success mr-2"
+                                           {% else %}
+                                               "btn btn-danger mr-2"
+                                           {% endif %}
+                                    name="resource_manager_{{ u.id }}" value={{ u.is_resource_manager }}>
+                                </td>
+                                <td style="text-align: center">
+                                    <input type="submit"
+                                           class={% if u.is_user_manager %}
+                                               "btn btn-success mr-2"
+                                           {% else %}
+                                               "btn btn-danger mr-2"
+                                           {% endif %}
+                                    name="user_manager_{{ u.id }}" value={{ u.is_user_manager }}>
+                                </td>
+                                <td style="text-align: center">
+                                    <input type="submit"
+                                           class={% if u.is_operator %}
+                                               "btn btn-success mr-2"
+                                           {% else %}
+                                               "btn btn-danger mr-2"
+                                           {% endif %}
+                                    name="operator_{{ u.id }}" value={{ u.is_operator }}>
+                                </td>
+                            {% endif %}
+                            {% if user.is_superuser %}
+                                <td style="text-align: center">
+                                    <input type="submit"
+                                           class={% if u.is_site_admin %}
+                                               "btn btn-success mr-2"
+                                           {% else %}
+                                               "btn btn-danger mr-2"
+                                           {% endif %}
+                                    name="site_admin_{{ u.id }}" value={{ u.is_site_admin }}>
+                                </td>
+                            {% endif %}
                         </tr>
 
                     {% endfor %}

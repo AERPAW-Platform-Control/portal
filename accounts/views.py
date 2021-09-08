@@ -57,7 +57,12 @@ def request_roles(request):
             body_message = form.cleaned_data['purpose']
             sender = request.user
             receivers = []
-            user_managers = AerpawUser.objects.filter(groups__name='user_manager')
+            if role_request == 'is Administrator':
+                user_managers = AerpawUser.objects.filter(is_superuser=True).distinct()
+            elif role_request in ['is Operator', 'can Manage Resources', 'can Manage User Roles']:
+                user_managers = AerpawUser.objects.filter(groups__name__in=['site_admin']).distinct()
+            else:
+                user_managers = AerpawUser.objects.filter(groups__name__in=['site_admin', 'user_manager']).distinct()
             for um in user_managers:
                 receivers.append(um)
             reference_note = 'Add role ' + str(role_request)
