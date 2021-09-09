@@ -25,7 +25,7 @@ class AerpawUserRoleChoice(Enum):  # A subclass of Enum
     operator = 'is Operator'
     project_manager = 'can Create Projects'
     resource_manager = 'can Manage Resources'
-    user_manager = 'can Manager User Roles'
+    user_manager = 'can Manage User Roles'
     aerpaw_user = 'is AERPAW User'
 
     @classmethod

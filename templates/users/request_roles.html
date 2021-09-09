@@ -17,7 +17,9 @@
                 {{ form.purpose.label }}: {{ form.purpose }}
                 <br><br>
                 <input class="btn btn-success mr-2" type="submit" value="Save"/>
-                <button class="btn btn-secondary" onclick="history.back();">Cancel</button>
+                <button class="btn btn-secondary mr-2">
+                    <a href="{% url 'profile' %}" class="unlink">Back</a>
+                </button>
             </form>
         </div>
     {% else %}
