@@ -9,15 +9,15 @@
     {% if user.is_authenticated %}
         <div class="container">
             <h2>New Experiment Definition</h2>
-            <p style="color:red";>{{ msg }}</p>
-            <form method="POST" class="post-form">
+            <p style="color:red" ;>{{ msg }}</p>
+            <form id="create-profile" method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input class="btn btn-success mr-2" type="submit" value="Save"/>
-                <button class="btn btn-secondary mr-2">
-                    <a href="{% url 'profiles' %}" class="unlink">Back</a>
-                </button>
             </form>
+            <button class="btn btn-success mr-2" type="submit" form="create-profile" value="save">Save</button>
+            <button class="btn btn-secondary mr-2" value="cancel">
+                <a href="{% url 'profiles' %}" class="unlink">Back</a>
+            </button>
         </div>
     {% else %}
         <div class="container">

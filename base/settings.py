@@ -22,6 +22,7 @@ env_path = Path('.') / '.env'
 load_dotenv(verbose=True, dotenv_path=env_path)
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
