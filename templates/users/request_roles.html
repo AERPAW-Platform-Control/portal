@@ -9,16 +9,18 @@
     {% if user.is_authenticated %}
         <div class="container">
             <h2>Aerpaw Request Roles</h2>
-            <form method="POST" class="post-form">
+            <form id="request-role" method="POST" class="post-form">
                 {% csrf_token %}
                 <br>
                 {{ form.requested_role.label }}: {{ form.requested_role }}
                 <br><br>
                 {{ form.purpose.label }}: {{ form.purpose }}
                 <br><br>
-                <input class="btn btn-success mr-2" type="submit" value="Save"/>
-                <button class="btn btn-secondary" onclick="history.back();">Cancel</button>
             </form>
+            <button class="btn btn-success mr-2" type="submit" form="request-role" value="save">Save</button>
+            <button class="btn btn-secondary mr-2" value="cancel">
+                <a href="{% url 'profile' %}" class="unlink">Back</a>
+            </button>
         </div>
     {% else %}
         <div class="container">

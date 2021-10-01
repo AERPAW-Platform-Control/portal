@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_aerpaw_user %}
         <head>
             <meta charset="utf-8">
             <title>Resources</title>

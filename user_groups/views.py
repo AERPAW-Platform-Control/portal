@@ -1,18 +1,13 @@
-from uuid import uuid4
-
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.core.mail import send_mail, BadHeaderError
+from django.core.mail import BadHeaderError
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.utils import timezone
 
 from accounts.models import AerpawUser, AerpawRoleRequest
-from usercomms.models import Usercomms
-from .templatetags.user_groups import role_name
 from usercomms.usercomms import portal_mail
+from .templatetags.user_groups import role_name
 
 
 @login_required
@@ -46,6 +41,7 @@ def user_requests(request):
     :param request:
     :return:
     """
+    user_manager = AerpawUser.objects.get(id=request.user.id)
     if request.method == "POST":
         for key in request.POST.keys():
             if not key == 'csrfmiddlewaretoken':
@@ -77,7 +73,7 @@ def user_requests(request):
         else:
             subject = '[AERPAW] User: ' + user_obj.display_name + ' requested role: ' + r_name + ' has been DENIED'
         body_message = notes
-        sender = AerpawUser.objects.get(id=request.user.id)
+        sender = user_manager
         receivers = [user_obj]
         user_managers = AerpawUser.objects.filter(groups__name='user_manager')
         for um in user_managers:
@@ -94,7 +90,22 @@ def user_requests(request):
                 messages.info(request, 'Success! DENIED: Request to add role: ' + r_name + ' has been sent')
         except BadHeaderError:
             return HttpResponse('Invalid header found.')
-
-    open_u_reqs = AerpawRoleRequest.objects.filter(is_completed=False).order_by('-created_date')
-    closed_u_reqs = AerpawRoleRequest.objects.filter(is_completed=True).order_by('-created_date')
+    sa_set = ['site_admin']
+    um_set = ['site_admin', 'operator', 'user_manager', 'resource_manager']
+    if user_manager.is_superuser:
+        print('IS SUPERUSER')
+        open_u_reqs = AerpawRoleRequest.objects.filter(is_completed=False).order_by('-created_date')
+        closed_u_reqs = AerpawRoleRequest.objects.filter(is_completed=True).order_by('-created_date')
+    elif user_manager.is_site_admin():
+        print('IS SITE ADMIN')
+        open_u_reqs = AerpawRoleRequest.objects.filter(is_completed=False).exclude(requested_role__in=sa_set).order_by(
+            '-created_date')
+        closed_u_reqs = AerpawRoleRequest.objects.filter(is_completed=True).exclude(requested_role__in=sa_set).order_by(
+            '-created_date')
+    else:
+        print('IS USER MANAGER')
+        open_u_reqs = AerpawRoleRequest.objects.filter(is_completed=False).exclude(requested_role__in=um_set).order_by(
+            '-created_date')
+        closed_u_reqs = AerpawRoleRequest.objects.filter(is_completed=True).exclude(requested_role__in=um_set).order_by(
+            '-created_date')
     return render(request, 'user_requests.html', {'ou_reqs': open_u_reqs, 'cu_reqs': closed_u_reqs})
