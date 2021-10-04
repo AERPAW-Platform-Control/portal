@@ -17,9 +17,9 @@
             <div class="d-flex flex-row align-items-center justify-content-between">
                 <h2>AERPAW Platform Resources</h2>
                 {% if user.is_resource_manager or user.is_superuser %}
-                <button class="btn btn-success mr-2">
-                    <a href="{% url 'resource_create' %}" class="unlink">Create New Resource</a>
-                </button>
+                    <button class="btn btn-success mr-2">
+                        <a href="{% url 'resource_create' %}" class="unlink">Create New Resource</a>
+                    </button>
                 {% endif %}
             </div>
             <!--
@@ -50,13 +50,13 @@
                     <th>Location</th>
                     <th>Units</th>
                     {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
-                    <th>Available Units</th>
-                    <th>UUID</th>
-                    <th>Stage</th>
-                    <th>Admin</th>
-                    <th>Created Date</th>
-                    <th>IP address</th>
-                    <th>hostname</th>
+                        <th>Available Units</th>
+                        <th>UUID</th>
+                        <th>Stage</th>
+                        <th>Admin</th>
+                        <th>Created Date</th>
+                        <th>IP address</th>
+                        <th>hostname</th>
                     {% endif %}
                 </tr>
                 {% for resource in resources %}
@@ -71,13 +71,13 @@
                         <td>{{ resource.location }}</td>
                         <td>{{ resource.units }}</td>
                         {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
-                        <td>{{ resource.availableUnits }}</td>
-                        <td>{{ resource.uuid }}</td>
-                        <td>{{ resource.stage }}</td>
-                        <td>{{ resource.admin }}</td>
-                        <td>{{ resource.created_date }}</td>
-                        <td>{{ resource.ip_address }}</td>
-                        <td>{{ resource.hostname }}</td>
+                            <td>{{ resource.availableUnits }}</td>
+                            <td>{{ resource.uuid }}</td>
+                            <td>{{ resource.stage }}</td>
+                            <td>{{ resource.admin }}</td>
+                            <td>{{ resource.created_date }}</td>
+                            <td>{{ resource.ip_address }}</td>
+                            <td>{{ resource.hostname }}</td>
                         {% endif %}
                     </tr>
                 {% endfor %}

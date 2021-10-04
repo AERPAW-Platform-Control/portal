@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_resource_manager %}
         <div class="container">
             <h2>Create Resource</h2>
             <form id="create-resource" method="POST" class="post-form">
