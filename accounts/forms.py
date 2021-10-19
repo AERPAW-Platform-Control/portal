@@ -40,10 +40,11 @@ class AerpawRoleRequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(AerpawRoleRequestForm, self).__init__(*args, **kwargs)
-        self.fields['purpose'].label = "Reason for request?"
+        self.fields['purpose'].label = "Purpose of request?"
         all_choices = AerpawUserRoleChoice.choices()
         cur_roles = self.user.groups.all()
-        cur_role_list = []
+        # per GH issue #85 - hide administrative roles from dropdown list
+        cur_role_list = ['site_admin', 'operator', 'resource_manager', 'user_manager']
         for role in cur_roles:
             cur_role_list.append(str(role))
         display_choices = [('', '--------')]
@@ -61,5 +62,5 @@ class AerpawRoleRequestForm(forms.ModelForm):
 
     requested_role = forms.ChoiceField(
         widget=forms.Select,
-        label='Role Function'
+        label='Requested Role'
     )
