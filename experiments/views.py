@@ -289,7 +289,7 @@ def experiment_initiate(request, experiment_uuid):
                 return render(request, 'experiment_initiate.html', {'experiment': experiment,
                                                                     'experimenter': experiment.experimenter.all(),
                                                                     'experiment_reservations': experiment_reservations,
-                                                                    'msg': '* Please check the experiment definition.'})
+                                                                    'msg': '* Please check the Experiment Resource Definition.'})
 
             if experiment.state < Experiment.STATE_DEPLOYING:  # and if reservation is_valid
                 experiment_state_change(request, experiment, "ready")

@@ -8,7 +8,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>Updating Experiment Definition</h2>
+            <h2>Updating Experiment Resource Definition</h2>
             <p style="color:red";>{{ msg }}</p>
             <form id="update-profile" method="POST" class="form-group">
                 {% csrf_token %}

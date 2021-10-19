@@ -33,7 +33,7 @@ def profile_create(request):
             profile_uuid = create_new_profile(request, form)
             if profile_uuid is None:
                 return render(request, 'profile_create.html', {'form': form,
-                    'msg': '* Please check the experiment definition.'})
+                    'msg': '* Please check the Experiment Resource Definition.'})
             return redirect('profile_detail', profile_uuid=profile_uuid)
     else:
         form = ProfileCreateForm(user=request.user)
@@ -72,7 +72,7 @@ def profile_update(request, profile_uuid):
             if temporary_uuid is None:
                 return render(request, 'profile_update.html',
                               { 'form': form, 'profile_uuid': str(profile_uuid), 'profile_name': profile.name,
-                                'msg': '* Please check the experiment definition.'}
+                                'msg': '* Please check the Experiment Resource Definition.'}
                               )
             else:
                 return redirect('profile_detail', profile_uuid=str(profile.uuid))

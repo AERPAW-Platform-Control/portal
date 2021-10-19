@@ -27,7 +27,7 @@ class ExperimentCreateForm(forms.ModelForm):
             queryset=self.profiles,
             required=True,
             widget=forms.Select(),
-            label='Experiment Definition',
+            label='Experiment Resource Definition',
         )
 
 
@@ -35,7 +35,7 @@ class ExperimentCreateForm(forms.ModelForm):
     #     queryset=Profile.objects.order_by('name'),
     #     required=True,
     #     widget=forms.Select(),
-    #     label='Experiment Definition',
+    #     label='Experiment Resource Definition',
     # )
 
     class Meta:
@@ -197,7 +197,7 @@ class ExperimentUpdateForm(forms.ModelForm):
         queryset=Profile.objects.order_by('name'),
         required=False,
         widget=forms.Select(),
-        label='Experiment Definition',
+        label='Experiment Resource Definition',
     )
     '''
 
