@@ -10,12 +10,33 @@ from .models import Experiment, UserStageChoice, StageChoice
 
 
 class ExperimentCreateForm(forms.ModelForm):
-    profile = forms.ModelChoiceField(
-        queryset=Profile.objects.order_by('name'),
-        required=True,
-        widget=forms.Select(),
-        label='Experiment Definition',
-    )
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(ExperimentCreateForm, self).__init__(*args, **kwargs)
+
+        if self.user.is_superuser or self.user.is_operator():
+            self.profiles = Profile.objects.all().order_by('name')
+        else:
+            self.qs1 = Profile.objects.filter(created_by=self.user)
+            self.profile_ids = Experiment.objects.filter(
+                experimenter=self.user).values_list('profile_id', flat=True).distinct()
+            self.qs2 = Profile.objects.filter(id__in=self.profile_ids)
+            self.profiles = self.qs1.union(self.qs2).order_by('name')
+
+        self.fields['profile'] = forms.ModelChoiceField(
+            queryset=self.profiles,
+            required=True,
+            widget=forms.Select(),
+            label='Experiment Definition',
+        )
+
+
+    # profile = forms.ModelChoiceField(
+    #     queryset=Profile.objects.order_by('name'),
+    #     required=True,
+    #     widget=forms.Select(),
+    #     label='Experiment Definition',
+    # )
 
     class Meta:
         model = Experiment

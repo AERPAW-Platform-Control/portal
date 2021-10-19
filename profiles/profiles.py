@@ -5,6 +5,7 @@ from django.utils import timezone
 from .models import Profile
 from accounts.models import AerpawUser
 from projects.models import Project
+from experiments.models import Experiment
 from experiments import experiments
 from resources.models import Resource
 import aerpawgw_client
@@ -131,7 +132,10 @@ def get_profile_list(request):
     if request.user.is_superuser:
         profiles = Profile.objects.order_by('name')
     else:
-        profiles = Profile.objects.order_by('name')
+        qs1 = Profile.objects.filter(created_by=request.user)
+        profile_ids = Experiment.objects.filter(experimenter=request.user).values_list('profile_id', flat=True).distinct()
+        qs2 = Profile.objects.filter(id__in=profile_ids)
+        profiles = qs1.union(qs2).order_by('name')
     return profiles
 
 

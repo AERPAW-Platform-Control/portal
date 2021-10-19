@@ -259,7 +259,7 @@ def project_update_owners(request, project_uuid):
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
     project_owners_orig = list(project.project_owners.all())
     if request.method == "POST":
-        form = ProjectUpdateOwnersForm(request.POST, instance=project)
+        form = ProjectUpdateOwnersForm(request.POST, instance=project, project=project)
         if form.is_valid():
             project_owners = list(form.cleaned_data.get('project_owners'))
             project_owners_added = list(set(project_owners).difference(set(project_owners_orig)))
@@ -299,7 +299,7 @@ def project_update_owners(request, project_uuid):
                 return HttpResponse('Invalid header found.')
             return redirect('project_detail', project_uuid=str(project.uuid))
     else:
-        form = ProjectUpdateOwnersForm(instance=project)
+        form = ProjectUpdateOwnersForm(instance=project, project=project)
     return render(request, 'project_update_owners.html',
                   {
                       'form': form, 'project_uuid': str(project_uuid), 'project_name': project.name}

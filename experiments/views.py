@@ -30,13 +30,15 @@ def experiment_create(request):
     """
     project = Project.objects.get(id=int(request.session.get('project_id', '')))
     if request.method == "POST":
-        form = ExperimentCreateForm(request.POST)
+        form = ExperimentCreateForm(request.POST, user=request.user)
         if form.is_valid():
             experiment_uuid = create_new_experiment(request, form,
                                                     request.session.get('project_id'))
             return redirect('experiment_detail', experiment_uuid=experiment_uuid)
+    elif request.user.is_anonymous:
+        form = None
     else:
-        form = ExperimentCreateForm()
+        form = ExperimentCreateForm(user=request.user)
     return render(request, 'experiment_create.html', {'form': form, 'project_uuid': str(project.uuid)})
 
 

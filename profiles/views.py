@@ -28,7 +28,7 @@ def profile_create(request):
     :return:
     """
     if request.method == "POST":
-        form = ProfileCreateForm(request.POST)
+        form = ProfileCreateForm(request.POST, user=request.user)
         if form.is_valid():
             profile_uuid = create_new_profile(request, form)
             if profile_uuid is None:
@@ -36,7 +36,7 @@ def profile_create(request):
                     'msg': '* Please check the experiment definition.'})
             return redirect('profile_detail', profile_uuid=profile_uuid)
     else:
-        form = ProfileCreateForm()
+        form = ProfileCreateForm(user=request.user)
     return render(request, 'profile_create.html', {'form': form})
 
 

@@ -40,7 +40,7 @@ class ProjectJoinForm(forms.Form):
 
 class ProjectUpdateMembersForm(forms.ModelForm):
     project_members = forms.ModelMultipleChoiceField(
-        queryset=AerpawUser.objects.all().exclude(username='admin'),
+        queryset=AerpawUser.objects.all().exclude(username='admin').order_by('display_name'),
         widget=FilteredSelectMultiple("Members", is_stacked=False),
         required=False
     )
@@ -71,11 +71,15 @@ class ProjectUpdateMembersForm(forms.ModelForm):
 
 
 class ProjectUpdateOwnersForm(forms.ModelForm):
-    project_owners = forms.ModelMultipleChoiceField(
-        queryset=AerpawUser.objects.all().exclude(username='admin'),
-        widget=FilteredSelectMultiple("Members", is_stacked=False),
-        required=False
-    )
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop('project', None)
+        super(ProjectUpdateOwnersForm, self).__init__(*args, **kwargs)
+        self.pm = Project.objects.filter(uuid=self.project.uuid).values_list('project_members', flat=True)
+        self.fields['project_owners'] = forms.ModelMultipleChoiceField(
+            queryset=AerpawUser.objects.filter(id__in=list(self.pm)).order_by('display_name'),
+            widget=FilteredSelectMultiple("Owners", is_stacked=False),
+            required=False
+        )
 
     class Media:
         extend = False

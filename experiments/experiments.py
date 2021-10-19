@@ -223,7 +223,7 @@ def get_experiment_list(request):
     if request.user.is_operator():
         experiments = Experiment.objects.order_by('name')
     else:
-        experiments = Experiment.objects.filter(experimenter=request.user).order_by('name')
+        experiments = Experiment.objects.filter(experimenter__uuid=request.user.uuid).order_by('name').distinct()
     return experiments
 
 
