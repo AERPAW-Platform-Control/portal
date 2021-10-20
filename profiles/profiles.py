@@ -1,6 +1,7 @@
 import uuid
 import os
 from django.utils import timezone
+from django.db.models import Q
 
 from .models import Profile
 from accounts.models import AerpawUser
@@ -12,10 +13,12 @@ import aerpawgw_client
 from aerpawgw_client.rest import ApiException
 import logging
 import json
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
 
+@login_required()
 def create_new_profile(request, form):
     """
 
@@ -79,6 +82,7 @@ def create_new_profile(request, form):
     return str(profile.uuid)
 
 
+@login_required()
 def update_existing_profile(request, profile, form):
     """
     Create new AERPAW Profile
@@ -106,6 +110,7 @@ def update_existing_profile(request, profile, form):
     return str(profile.uuid)
 
 
+@login_required()
 def delete_existing_profile(request, profile):
     """
 
@@ -123,6 +128,7 @@ def delete_existing_profile(request, profile):
     return False
 
 
+@login_required()
 def get_profile_list(request):
     """
 
@@ -132,13 +138,16 @@ def get_profile_list(request):
     if request.user.is_superuser:
         profiles = Profile.objects.order_by('name')
     else:
-        qs1 = Profile.objects.filter(created_by=request.user)
-        profile_ids = Experiment.objects.filter(experimenter=request.user).values_list('profile_id', flat=True).distinct()
-        qs2 = Profile.objects.filter(id__in=profile_ids)
-        profiles = qs1.union(qs2).order_by('name')
+        public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
+        my_projects = Project.objects.filter(Q(project_creator=request.user) |
+                                             Q(project_members__in=[request.user]) |
+                                             Q(project_owners__in=[request.user])).values_list('id', flat=True)
+        projects = set(list(public_projects) + list(my_projects))
+        profiles = Profile.objects.filter(project__in=projects).order_by('name').distinct()
     return profiles
 
 
+@login_required()
 def parse_profile(request, experiment_definition):
     """
     Verify if resource definition is valid and return the resources as dictionary

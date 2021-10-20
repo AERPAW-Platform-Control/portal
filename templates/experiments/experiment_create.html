@@ -17,7 +17,15 @@
             <button class="btn btn-secondary mr-2" value="cancel">
                 <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="unlink">Cancel</a>
             </button>
+            <button class="btn btn-success mr-2" style="margin-left: 48px">
+                <a href="{% url 'profile_create' %}?project_id={{ project_id }}" class="unlink">Create New Resource
+                    Definition</a>
+            </button>
         </div>
+        <p>
+            <b>As an experimenter</b>: If you choose to use an Experiment Resource Definition from other's
+            public projects, you have the risk to lose your "Experiment" when the Definition is deleted by the owner.
+        </p>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or are not authorized to view this page</p>

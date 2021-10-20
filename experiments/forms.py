@@ -7,36 +7,28 @@ from projects.models import Project
 from reservations.models import Reservation
 from profiles.models import Profile
 from .models import Experiment, UserStageChoice, StageChoice
+from django.forms import ModelChoiceField
+
+
+class ExperimentModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return '{0} ({1})'.format(obj.name, obj.project.name)
 
 
 class ExperimentCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
+        self.project_id = kwargs.pop('project_id', None)
         super(ExperimentCreateForm, self).__init__(*args, **kwargs)
-
-        if self.user.is_superuser or self.user.is_operator():
-            self.profiles = Profile.objects.all().order_by('name')
-        else:
-            self.qs1 = Profile.objects.filter(created_by=self.user)
-            self.profile_ids = Experiment.objects.filter(
-                experimenter=self.user).values_list('profile_id', flat=True).distinct()
-            self.qs2 = Profile.objects.filter(id__in=self.profile_ids)
-            self.profiles = self.qs1.union(self.qs2).order_by('name')
-
-        self.fields['profile'] = forms.ModelChoiceField(
+        self.public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
+        if self.project_id not in self.public_projects:
+            self.public_projects.append(self.project_id)
+        self.profiles = Profile.objects.filter(project__in=self.public_projects).order_by('name').distinct()
+        self.fields['profile'] = ExperimentModelChoiceField(
             queryset=self.profiles,
             required=True,
             widget=forms.Select(),
             label='Experiment Resource Definition',
         )
-
-
-    # profile = forms.ModelChoiceField(
-    #     queryset=Profile.objects.order_by('name'),
-    #     required=True,
-    #     widget=forms.Select(),
-    #     label='Experiment Resource Definition',
-    # )
 
     class Meta:
         model = Experiment
