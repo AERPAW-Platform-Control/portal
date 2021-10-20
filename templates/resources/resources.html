@@ -68,7 +68,12 @@
                         </td>
                         <td>{{ resource.description }}</td>
                         <td>{{ resource.resourceType }}</td>
-                        <td>{{ resource.location }}</td>
+                        <td>
+                            {{ resource.location }}
+                            {% if resource_map %}
+                                (<a href="{{ resource_map }}" target="_blank">map</a>)
+                            {% endif %}
+                        </td>
                         <td>{{ resource.units }}</td>
                         {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
                             <td>{{ resource.availableUnits }}</td>
