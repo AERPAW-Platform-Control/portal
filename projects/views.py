@@ -31,6 +31,7 @@ def projects(request):
     return render(request, 'projects.html', {'my_projects': my_projects, 'other_projects': other_projects})
 
 
+@login_required()
 def project_create(request):
     """
 
@@ -48,6 +49,7 @@ def project_create(request):
     return render(request, 'project_create.html', {'form': form})
 
 
+@login_required()
 def project_detail(request, project_uuid):
     """
 
@@ -130,6 +132,7 @@ def project_detail(request, project_uuid):
                    'experiments': project_experiments.all()})
 
 
+@login_required()
 def project_join(request, project_uuid):
     """
 
@@ -171,6 +174,7 @@ def project_join(request, project_uuid):
     return render(request, "project_join.html", {'form': form, 'project': project})
 
 
+@login_required()
 def project_update(request, project_uuid):
     """
 
@@ -192,6 +196,7 @@ def project_update(request, project_uuid):
                   )
 
 
+@login_required()
 def project_update_members(request, project_uuid):
     """
 
@@ -249,6 +254,7 @@ def project_update_members(request, project_uuid):
                   )
 
 
+@login_required()
 def project_update_owners(request, project_uuid):
     """
 
@@ -306,6 +312,7 @@ def project_update_owners(request, project_uuid):
                   )
 
 
+@login_required()
 def project_delete(request, project_uuid):
     """
 

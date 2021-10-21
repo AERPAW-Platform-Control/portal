@@ -1,13 +1,12 @@
 from django import forms
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.forms import ModelChoiceField
 
 from accounts.models import AerpawUser
+from profiles.models import Profile
 from projects.models import Project
 from reservations.models import Reservation
-from profiles.models import Profile
 from .models import Experiment, UserStageChoice, StageChoice
-from django.forms import ModelChoiceField
 
 
 class ExperimentModelChoiceField(ModelChoiceField):
@@ -202,7 +201,6 @@ class ExperimentUpdateForm(forms.ModelForm):
 
 
 class ExperimentUpdateByOpsForm(forms.ModelForm):
-
     stage = forms.ChoiceField(
         choices=StageChoice.choices(),
         required=True,
@@ -244,7 +242,7 @@ class ExperimentSubmitForm(forms.ModelForm):
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
         required=False,
         label='Testbed Experiment Description\n',
-        #help_text='\nsuch as "The drone will take off at an altitude of 50m and then go west 300m, then return to launch and land."'
+        # help_text='\nsuch as "The drone will take off at an altitude of 50m and then go west 300m, then return to launch and land."'
     )
 
     class Meta:

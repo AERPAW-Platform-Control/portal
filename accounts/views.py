@@ -129,7 +129,6 @@ def credential(request):
                     open(os.path.join(tempfile.gettempdir(), 'aerpaw_id_rsa.zip'), 'rb'),
                     as_attachment=True)
             except Exception as e:
-                print(output)
                 print(e)
     else:
         form = AerpawUserCredentialForm()

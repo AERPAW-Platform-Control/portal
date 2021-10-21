@@ -1,17 +1,26 @@
 # Create your views here.
 
+
+import logging
 from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 
+from projects.models import Project
 from usercomms.usercomms import portal_mail
-from .forms import *
-from .experiments import *
-import threading
+from .experiments import get_experiment_list, generate_experiment_session_request, create_new_experiment, \
+    get_emulab_manifest, experiment_state_change, query_emulab_instance_status, \
+    delete_existing_experiment, is_emulab_stage, initiate_emulab_instance, update_existing_experiment
+from .forms import ExperimentCreateForm, ExperimentUpdateExperimentersForm, ExperimentUpdateForm, ExperimentSubmitForm, \
+    ExperimentUpdateByOpsForm
+from .models import Experiment
+
+logger = logging.getLogger(__name__)
 
 
-@login_required
+@login_required()
 def experiments(request):
     """
 
@@ -22,6 +31,7 @@ def experiments(request):
     return render(request, 'experiments.html', {'experiments': experiments})
 
 
+@login_required()
 def experiment_create(request):
     """
 
@@ -43,6 +53,7 @@ def experiment_create(request):
                   {'form': form, 'project_uuid': str(project.uuid), 'project_id': str(project.id)})
 
 
+@login_required()
 def experiment_update_experimenters(request, experiment_uuid):
     """
 
@@ -101,7 +112,7 @@ def experiment_update_experimenters(request, experiment_uuid):
 #
 #     return render(request, 'experiment_create.html', {'form': form})
 
-
+@login_required()
 def experiment_detail(request, experiment_uuid):
     """
 
@@ -139,6 +150,7 @@ def experiment_detail(request, experiment_uuid):
                   )
 
 
+@login_required()
 def experiment_update(request, experiment_uuid):
     """
 
@@ -165,6 +177,7 @@ def experiment_update(request, experiment_uuid):
                   )
 
 
+@login_required()
 def experiment_update_by_ops(request, experiment_uuid):
     """
     This temporary code will need some update after GA
@@ -178,23 +191,23 @@ def experiment_update_by_ops(request, experiment_uuid):
     if request.method == "POST":
         form = ExperimentUpdateByOpsForm(request.POST, instance=experiment)
         if form.is_valid():
-            experimenter = experiment.created_by # save first, otherwise soon overwritten
+            experimenter = experiment.created_by  # save first, otherwise soon overwritten
             experiment = form.save(commit=False)
             experiment_uuid = update_existing_experiment(request, experiment, form, prev_stage,
                                                          prev_state)
             if experiment.message is not None and experiment.message != "":
                 subject = 'Aerpaw Experiment Notification: {}'.format(experiment.uuid)
                 email_message = "[{}]\n\n".format(subject) \
-                               + "Experiment Name: {}\n".format(str(experiment)) \
-                               + "Project: {}\n\n".format(experiment.project) \
-                               + "Notification/Message:\n{}\n".format(experiment.message)
+                                + "Experiment Name: {}\n".format(str(experiment)) \
+                                + "Project: {}\n\n".format(experiment.project) \
+                                + "Notification/Message:\n{}\n".format(experiment.message)
                 receivers = [experimenter]
                 logger.warning("send_email:\n" + subject)
                 logger.warning(email_message)
                 logger.warning("receivers = {}\n".format(receivers))
                 portal_mail(subject=subject, body_message=email_message, sender=request.user,
-                                receivers=receivers,
-                                reference_note=None, reference_url=None)
+                            receivers=receivers,
+                            reference_note=None, reference_url=None)
 
             return redirect('experiment_detail', experiment_uuid=str(experiment.uuid))
 
@@ -206,6 +219,7 @@ def experiment_update_by_ops(request, experiment_uuid):
                   )
 
 
+@login_required()
 def experiment_submit(request, experiment_uuid):
     """
     Submit = update experiment stage from development to Testbed/(Sandbox?)
@@ -232,6 +246,7 @@ def experiment_submit(request, experiment_uuid):
                   )
 
 
+@login_required()
 def experiment_delete(request, experiment_uuid):
     """
 
@@ -250,6 +265,7 @@ def experiment_delete(request, experiment_uuid):
                    'experiment_reservations': experiment_reservations})
 
 
+@login_required()
 def experiment_initiate(request, experiment_uuid):
     """
     handles experiment initiate OR terminate depending on its state
@@ -316,6 +332,7 @@ def experiment_initiate(request, experiment_uuid):
                    'experiment_reservations': experiment_reservations})
 
 
+@login_required()
 def experiment_manifest(request, experiment_uuid):
     """
     render manifest information for the experiment
