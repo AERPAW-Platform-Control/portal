@@ -3,12 +3,15 @@ from uuid import UUID
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.mail import BadHeaderError
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from accounts.models import AerpawUser
+from experiments.models import Experiment
+from profiles.models import Profile
 from usercomms.usercomms import portal_mail
 # from cicd.models import Cicd
 from .forms import ProjectCreateForm, ProjectUpdateForm, ProjectUpdateMembersForm, ProjectUpdateOwnersForm, \
@@ -124,12 +127,13 @@ def project_detail(request, project_uuid):
     project_members = project.project_members.order_by('username')
     project_owners = project.project_owners.order_by('username')
     project_experiments = project.experiment_of_project
+    project_profiles = Profile.objects.filter(project_id=project.id).order_by('name')
     project_requests = ProjectMembershipRequest.objects.filter(project_uuid=project_uuid, is_completed=False).order_by(
         '-created_date')
     return render(request, 'project_detail.html',
                   {'project': project, 'project_members': project_members, 'project_owners': project_owners,
                    'is_pc': is_pc, 'is_po': is_po, 'is_pm': is_pm, 'project_requests': project_requests,
-                   'experiments': project_experiments.all()})
+                   'experiments': project_experiments.all(), 'profiles': project_profiles})
 
 
 @login_required()
@@ -321,9 +325,18 @@ def project_delete(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
-    project_members = project.project_members.order_by('oidc_claim_name')
+    project_owners = project.project_owners.order_by('display_name')
+    project_members = project.project_members.order_by('display_name')
+    profile_ids = Profile.objects.filter(project=project.id).values_list('pk', flat=True).distinct()
+    profiles = Profile.objects.filter(pk__in=profile_ids).order_by('name')
+    experiments = Experiment.objects.filter(Q(profile__project_id=project.id) |
+                                            Q(profile__in=list(profiles)) |
+                                            Q(project=project.id)).order_by('name').distinct()
     if request.method == "POST":
-        is_removed = delete_existing_project(request, project)
+        is_removed = delete_existing_project(request, project, profiles, experiments)
         if is_removed:
             return redirect('projects')
-    return render(request, 'project_delete.html', {'project': project, 'project_members': project_members})
+    return render(request, 'project_delete.html',
+                  {'project': project, 'project_owners': project_owners, 'project_members': project_members,
+                   'profiles': profiles, 'experiments': experiments}
+                  )

@@ -13,16 +13,16 @@
                 {% csrf_token %}
                 {{ form.as_p }}
             </form>
-            <button class="btn btn-success mr-2" type="submit" form="create-experiment" value="save">Save</button>
+            <button class="btn btn-success mr-2" type="submit" form="create-experiment" value="save">Save Experiment</button>
             <button class="btn btn-secondary mr-2" value="cancel">
                 <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="unlink">Cancel</a>
             </button>
-            <button class="btn btn-success mr-2" style="margin-left: 48px">
-                <a href="{% url 'profile_create' %}?project_id={{ project_id }}" class="unlink">Create New Resource
+            <button class="btn btn-success mr-2" style="margin-left: 60px">
+                <a href="{% url 'profile_create' %}?project_id={{ project_id }}" class="unlink">Add Resource
                     Definition</a>
             </button>
         </div>
-        <p>
+        <p class="text-danger">
             <b>As an experimenter</b>: If you choose to use an Experiment Resource Definition from other's
             public projects, you have the risk to lose your "Experiment" when the Definition is deleted by the owner.
         </p>

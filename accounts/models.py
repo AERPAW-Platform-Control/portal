@@ -23,7 +23,7 @@ from django.utils import timezone
 class AerpawUserRoleChoice(Enum):  # A subclass of Enum
     site_admin = 'Administrator'
     operator = 'Operator'
-    project_manager = 'Principal Investigator'
+    project_manager = 'Principal Investigator (PI)'
     resource_manager = 'Resource Manager'
     user_manager = 'User Role Manager'
     aerpaw_user = 'AERPAW User'

@@ -4,6 +4,7 @@ from uuid import UUID
 
 from django.shortcuts import render, redirect, get_object_or_404
 
+from experiments.models import Experiment
 from .forms import ProfileCreateForm, ProfileUpdateForm
 from .profiles import *
 
@@ -33,7 +34,7 @@ def profile_create(request):
             profile_uuid = create_new_profile(request, form)
             if profile_uuid is None:
                 return render(request, 'profile_create.html', {'form': form,
-                                                               'msg': '* Please check the Experiment Resource Definition.'})
+                                                               'msg': '* [ERROR] Invalid entry for "Definition".'})
             return redirect('profile_detail', profile_uuid=profile_uuid)
     else:
         form = ProfileCreateForm(user=request.user, project=project)
@@ -74,7 +75,7 @@ def profile_update(request, profile_uuid):
             if temporary_uuid is None:
                 return render(request, 'profile_update.html',
                               {'form': form, 'profile_uuid': str(profile_uuid), 'profile_name': profile.name,
-                               'msg': '* Please check the Experiment Resource Definition.'}
+                               'msg': '* [ERROR] Invalid entry for "Definition".'}
                               )
             else:
                 return redirect('profile_detail', profile_uuid=str(profile.uuid))
@@ -95,8 +96,9 @@ def profile_delete(request, profile_uuid):
     :return:
     """
     profile = get_object_or_404(Profile, uuid=UUID(str(profile_uuid)))
+    experiments = Experiment.objects.filter(profile_id=profile.id).order_by('name')
     if request.method == "POST":
-        is_removed = delete_existing_profile(request, profile)
+        is_removed = delete_existing_profile(request, profile, experiments)
         if is_removed:
             return redirect('profiles')
-    return render(request, 'profile_delete.html', {'profile': profile})
+    return render(request, 'profile_delete.html', {'profile': profile, 'experiments': experiments})
