@@ -9,6 +9,13 @@
     {% if user.is_authenticated %}
         <div class="container">
             <h2>New Experiment Resource Definition</h2>
+            <p>
+                Read about: <a
+                    href="https://sites.google.com/ncsu.edu/aerpaw-wiki/aerpaw-user-manual/2-experiment-web-portal/2-4-creating-and-managing-experiments"
+                    target="_blank">
+                Creating and Managing Experiments
+            </a>
+            </p>
             <p style="color:red" ;>{{ msg }}</p>
             <form id="create-profile" method="POST" class="post-form">
                 {% csrf_token %}
