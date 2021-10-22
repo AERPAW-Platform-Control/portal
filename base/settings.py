@@ -219,7 +219,10 @@ AUTH_USER_MODEL = 'accounts.AerpawUser'
 # Django running behind Nginx reverse proxy
 USE_X_FORWARDED_HOST = True
 
-# AERPAW Email 
+# AERPAW Email for development (use only 1 email backend at a time)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# AERPAW Email for production (use only 1 email backend at a time)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_PORT = os.getenv('EMAIL_PORT')
@@ -231,3 +234,5 @@ EMAIL_USE_SSL = False
 
 # account for Django 3.2 (Warning models.W042)
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+AERPAW_MAP_URL = os.getenv('AERPAW_MAP_URL', None)

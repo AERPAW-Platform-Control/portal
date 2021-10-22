@@ -1,24 +1,24 @@
 from django import forms
 
-from accounts.models import AerpawUser
 from projects.models import Project
 from .models import Profile
 
 
 class ProfileCreateForm(forms.ModelForm):
 
-    project = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
-        required=True,
-        widget=forms.Select(),
-        label='Project',
-    )
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.pr = kwargs.pop('project', None)
+        super(ProfileCreateForm, self).__init__(*args, **kwargs)
+        self.projects = Project.objects.filter(id=self.pr.id)
 
-    profile = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
-        required=False,
-        label='Definition',
-    )
+        self.fields['project'] = forms.ModelChoiceField(
+            queryset=self.projects,
+            initial=self.pr,
+            required=True,
+            widget=forms.Select(),
+            label='Project'
+        )
 
     class Meta:
         model = Profile
@@ -27,16 +27,23 @@ class ProfileCreateForm(forms.ModelForm):
             'description',
             'project',
             'profile',
-            #'created_by',
-            #'created_date',
-            #'stage',
+            # 'created_by',
+            # 'created_date',
+            # 'stage',
         )
+
+    profile = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='Definition',
+    )
 
     def clean_title(self):
         data = self.cleaned_data.get('name')
-        if len(data) <4:
+        if len(data) < 4:
             raise forms.ValidationError("The name is not long enough!")
         return data
+
 
 class ProfileUpdateForm(forms.ModelForm):
     name = forms.CharField(
@@ -71,7 +78,7 @@ class ProfileUpdateForm(forms.ModelForm):
             'description',
             'project',
             'profile',
-            #'modified_by',
-            #'modified_date',
-            #'stage',
+            # 'modified_by',
+            # 'modified_date',
+            # 'stage',
         )

@@ -9,11 +9,17 @@
     {% if user.is_authenticated %}
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
-                <h2>Experiment Definition</h2>
-                <button class="btn btn-success mr-2">
-                    <a href="{% url 'profile_create' %}" class="unlink">Create New</a>
-                </button>
+                <h2>Experiment Resource Definition</h2>
+                {# <button class="btn btn-success mr-2">#}
+                {#     <a href="{% url 'profile_create' %}" class="unlink">Create New</a>#}
+                {# </button>#}
             </div>
+            {# per GH issue #87 - language changes #}
+            <p class="text-danger">
+                <b>For every Experiment</b>: First define the subset of AERPAW resources to be used in that
+                Experiment. Then, select one of the Experiment Resource Definitions provided below,
+                or create your own.
+            </p>
             <table class="table table-striped table-bordered mt-4">
                 <tr>
                     <th>Name</th>
@@ -23,17 +29,17 @@
                     <th>Created Date</th>
                 </tr>
                 {% for profile in profiles %}
-                <tr>
-                    <td>
-                        <a href="{% url 'profile_detail' profile_uuid=profile.uuid %}">
-                            {{ profile.name }}
-                        </a>
-                    </td>
-                    <td>{{ profile.description }}</td>
-                    <td>{{ profile.project }}</td>
-                    <td>{{ profile.created_by }}</td>
-                    <td>{{ profile.created_date }}</td>
-                </tr>
+                    <tr>
+                        <td>
+                            <a href="{% url 'profile_detail' profile_uuid=profile.uuid %}">
+                                {{ profile.name }}
+                            </a>
+                        </td>
+                        <td>{{ profile.description }}</td>
+                        <td>{{ profile.project }}</td>
+                        <td>{{ profile.created_by }}</td>
+                        <td>{{ profile.created_date }}</td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>

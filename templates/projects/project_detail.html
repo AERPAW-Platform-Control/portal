@@ -19,6 +19,41 @@
                     <td>{{ project.is_public }}</td>
                 </tr>
                 <tr>
+                    <td>Experiment Resource Definitions</td>
+                    {% if profiles %}
+                        <td>
+                            {% for profile in profiles %}
+                                <a href="{% url 'profile_detail' profile_uuid=profile.uuid %}">
+                                    {{ profile.name }}
+                                </a>
+                                : {{ profile.description }}<br>
+                            {% endfor %}
+                        </td>
+                    {% else %}
+                        <td>
+                            <p class="text-danger"><b>As an experimenter</b>: If you choose to use an Experiment
+                                Resource Definition from other's
+                                public projects, you have the risk to lose your "Experiment" when the
+                                Definition is deleted by the owner.
+                            </p>
+                            <p>
+                                Read about: <a
+                                    href="https://sites.google.com/ncsu.edu/aerpaw-wiki/aerpaw-user-manual/2-experiment-web-portal/2-4-creating-and-managing-experiments"
+                                    target="_blank">
+                                Creating and Managing Experiments
+                            </a>
+                            </p>
+                        </td>
+                    {% endif %}
+                    <td>
+                        <button class="btn btn-success mr-2">
+                            <a href="{% url 'profile_create' %}?project_id={{ project.id }}" class="unlink">
+                                Add Resource Definition
+                            </a>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
                     <td>Experiments</td>
                     <td>
                         {% for experiment in experiments %}
@@ -31,7 +66,7 @@
                     <td>
                         <button class="btn btn-success mr-2">
                             <a href="{% url 'experiment_create' %}?project_id={{ project.id }}" class="unlink">
-                                Create a New Experiment
+                                Add Experiment
                             </a>
                         </button>
                     </td>
@@ -64,7 +99,7 @@
                 {#                    {% endif %}#}
                 {#                </tr>#}
                 <tr>
-                    <td>Project Creator</td>
+                    <td>Principal Investigator (PI)</td>
                     <td>{{ project.project_creator }}</td>
                 </tr>
                 <tr>

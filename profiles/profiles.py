@@ -1,20 +1,22 @@
-import uuid
+import json
+import logging
 import os
-from django.utils import timezone
+import uuid
 
-from .models import Profile
-from accounts.models import AerpawUser
-from projects.models import Project
-from experiments import experiments
-from resources.models import Resource
 import aerpawgw_client
 from aerpawgw_client.rest import ApiException
-import logging
-import json
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.utils import timezone
+
+from projects.models import Project
+from resources.models import Resource
+from .models import Profile
 
 logger = logging.getLogger(__name__)
 
 
+@login_required()
 def create_new_profile(request, form):
     """
 
@@ -46,7 +48,7 @@ def create_new_profile(request, form):
     profile.created_by = request.user
     profile.created_date = timezone.now()
     profile.project = Project.objects.get(id=int(form.data.getlist('project')[0]))
-    #profile.stage = form.data.getlist('stage')[0]
+    # profile.stage = form.data.getlist('stage')[0]
 
     '''
     # user doesn't care about emulab profile.
@@ -65,19 +67,20 @@ def create_new_profile(request, form):
         print(e)
         profile.project = None
 
-    #try:
+    # try:
     #    reservation_id_list=form.data.getlist('reservation')
     #    if not reservation_id_list:
     #        reservation_id = reservation_id_list[0]
     #        profile.reservations = Reservation.objects.get(id=int(reservation_id))
-    #except ValueError as e:
+    # except ValueError as e:
     #    print(e)
     #    profile.reservations= None
-    #profile.save()
+    # profile.save()
 
     return str(profile.uuid)
 
 
+@login_required()
 def update_existing_profile(request, profile, form):
     """
     Create new AERPAW Profile
@@ -97,7 +100,7 @@ def update_existing_profile(request, profile, form):
         logger.warning("definition format not correct")
         return None
 
-    #if is_emulab_profile(profile):
+    # if is_emulab_profile(profile):
     #    delete_emulab_profile(request, profile)
     #    create_new_emulab_profile(request, profile)
 
@@ -105,16 +108,20 @@ def update_existing_profile(request, profile, form):
     return str(profile.uuid)
 
 
-def delete_existing_profile(request, profile):
+@login_required()
+def delete_existing_profile(request, profile, experiments):
     """
 
     :param request:
     :param profile:
+    :param experiments:
     :return:
     """
     try:
-        #if is_emulab_profile(profile):
+        # if is_emulab_profile(profile):
         #    delete_emulab_profile(request, profile)
+        for experiment in experiments:
+            experiment.delete()
         profile.delete()
         return True
     except Exception as e:
@@ -122,6 +129,7 @@ def delete_existing_profile(request, profile):
     return False
 
 
+@login_required()
 def get_profile_list(request):
     """
 
@@ -131,10 +139,16 @@ def get_profile_list(request):
     if request.user.is_superuser:
         profiles = Profile.objects.order_by('name')
     else:
-        profiles = Profile.objects.order_by('name')
+        public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
+        my_projects = Project.objects.filter(Q(project_creator=request.user) |
+                                             Q(project_members__in=[request.user]) |
+                                             Q(project_owners__in=[request.user])).values_list('id', flat=True)
+        projects = set(list(public_projects) + list(my_projects))
+        profiles = Profile.objects.filter(project__in=projects).order_by('name').distinct()
     return profiles
 
 
+@login_required()
 def parse_profile(request, experiment_definition):
     """
     Verify if resource definition is valid and return the resources as dictionary
@@ -145,7 +159,7 @@ def parse_profile(request, experiment_definition):
     """
     try:
         logger.info(experiment_definition)
-        resources=json.loads(experiment_definition)
+        resources = json.loads(experiment_definition)
 
         if len(resources) < 1:
             raise Exception('Empty definition')

@@ -1,23 +1,24 @@
-import uuid
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings
-
-from usercomms.usercomms import portal_mail
-from .models import Experiment
-from profiles.profiles import *
-from resources.resources import *
-from resources.models import Resource
-import aerpawgw_client
-from aerpawgw_client.rest import ApiException
-from datetime import datetime
+import json
 import logging
 import os
-import json
-from .jenkins_api import deploy_experiment, info_deployment
 import time
+import uuid
+from datetime import datetime
+
+import aerpawgw_client
+from aerpawgw_client.rest import ApiException
+from django.utils import timezone
+
+from accounts.models import AerpawUser
+from profiles.models import Profile
+from profiles.profiles import is_emulab_stage, parse_profile
+from projects.models import Project
+from reservations.models import Reservation
+from resources.models import Resource
+from resources.resources import emulab_location_to_urn
+from usercomms.usercomms import portal_mail
+from .jenkins_api import deploy_experiment, info_deployment
+from .models import Experiment
 
 logger = logging.getLogger(__name__)
 
@@ -176,8 +177,9 @@ def send_request_to_testbed(request, experiment):
         logger.warning("send_email:\n" + subject)
         logger.warning(message)
         portal_mail(subject=subject, body_message=message, sender=request.user,
-                        receivers=receivers,
-                        reference_note=None, reference_url=None)
+                    receivers=receivers,
+                    reference_note=None, reference_url=None)
+
 
 def update_experiment_reservations(experiment, experiment_reservation_id_list):
     """
@@ -223,7 +225,7 @@ def get_experiment_list(request):
     if request.user.is_operator():
         experiments = Experiment.objects.order_by('name')
     else:
-        experiments = Experiment.objects.filter(experimenter=request.user).order_by('name')
+        experiments = Experiment.objects.filter(experimenter__uuid=request.user.uuid).order_by('name').distinct()
     return experiments
 
 

@@ -123,14 +123,20 @@ def update_existing_project(request, project, form):
     return str(project.uuid)
 
 
-def delete_existing_project(request, project):
+def delete_existing_project(request, project, profiles, experiments):
     """
 
     :param request:
     :param project:
+    :param profiles:
+    :param experiments:
     :return:
     """
     try:
+        for experiment in experiments:
+            experiment.delete()
+        for profile in profiles:
+            profile.delete()
         project.delete()
         return True
     except Exception as e:
