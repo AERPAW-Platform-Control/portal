@@ -57,19 +57,19 @@
                         <td>{{ resource.hostname }}</td>
                     </tr>
                 {% endif %}
-                <tr>
-                    <td>Reservations</td>
-                    {% for reservation in reservations %}
-                        <td>
-                            <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">
-                                {{ reservation.name }}
-                            </a>
-                        </td>
-                        <td>
-                            reservation.units
-                        </td>
-                    {% endfor %}
-                </tr>
+                {#                <tr>#}
+                {#                    <td>Reservations</td>#}
+                {#                    {% for reservation in reservations %}#}
+                {#                        <td>#}
+                {#                            <a href="{% url 'reservation_detail_own' reservation_uuid=reservation.uuid %}">#}
+                {#                                {{ reservation.name }}#}
+                {#                            </a>#}
+                {#                        </td>#}
+                {#                        <td>#}
+                {#                            reservation.units#}
+                {#                        </td>#}
+                {#                    {% endfor %}#}
+                {#                </tr>#}
             </table>
             {% if user.is_resource_manager %}
                 <button class="btn btn-success mr-2">

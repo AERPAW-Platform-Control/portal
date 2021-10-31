@@ -38,7 +38,7 @@ def profile_create(request):
             return redirect('profile_detail', profile_uuid=profile_uuid)
     else:
         form = ProfileCreateForm(user=request.user, project=project)
-    return render(request, 'profile_create.html', {'form': form})
+    return render(request, 'profile_create.html', {'form': form, 'project_uuid': str(project.uuid)})
 
 
 @login_required()

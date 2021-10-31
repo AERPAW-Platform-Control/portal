@@ -17,15 +17,15 @@
                         <th>Display Name</th>
                         <th>Username</th>
                         <th>Email</th>
-                        <th>is AERPAW User</th>
-                        <th>can Create Projects</th>
+                        <th>AERPAW User</th>
+                        <th>Principal Investigator (PI)</th>
                         {% if user.is_site_admin %}
-                            <th>can Manage Resources</th>
-                            <th>can Manage User Roles</th>
-                            <th>is Operator</th>
+                            <th>Resource Manager</th>
+                            <th>User Role Manager</th>
+                            <th>Operator</th>
                         {% endif %}
                         {% if user.is_superuser %}
-                            <th>is Administrator</th>
+                            <th>Administrator</th>
                         {% endif %}
                     </tr>
                     {% for u in all_users %}

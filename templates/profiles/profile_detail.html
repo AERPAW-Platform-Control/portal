@@ -20,7 +20,16 @@
                 </tr>
                 <tr>
                     <td>Project</td>
-                    <td>{{ profile.project }}</td>
+                    <td>
+                        {% if is_creator or profile.project.is_public or user.is_operator or user.is_site_admin %}
+                            <a href="{% url 'project_detail' project_uuid=profile.project.uuid %}">
+                                {{ profile.project }}
+                            </a>
+                        {% else %}
+                            {{ profile.project }}
+                        {% endif %}
+                    </td>
+                    {#                    <td>{{ profile.project }}</td>#}
                 </tr>
                 <tr>
                     <td>Created By</td>
@@ -39,12 +48,12 @@
                 <a href="{% url 'profiles' %}" class="unlink">Back</a>
             </button>
             {% if is_creator %}
-            <button class="btn btn-danger">
-                <a href="{% url 'profile_delete' profile_uuid=profile.uuid %}" class="unlink">Delete</a>
-            </button>
-            <button class="btn btn-success mr-2">
-                <a href="{% url 'profile_update' profile_uuid=profile.uuid %}" class="unlink">Update</a>
-            </button>
+                <button class="btn btn-danger">
+                    <a href="{% url 'profile_delete' profile_uuid=profile.uuid %}" class="unlink">Delete</a>
+                </button>
+                <button class="btn btn-success mr-2">
+                    <a href="{% url 'profile_update' profile_uuid=profile.uuid %}" class="unlink">Update</a>
+                </button>
             {% endif %}
         </div>
     {% else %}

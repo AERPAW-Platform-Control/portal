@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import BadHeaderError
 from django.db.models import Q
 from django.http import HttpResponse
@@ -23,7 +23,8 @@ from .projects import create_new_project, get_project_list, update_existing_proj
 PI_message = "Please email the admin to become a PI first!"
 
 
-@login_required
+@login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def projects(request):
     """
 
@@ -35,6 +36,7 @@ def projects(request):
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_project_manager() or u.is_site_admin())
 def project_create(request):
     """
 
@@ -53,6 +55,7 @@ def project_create(request):
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def project_detail(request, project_uuid):
     """
 
@@ -137,6 +140,7 @@ def project_detail(request, project_uuid):
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def project_join(request, project_uuid):
     """
 
@@ -179,6 +183,7 @@ def project_join(request, project_uuid):
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def project_update(request, project_uuid):
     """
 
@@ -187,6 +192,10 @@ def project_update(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
+    # set user permissions
+    is_pc = (project.project_creator == request.user)
+    is_po = (request.user in project.project_owners.all())
+    is_pm = (request.user in project.project_members.all())
     if request.method == "POST":
         form = ProjectUpdateForm(request.POST, instance=project)
         if form.is_valid():
@@ -196,11 +205,13 @@ def project_update(request, project_uuid):
     else:
         form = ProjectUpdateForm(instance=project)
     return render(request, 'project_update.html',
-                  {'form': form, 'project_uuid': str(project_uuid), 'project_name': project.name}
+                  {'form': form, 'project_uuid': str(project_uuid), 'project_name': project.name,
+                   'is_pc': is_pc, 'is_po': is_po, 'is_pm': is_pm}
                   )
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def project_update_members(request, project_uuid):
     """
 
@@ -209,6 +220,10 @@ def project_update_members(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
+    # set user permissions
+    is_pc = (project.project_creator == request.user)
+    is_po = (request.user in project.project_owners.all())
+    is_pm = (request.user in project.project_members.all())
     project_members_orig = list(project.project_members.all())
     if request.method == "POST":
         form = ProjectUpdateMembersForm(request.POST, instance=project)
@@ -254,11 +269,13 @@ def project_update_members(request, project_uuid):
         form = ProjectUpdateMembersForm(instance=project)
     return render(request, 'project_update_members.html',
                   {
-                      'form': form, 'project_uuid': str(project_uuid), 'project_name': project.name}
+                      'form': form, 'project_uuid': str(project_uuid), 'project_name': project.name,
+                      'is_pc': is_pc, 'is_po': is_po, 'is_pm': is_pm}
                   )
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def project_update_owners(request, project_uuid):
     """
 
@@ -267,6 +284,10 @@ def project_update_owners(request, project_uuid):
     :return:
     """
     project = get_object_or_404(Project, uuid=UUID(str(project_uuid)))
+    # set user permissions
+    is_pc = (project.project_creator == request.user)
+    is_po = (request.user in project.project_owners.all())
+    is_pm = (request.user in project.project_members.all())
     project_owners_orig = list(project.project_owners.all())
     if request.method == "POST":
         form = ProjectUpdateOwnersForm(request.POST, instance=project, project=project)
@@ -312,11 +333,13 @@ def project_update_owners(request, project_uuid):
         form = ProjectUpdateOwnersForm(instance=project, project=project)
     return render(request, 'project_update_owners.html',
                   {
-                      'form': form, 'project_uuid': str(project_uuid), 'project_name': project.name}
+                      'form': form, 'project_uuid': str(project_uuid), 'project_name': project.name,
+                      'is_pc': is_pc, 'is_po': is_po, 'is_pm': is_pm}
                   )
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def project_delete(request, project_uuid):
     """
 
@@ -332,11 +355,13 @@ def project_delete(request, project_uuid):
     experiments = Experiment.objects.filter(Q(profile__project_id=project.id) |
                                             Q(profile__in=list(profiles)) |
                                             Q(project=project.id)).order_by('name').distinct()
+    # set user permissions
+    is_pc = (project.project_creator == request.user)
     if request.method == "POST":
         is_removed = delete_existing_project(request, project, profiles, experiments)
         if is_removed:
             return redirect('projects')
     return render(request, 'project_delete.html',
                   {'project': project, 'project_owners': project_owners, 'project_members': project_members,
-                   'profiles': profiles, 'experiments': experiments}
+                   'profiles': profiles, 'experiments': experiments, 'is_pc': is_pc}
                   )

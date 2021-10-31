@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated and user.is_aerpaw_user %}
+    {% if user.is_authenticated %}
         <head>
             <meta charset="utf-8">
             <title>Resources</title>
@@ -24,22 +24,22 @@
             </div>
             <!--
             {% if user.is_operator or user.is_resource_manager or user.is_site_admin %}
-            <div class="container py-4">
-                <div class="toolbar">
-                    <div class="input-group mb-3 toolbar-dropdown">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="typeSelect">Type</label>
+                <div class="container py-4">
+                    <div class="toolbar">
+                        <div class="input-group mb-3 toolbar-dropdown">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="typeSelect">Type</label>
+                            </div>
+                            <select class="custom-select" id="typeSelect" onChange="changeType()">
+                                <option selected value="all">All Types</option>
+                                {% for resourceType in resource_list %}
+                                    <option value="{{ resourceType }}">{{ resourceType }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <select class="custom-select" id="typeSelect" onChange="changeType()">
-                            <option selected value="all">All Types</option>
-                            {% for resourceType in resource_list %}
-                                <option value="{{ resourceType }}">{{ resourceType }}</option>
-                            {% endfor %}
-                        </select>
                     </div>
+                    <div id="main" style="width: 1000px;height:400px;" class="mt-4"></div>
                 </div>
-                <div id="main" style="width: 1000px;height:400px;" class="mt-4"></div>
-            </div>
             {% endif %}
             -->
             <table class="table table-striped table-bordered mt-4">

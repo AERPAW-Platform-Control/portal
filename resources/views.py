@@ -3,12 +3,10 @@
 # Create your views here.
 
 import json
-import os
 from uuid import UUID
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms.models import model_to_dict
 from django.shortcuts import render, redirect, get_object_or_404
 from urllib3.exceptions import MaxRetryError
@@ -46,6 +44,7 @@ def get_reservations_json(reservations):
 
 
 @login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def resources(request):
     """
 
@@ -82,7 +81,7 @@ def resources(request):
 
 
 @login_required()
-@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager())
+@user_passes_test(lambda u: u.is_site_admin() or u.is_resource_manager())
 def resource_create(request):
     """
 

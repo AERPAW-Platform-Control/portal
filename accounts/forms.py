@@ -51,6 +51,7 @@ class AerpawRoleRequestForm(forms.ModelForm):
         for ch in all_choices:
             if str(ch[0]) not in cur_role_list:
                 display_choices.append(ch)
+        display_choices.sort()
         self.fields['requested_role'].choices = display_choices
 
     class Meta:

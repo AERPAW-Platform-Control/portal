@@ -39,6 +39,9 @@
                 <tr>
                     <td>Roles</td>
                     <td>
+                        {% if not user.is_aerpaw_user %}
+                            Request to become an <a href="{% url 'request_roles' %}">AERPAW User</a>
+                        {% endif %}
                         {% for group in user.groups.all|sort_by:'name' %}
                             <b>{{ group|role_name }}</b><br>
                         {% endfor %}

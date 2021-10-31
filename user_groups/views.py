@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group
 from django.core.mail import BadHeaderError
 from django.http import HttpResponse
@@ -11,6 +11,7 @@ from .templatetags.user_groups import role_name
 
 
 @login_required
+@user_passes_test(lambda u: u.is_user_manager() or u.is_site_admin())
 def user_groups(request):
     """
 
@@ -30,11 +31,12 @@ def user_groups(request):
                     user_obj.groups.add(group_obj)
                 user_obj.save()
     user = request.user
-    all_users = AerpawUser.objects.all().exclude(username='admin').order_by('username')
+    all_users = AerpawUser.objects.all().exclude(username='admin').order_by('display_name')
     return render(request, 'user_groups.html', {'user': user, 'all_users': all_users})
 
 
 @login_required
+@user_passes_test(lambda u: u.is_user_manager() or u.is_site_admin())
 def user_requests(request):
     """
 
