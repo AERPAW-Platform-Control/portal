@@ -136,7 +136,7 @@ def get_profile_list(request):
     :param request:
     :return:
     """
-    if request.user.is_superuser:
+    if request.user.is_superuser or request.user.is_site_admin() or request.user.is_operator():
         profiles = Profile.objects.order_by('name')
     else:
         public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
