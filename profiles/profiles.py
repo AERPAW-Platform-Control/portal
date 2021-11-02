@@ -47,10 +47,10 @@ def create_new_profile(request, form):
 
     profile.created_by = request.user
     profile.created_date = timezone.now()
-    project_id = form.data.getlist('project')[0]
-    if project_id:
+    try:
+        project_id = form.data.getlist('project')[0]
         profile.project = Project.objects.get(id=int(project_id))
-    else:
+    except Exception as exc:
         profile.project = None
         profile.is_template = True
     # profile.stage = form.data.getlist('stage')[0]
