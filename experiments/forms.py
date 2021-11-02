@@ -7,21 +7,29 @@ from profiles.models import Profile
 from projects.models import Project
 from reservations.models import Reservation
 from .models import Experiment, UserStageChoice, StageChoice
+from django.db.models import Q
 
 
 class ExperimentModelChoiceField(ModelChoiceField):
     def label_from_instance(self, obj):
-        return '{0} ({1})'.format(obj.name, obj.project.name)
+        erd_name = None
+        erd_project = 'TEMPLATE'
+        if obj.name:
+            erd_name = obj.name
+        if obj.project:
+            erd_project = obj.project.name
+        return '{0} ({1})'.format(erd_name, erd_project)
 
 
 class ExperimentCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.project_id = kwargs.pop('project_id', None)
         super(ExperimentCreateForm, self).__init__(*args, **kwargs)
-        self.public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
-        if self.project_id not in self.public_projects:
-            self.public_projects.append(self.project_id)
-        self.profiles = Profile.objects.filter(project__in=self.public_projects).order_by('name').distinct()
+        # self.public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
+        # if self.project_id not in self.public_projects:
+        #     self.public_projects.append(self.project_id)
+        self.profiles = Profile.objects.filter(Q(project_id=int(self.project_id)) |
+                                               Q(is_template=True)).order_by('name').distinct()
         self.fields['profile'] = ExperimentModelChoiceField(
             queryset=self.profiles,
             required=True,

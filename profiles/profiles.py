@@ -47,7 +47,12 @@ def create_new_profile(request, form):
 
     profile.created_by = request.user
     profile.created_date = timezone.now()
-    profile.project = Project.objects.get(id=int(form.data.getlist('project')[0]))
+    project_id = form.data.getlist('project')[0]
+    if project_id:
+        profile.project = Project.objects.get(id=int(project_id))
+    else:
+        profile.project = None
+        profile.is_template = True
     # profile.stage = form.data.getlist('stage')[0]
 
     '''
@@ -63,7 +68,7 @@ def create_new_profile(request, form):
     try:
         profile.project.profile_of_project.add(profile)
         profile.save()
-    except ValueError as e:
+    except (AttributeError, ValueError) as e:
         print(e)
         profile.project = None
 
@@ -75,7 +80,7 @@ def create_new_profile(request, form):
     # except ValueError as e:
     #    print(e)
     #    profile.reservations= None
-    # profile.save()
+    profile.save()
 
     return str(profile.uuid)
 
@@ -136,15 +141,16 @@ def get_profile_list(request):
     :param request:
     :return:
     """
-    if request.user.is_superuser or request.user.is_site_admin() or request.user.is_operator():
+    if request.user.is_site_admin() or request.user.is_operator():
         profiles = Profile.objects.order_by('name')
     else:
-        public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
+        # public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
         my_projects = Project.objects.filter(Q(project_creator=request.user) |
                                              Q(project_members__in=[request.user]) |
                                              Q(project_owners__in=[request.user])).values_list('id', flat=True)
-        projects = set(list(public_projects) + list(my_projects))
-        profiles = Profile.objects.filter(project__in=projects).order_by('name').distinct()
+        # projects = set(list(public_projects) + list(my_projects))
+        profiles = Profile.objects.filter(Q(project__in=list(my_projects)) |
+                                          Q(is_template=True)).order_by('name').distinct()
     return profiles
 
 
@@ -155,7 +161,7 @@ def parse_profile(request, experiment_definition):
     Currently the resource definition is provided by user with raw json file.
 
     :param request:
-    :param experiment:
+    :param experiment_definition:
     """
     try:
         logger.info(experiment_definition)
