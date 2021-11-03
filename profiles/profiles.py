@@ -48,7 +48,7 @@ def create_new_profile(request, form):
     profile.created_by = request.user
     profile.created_date = timezone.now()
     try:
-        project_id = form.data.getlist('project')[0]
+        project_id = request.GET.get('project_id', None)
         profile.project = Project.objects.get(id=int(project_id))
     except Exception as exc:
         profile.project = None
@@ -68,7 +68,7 @@ def create_new_profile(request, form):
     try:
         profile.project.profile_of_project.add(profile)
         profile.save()
-    except (AttributeError, ValueError) as e:
+    except Exception as e:
         print(e)
         profile.project = None
 
