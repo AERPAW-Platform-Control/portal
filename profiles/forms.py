@@ -10,22 +10,31 @@ class ProfileCreateForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         self.pr = kwargs.pop('project', None)
         super(ProfileCreateForm, self).__init__(*args, **kwargs)
-        self.projects = Project.objects.filter(id=self.pr.id)
-
-        self.fields['project'] = forms.ModelChoiceField(
-            queryset=self.projects,
-            initial=self.pr,
-            required=True,
-            widget=forms.Select(),
-            label='Project'
+        if self.pr:
+            # self.projects = Project.objects.filter(id=self.pr.id)
+            self.projects = str(self.pr)
+        else:
+            # self.projects = Project.objects.filter(id=-1)
+            self.projects = 'TEMPLATE'
+        self.fields['project'] = forms.CharField(
+            initial=self.projects,
+            disabled=True
         )
+        # self.fields['project'] = forms.ModelChoiceField(
+        #     queryset=self.projects,
+        #     initial=self.pr,
+        #     widget=forms.Select(),
+        #     label='Project',
+        #     required=False,
+        #     blank=True,
+        # )
 
     class Meta:
         model = Profile
         fields = (
+            # 'project',
             'name',
             'description',
-            'project',
             'profile',
             # 'created_by',
             # 'created_date',
@@ -46,6 +55,30 @@ class ProfileCreateForm(forms.ModelForm):
 
 
 class ProfileUpdateForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.pr = kwargs.pop('project', None)
+        super(ProfileUpdateForm, self).__init__(*args, **kwargs)
+        if self.pr:
+            # self.projects = Project.objects.filter(id=self.pr.id)
+            self.projects = str(self.pr)
+        else:
+            # self.projects = Project.objects.filter(id=-1)
+            self.projects = 'TEMPLATE'
+        self.fields['project'] = forms.CharField(
+            initial=self.projects,
+            disabled=True
+        )
+        # self.fields['project'] = forms.ModelChoiceField(
+        #     queryset=self.projects,
+        #     initial=self.pr,
+        #     widget=forms.Select(),
+        #     label='Project',
+        #     required=False,
+        #     blank=True,
+        # )
+
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60}),
         required=True,
@@ -57,13 +90,13 @@ class ProfileUpdateForm(forms.ModelForm):
         label='Description',
     )
 
-    project = forms.ModelChoiceField(
-        queryset=Project.objects.order_by('name'),
-        required=True,
-        initial=0,
-        widget=forms.Select(),
-        label='Project',
-    )
+    # project = forms.ModelChoiceField(
+    #     queryset=Project.objects.filter().order_by('name'),
+    #     required=True,
+    #     initial=0,
+    #     widget=forms.Select(),
+    #     label='Project',
+    # )
 
     profile = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
@@ -74,9 +107,9 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = (
+            # 'project',
             'name',
             'description',
-            'project',
             'profile',
             # 'modified_by',
             # 'modified_date',

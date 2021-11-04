@@ -36,7 +36,21 @@ def create_new_experiment(request, form, project_id):
     experiment.name = form.data.getlist('name')[0]
     try:
         experiment.description = form.data.getlist('description')[0]
-        experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
+        profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
+        if profile.is_template:
+            profile.pk = None
+            profile.id = None
+            profile.save()
+            profile.uuid = uuid.uuid4()
+            profile.is_template = False
+            profile.name = profile.name + ' (copy)'
+            profile.created_by = request.user
+            profile.modified_by = request.user
+            profile.created_date = timezone.now()
+            profile.modified_date = timezone.now()
+            profile.project = Project.objects.get(id=str(project_id))
+            profile.save()
+        experiment.profile = profile
     except ValueError as e:
         print(e)
         experiment.profile = None

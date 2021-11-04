@@ -27,18 +27,25 @@ def profile_create(request):
     :param request:
     :return:
     """
-    project = get_object_or_404(Project, id=int(request.session.get('project_id', '')))
+    try:
+        is_template = request.GET['is_template']
+        project = None
+        project_uuid = 'None'
+    except Exception as exc:
+        project = get_object_or_404(Project, id=int(request.session.get('project_id', '')))
+        project_uuid = str(project.uuid)
     if request.method == "POST":
         form = ProfileCreateForm(request.POST, user=request.user, project=project)
         if form.is_valid():
             profile_uuid = create_new_profile(request, form)
             if profile_uuid is None:
                 return render(request, 'profile_create.html', {'form': form,
+                                                               'project_uuid': project_uuid,
                                                                'msg': '* [ERROR] Invalid entry for "Definition".'})
             return redirect('profile_detail', profile_uuid=profile_uuid)
     else:
         form = ProfileCreateForm(user=request.user, project=project)
-    return render(request, 'profile_create.html', {'form': form, 'project_uuid': str(project.uuid)})
+    return render(request, 'profile_create.html', {'form': form, 'project_uuid': project_uuid})
 
 
 @login_required()
@@ -64,9 +71,13 @@ def profile_update(request, profile_uuid):
     :return:
     """
     profile = get_object_or_404(Profile, uuid=UUID(str(profile_uuid)))
+    if profile.project:
+        project = get_object_or_404(Project, id=profile.project.id)
+    else:
+        project = None
     if request.method == "POST":
         old_profile_name = profile.name
-        form = ProfileUpdateForm(request.POST, instance=profile)
+        form = ProfileUpdateForm(request.POST, instance=profile, project=project)
         if form.is_valid():
             # if is_emulab_profile(profile):
             #    delete_emulab_profile(request, profile, old_profile_name)
@@ -80,7 +91,7 @@ def profile_update(request, profile_uuid):
             else:
                 return redirect('profile_detail', profile_uuid=str(profile.uuid))
     else:
-        form = ProfileUpdateForm(instance=profile)
+        form = ProfileUpdateForm(instance=profile, project=project)
     return render(request, 'profile_update.html',
                   {
                       'form': form, 'profile_uuid': str(profile_uuid), 'profile_name': profile.name}

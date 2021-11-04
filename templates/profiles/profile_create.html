@@ -9,22 +9,21 @@
     {% if user.is_authenticated %}
         <div class="container">
             <h2>New Experiment Resource Definition</h2>
-            <p>
-                Read about: <a
-                    href="https://sites.google.com/ncsu.edu/aerpaw-wiki/aerpaw-user-manual/2-experiment-web-portal/2-4-creating-and-managing-experiments"
-                    target="_blank">
-                Creating and Managing Experiments
-            </a>
-            </p>
             <p style="color:red" ;>{{ msg }}</p>
             <form id="create-profile" method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
             </form>
             <button class="btn btn-success mr-2" type="submit" form="create-profile" value="save">Save</button>
-            <button class="btn btn-secondary mr-2" value="cancel">
-                <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="unlink">Cancel</a>
-            </button>
+            {% if project_uuid != 'None' %}
+                <button class="btn btn-secondary mr-2" value="cancel">
+                    <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="unlink">Cancel</a>
+                </button>
+            {% else %}
+                <button class="btn btn-secondary mr-2" value="cancel">
+                    <a href="{% url 'profiles' %}" class="unlink">Cancel</a>
+                </button>
+            {% endif %}
         </div>
     {% else %}
         <div class="container">
