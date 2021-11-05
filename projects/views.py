@@ -355,6 +355,10 @@ def project_delete(request, project_uuid):
     experiments = Experiment.objects.filter(Q(profile__project_id=project.id) |
                                             Q(profile__in=list(profiles)) |
                                             Q(project=project.id)).order_by('name').distinct()
+    for exp in experiments:
+        if not exp.can_initiate():
+            messages.error(request, '[EXPERIMENT] {0} is not IDLE .. Unable to delete Project'.format(exp.name))
+            return project_detail(request, project_uuid)
     # set user permissions
     is_pc = (project.project_creator == request.user)
     if request.method == "POST":

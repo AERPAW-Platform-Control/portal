@@ -2,6 +2,7 @@
 
 from uuid import UUID
 
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 
 from experiments.models import Experiment
@@ -57,9 +58,10 @@ def profile_detail(request, profile_uuid):
     :return:
     """
     profile = get_object_or_404(Profile, uuid=UUID(str(profile_uuid)))
+    experiments = profile.experiment_profile.all()
     is_creator = (profile.created_by == request.user)
     return render(request, 'profile_detail.html',
-                  {'profile': profile, 'is_creator': is_creator})
+                  {'profile': profile, 'is_creator': is_creator, 'experiments': experiments})
 
 
 @login_required()
@@ -108,6 +110,11 @@ def profile_delete(request, profile_uuid):
     """
     profile = get_object_or_404(Profile, uuid=UUID(str(profile_uuid)))
     experiments = Experiment.objects.filter(profile_id=profile.id).order_by('name')
+    for exp in experiments:
+        if not exp.can_initiate():
+            messages.error(request,
+                           '[EXPERIMENT] {0} is not IDLE .. Unable to delete Resource Description'.format(exp.name))
+            return profile_detail(request, profile_uuid)
     if request.method == "POST":
         is_removed = delete_existing_profile(request, profile, experiments)
         if is_removed:

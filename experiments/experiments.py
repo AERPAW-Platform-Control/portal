@@ -236,7 +236,7 @@ def get_experiment_list(request):
     :param request:
     :return:
     """
-    if request.user.is_operator():
+    if request.user.is_operator() or request.user.is_site_admin():
         experiments = Experiment.objects.order_by('name')
     else:
         experiments = Experiment.objects.filter(experimenter__uuid=request.user.uuid).order_by('name').distinct()
