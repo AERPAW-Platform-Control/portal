@@ -19,11 +19,9 @@
                     <td>{{ profile.description }}</td>
                 </tr>
                 <tr>
-                    <td>Project</td>
-                    <td>
-                        {% if profile.is_template %}
-                            TEMPLATE
-                        {% else %}
+                    {% if not profile.is_template %}
+                        <td>Project</td>
+                        <td>
                             {% if is_creator or profile.project.is_public or user.is_operator or user.is_site_admin %}
                                 <a href="{% url 'project_detail' project_uuid=profile.project.uuid %}">
                                     {{ profile.project }}
@@ -31,9 +29,8 @@
                             {% else %}
                                 {{ profile.project }}
                             {% endif %}
-                        {% endif %}
-                    </td>
-                    {#                    <td>{{ profile.project }}</td>#}
+                        </td>
+                    {% endif %}
                 </tr>
                 {% if not profile.is_template %}
                     <tr>

@@ -9,7 +9,7 @@
     {% if user.is_authenticated %}
         <div class="container">
             <div class="d-flex flex-row align-items-center justify-content-between">
-                <h2>Experiment Resource Definition</h2>
+                <h2>Experiment Resource Definition (ERD)</h2>
                 {% if user.is_site_admin %}
                     <button class="btn btn-success mr-2">
                         <a href="{% url 'profile_create' %}?is_template=true" class="unlink">Create Template</a>
@@ -18,11 +18,12 @@
             </div>
             {# per GH issue #87 - language changes #}
             <p class="text-info">
-                <b>For every Experiment</b>: First define the subset of AERPAW resources to be used in that Experiment,
-                by selecting one of the Experiment Resource Definition Templates provided below, or creating your own
-                within your Project.
+                <b>Each Experiment must reference an ERD</b>: An ERD is a subset of AERPAW resources to be used in an
+                Experiment. When defining an Experiment from within a Project the User may use one of the ERD Templates
+                provided below, or create their own - It should be noted that ERD creation and assignment can only take
+                place from within a Project.
             </p>
-        <p>
+            <p>
                 Read about: <a
                     href="https://sites.google.com/ncsu.edu/aerpaw-wiki/aerpaw-user-manual/2-experiment-web-portal/2-4-creating-and-managing-experiments"
                     target="_blank">
@@ -34,7 +35,6 @@
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
-                    <th>Project</th>
                     <th>Created By</th>
                     <th>Created Date</th>
                 </tr>
@@ -47,7 +47,6 @@
                                 </a>
                             </td>
                             <td>{{ profile.description }}</td>
-                            <td>TEMPLATE</td>
                             <td>{{ profile.created_by }}</td>
                             <td>{{ profile.created_date }}</td>
                         </tr>
