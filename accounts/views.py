@@ -47,6 +47,10 @@ def request_roles(request):
     :param request:
     :return:
     """
+    if request.user.is_aerpaw_user() and request.user.is_project_manager():
+        has_role_options = False
+    else:
+        has_role_options = True
     if request.method == 'GET':
         form = AerpawRoleRequestForm(user=request.user)
     else:
@@ -75,7 +79,7 @@ def request_roles(request):
                 return HttpResponse('Invalid header found.')
             return redirect('profile')
 
-    return render(request, 'request_roles.html', {'form': form})
+    return render(request, 'request_roles.html', {'form': form, 'has_role_options': has_role_options})
 
 
 @login_required
