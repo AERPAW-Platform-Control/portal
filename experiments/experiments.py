@@ -16,7 +16,7 @@ from projects.models import Project
 from reservations.models import Reservation
 from resources.models import Resource
 from resources.resources import emulab_location_to_urn
-from usercomms.usercomms import portal_mail
+from usercomms.usercomms import portal_mail, ack_mail
 from .jenkins_api import deploy_experiment, info_deployment
 from .models import Experiment
 
@@ -143,6 +143,11 @@ def update_existing_experiment(request, experiment, form, prev_stage, prev_state
                 experiment.submit()
                 experiment.save()
                 send_request_to_testbed(request, experiment)
+                kwargs = {'experiment_name': str(experiment)}
+                ack_mail(
+                    template='experiment_submit', user_name=request.user.display_name,
+                    user_email=request.user.email, **kwargs
+                )
             elif experiment.stage == 'Idle':
                 # Operator finished testbed testing, change the experiment back to Idle
                 experiment.idle()
@@ -160,9 +165,9 @@ def update_existing_experiment(request, experiment, form, prev_stage, prev_state
 
 
 def send_request_to_testbed(request, experiment):
+    action = None
     if is_emulab_stage(experiment.stage):
         return  # do nothing, this function is not for emulab
-
     if experiment.state == Experiment.STATE_DEPLOYING:
         action = 'START'
     elif experiment.state == Experiment.STATE_IDLE:
@@ -170,7 +175,7 @@ def send_request_to_testbed(request, experiment):
     elif experiment.state == Experiment.STATE_SUBMIT:
         action = 'SUBMIT'
 
-    if action is not None:
+    if action:
         subject = 'Aerpaw Experiment Action Session Request: {} {}:{}'.format(action,
                                                                               str(experiment.uuid),
                                                                               experiment.stage)
@@ -193,6 +198,12 @@ def send_request_to_testbed(request, experiment):
         portal_mail(subject=subject, body_message=message, sender=request.user,
                     receivers=receivers,
                     reference_note=None, reference_url=None)
+        if action == 'START':
+            kwargs = {'experiment_name': str(experiment)}
+            ack_mail(
+                template='experiment_init', user_name=request.user.display_name,
+                user_email=request.user.email, **kwargs
+            )
 
 
 def update_experiment_reservations(experiment, experiment_reservation_id_list):

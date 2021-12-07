@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import BadHeaderError
@@ -8,11 +6,12 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from uuid import UUID
 
 from accounts.models import AerpawUser
 from experiments.models import Experiment
 from profiles.models import Profile
-from usercomms.usercomms import portal_mail
+from usercomms.usercomms import portal_mail, ack_mail
 # from cicd.models import Cicd
 from .forms import ProjectCreateForm, ProjectUpdateForm, ProjectUpdateMembersForm, ProjectUpdateOwnersForm, \
     ProjectJoinForm, JOIN_CHOICES
@@ -174,6 +173,11 @@ def project_join(request, project_uuid):
                 create_new_project_membership_request(request, project_uuid, member_type, body_message)
                 portal_mail(subject=subject, body_message=body_message, sender=sender, receivers=receivers,
                             reference_note=reference_note, reference_url=reference_url)
+                kwargs = {'project_name': str(project.name), 'project_owner': str(project.created_by)}
+                ack_mail(
+                    template='project_join', user_name=request.user.display_name,
+                    user_email=request.user.email, **kwargs
+                )
                 messages.info(request, 'Success! Request to join project: ' + str(project.name) + ' has been sent')
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
