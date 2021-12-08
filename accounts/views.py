@@ -1,5 +1,3 @@
-# accounts/views.py
-
 import os
 import subprocess
 import tempfile
@@ -7,9 +5,12 @@ from zipfile import ZipFile
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.mail import BadHeaderError
 from django.http import FileResponse
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
+from usercomms.usercomms import portal_mail
 from .accounts import create_new_role_request
 from .forms import AerpawUserSignupForm, AerpawUserCredentialForm, AerpawRoleRequestForm, AerpawUser
 from .models import create_new_signup, update_credential
@@ -46,16 +47,39 @@ def request_roles(request):
     :param request:
     :return:
     """
-    if request.method == "POST":
+    if request.user.is_aerpaw_user() and request.user.is_project_manager():
+        has_role_options = False
+    else:
+        has_role_options = True
+    if request.method == 'GET':
+        form = AerpawRoleRequestForm(user=request.user)
+    else:
         form = AerpawRoleRequestForm(request.POST, user=request.user)
         if form.is_valid():
-            # signup_uuid = create_new_signup(request, form)
             role_request = create_new_role_request(request, form)
-            messages.info(request, 'INFO: Role Request has been created for - {0}'.format(str(role_request)))
+            subject = '[AERPAW] User: ' + request.user.display_name + ' has requested role: ' + role_request
+            body_message = form.cleaned_data['purpose']
+            sender = request.user
+            receivers = []
+            if role_request == 'is Administrator':
+                user_managers = AerpawUser.objects.filter(is_superuser=True).distinct()
+            elif role_request in ['is Operator', 'can Manage Resources', 'can Manage User Roles']:
+                user_managers = AerpawUser.objects.filter(groups__name__in=['site_admin']).distinct()
+            else:
+                user_managers = AerpawUser.objects.filter(groups__name__in=['site_admin', 'user_manager']).distinct()
+            for um in user_managers:
+                receivers.append(um)
+            reference_note = 'Add role ' + str(role_request)
+            reference_url = 'https://' + str(request.get_host()) + '/manage/user_requests'
+            try:
+                portal_mail(subject=subject, body_message=body_message, sender=sender, receivers=receivers,
+                            reference_note=reference_note, reference_url=reference_url)
+                messages.info(request, 'Success! Request to add role: ' + role_request + ' has been sent')
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
             return redirect('profile')
-    else:
-        form = AerpawRoleRequestForm(user=request.user)
-    return render(request, 'request_roles.html', {'form': form})
+
+    return render(request, 'request_roles.html', {'form': form, 'has_role_options': has_role_options})
 
 
 @login_required
@@ -89,7 +113,7 @@ def credential(request):
         if 'savebtn' in request.POST and form.is_valid():
             if request.POST['publickey']:
                 update_credential(request, form)
-                form = AerpawUserCredentialForm() # clear form
+                form = AerpawUserCredentialForm()  # clear form
             render(request, 'credential.html', {'form': form})
 
         elif 'generatebtn' in request.POST:
@@ -109,7 +133,6 @@ def credential(request):
                     open(os.path.join(tempfile.gettempdir(), 'aerpaw_id_rsa.zip'), 'rb'),
                     as_attachment=True)
             except Exception as e:
-                print(output)
                 print(e)
     else:
         form = AerpawUserCredentialForm()

@@ -9,6 +9,7 @@ APPS_LIST=(
   "profiles"
   "cicd"
   "user_groups"
+  "usercomms"
 )
 
 FIXTURES_LIST=(

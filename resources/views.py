@@ -2,20 +2,17 @@
 
 # Create your views here.
 
-from django.contrib.auth.decorators import user_passes_test
-
+import json
 from uuid import UUID
-from urllib3.exceptions import MaxRetryError
-from django.contrib import messages
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.forms.models import model_to_dict
+from django.shortcuts import render, redirect, get_object_or_404
+from urllib3.exceptions import MaxRetryError
 
 from .forms import ResourceCreateForm, ResourceChangeForm
-from .models import Resource
 from .resources import *
-
-import json
 
 
 def get_resources_json(resources):
@@ -46,6 +43,8 @@ def get_reservations_json(reservations):
     return json.dumps(result)
 
 
+@login_required()
+@user_passes_test(lambda u: u.is_aerpaw_user())
 def resources(request):
     """
 
@@ -61,6 +60,7 @@ def resources(request):
     resources_json = get_resources_json(resources)
     reserved_resource = get_all_reserved_units(24, 2)
     reservations_json = get_reservations_json(reserved_resource)
+    resource_map = os.getenv('AERPAW_MAP_URL')
 
     # resource type list
     resource_list = []
@@ -76,10 +76,12 @@ def resources(request):
                       'reservations': reserved_resource,
                       'reservations_json': reservations_json,
                       'resource_list': resource_list,
+                      'resource_map': resource_map,
                   })
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager)
+@login_required()
+@user_passes_test(lambda u: u.is_site_admin() or u.is_resource_manager())
 def resource_create(request):
     """
 
@@ -96,6 +98,7 @@ def resource_create(request):
     return render(request, 'resource_create.html', {'form': form})
 
 
+@login_required()
 def resource_detail(request, resource_uuid):
     """
 
@@ -105,10 +108,13 @@ def resource_detail(request, resource_uuid):
     """
     resource = get_object_or_404(Resource, uuid=UUID(str(resource_uuid)))
     resource_reservations = resource.reservation_of_resource
-    return render(request, 'resource_detail.html', {'resource': resource, 'reservations': resource_reservations.all()})
+    resource_map = os.getenv('AERPAW_MAP_URL')
+    return render(request, 'resource_detail.html',
+                  {'resource': resource, 'reservations': resource_reservations.all(), 'resource_map': resource_map})
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager)
+@login_required()
+@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager())
 def resource_update(request, resource_uuid):
     """
 
@@ -131,7 +137,8 @@ def resource_update(request, resource_uuid):
                   )
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager)
+@login_required()
+@user_passes_test(lambda u: u.is_superuser or u.is_resource_manager())
 def resource_delete(request, resource_uuid):
     """
 

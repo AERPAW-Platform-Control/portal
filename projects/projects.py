@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.db.models import Q
 from django.utils import timezone
 
-from .models import Project, AerpawUser
+from .models import Project, AerpawUser, ProjectMembershipRequest
 
 
 def create_new_project(request, form):
@@ -20,9 +20,15 @@ def create_new_project(request, form):
     project.name = form.data.getlist('name')[0]
     try:
         project.description = form.data.getlist('description')[0]
-    except ValueError as e:
+    except IndexError as e:
         print(e)
         project.description = None
+    try:
+        if form.data.getlist('is_public')[0]:
+            project.is_public = True
+    except IndexError as e:
+        print(e)
+        project.is_public = False
 
     project.project_creator = request.user
     project.created_by = request.user
@@ -102,23 +108,35 @@ def update_existing_project(request, project, form):
     project.name = form.data.getlist('name')[0]
     try:
         project.description = form.data.getlist('description')[0]
-    except ValueError as e:
+    except IndexError as e:
         print(e)
         project.description = None
+    try:
+        if form.data.getlist('is_public')[0]:
+            project.is_public = True
+    except IndexError as e:
+        print(e)
+        project.is_public = False
 
     project.save()
 
     return str(project.uuid)
 
 
-def delete_existing_project(request, project):
+def delete_existing_project(request, project, profiles, experiments):
     """
 
     :param request:
     :param project:
+    :param profiles:
+    :param experiments:
     :return:
     """
     try:
+        for experiment in experiments:
+            experiment.delete()
+        for profile in profiles:
+            profile.delete()
         project.delete()
         return True
     except Exception as e:
@@ -132,7 +150,6 @@ def get_project_list(request):
     :param request:
     :return:
     """
-    print(request.user)
     my_projects = Project.objects.filter(
         Q(project_creator=request.user) |
         Q(project_owners__in=[request.user]) |
@@ -140,3 +157,20 @@ def get_project_list(request):
     ).order_by('name').distinct()
     other_projects = Project.objects.all().difference(my_projects).order_by('name')
     return my_projects, other_projects
+
+
+def create_new_project_membership_request(request, project_uuid, member_type, message):
+    pm_request = ProjectMembershipRequest()
+    pm_request.project_uuid = project_uuid
+    pm_request.requested_by = request.user
+    pm_request.member_type = member_type
+    pm_request.message = message
+    pm_request.created_by = request.user
+    pm_request.created_date = timezone.now()
+    pm_request.is_approved = False
+    pm_request.is_completed = False
+    pm_request.modified_by = pm_request.created_by
+    pm_request.modified_date = pm_request.created_date
+    pm_request.save()
+
+    return True

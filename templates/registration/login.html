@@ -10,13 +10,24 @@
             <input type="submit" value="logout">
         </form>
     {% else %}
-        <br/>
-        <p>
-            This site uses CILogon to authenticate user identity:
-            <a href="{% url 'oidc_authentication_init' %}">
-                <img style="border-style:none; vertical-align:middle"
-                     src="https://cilogon.org/images/cilogon-logon-48-w.png"
-                     alt=""></a>
-        </p>
+        <div>
+            <b>AERPAW Portal uses <a href="https://www.cilogon.org" target="_blank">CILogon</a> to authenticate user
+                identity:</b>
+        </div>
+        <br>
+        <div style="border: 5px outset #696; cursor:pointer; padding:3px; display:inline-block;"
+             onclick="location.href='{% url 'oidc_authentication_init' %}'">
+            <a href="{% url 'oidc_authentication_init' %}"
+               style="font-family:Arial,sans-serif; font-style:italic; font-weight:bold; font-size:32px; color:#363;
+               text-decoration:none;"><img
+                    alt=""
+                    src="https://cilogon.org/images/cilogon-logo-48x48.png"
+                    style="vertical-align:middle"/>&nbsp;AERPAW&nbsp;Login&nbsp;</a>
+        </div>
+        <br><br>
+        <strong>NOTE: If this is your first time signing in an account will automatically be created for you based on
+            the Identity
+            Provider you choose to authenticate with.
+        </strong>
     {% endif %}
 {% endblock %}

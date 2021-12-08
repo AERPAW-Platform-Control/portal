@@ -22,6 +22,7 @@ env_path = Path('.') / '.env'
 load_dotenv(verbose=True, dotenv_path=env_path)
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -56,8 +57,9 @@ INSTALLED_APPS = [
     'experiments',  # aerpaw experiments
     'projects',  # aerpaw projects
     'profiles',  # aerpaw profiles
-    'cicd',  # aerpaw cicd
+    # 'cicd',  # aerpaw cicd (RM_CICD: Deactivate until further notice 8/15/2021)
     'user_groups',  # user_groups
+    'usercomms',  # aerpaw user communications
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -91,8 +93,9 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/reservations'),
             os.path.join(BASE_DIR, 'templates/resources'),
             os.path.join(BASE_DIR, 'templates/profiles'),
-            os.path.join(BASE_DIR, 'templates/cicd'),
+            # os.path.join(BASE_DIR, 'templates/cicd'),
             os.path.join(BASE_DIR, 'templates/manage'),
+            os.path.join(BASE_DIR, 'templates/usercomms'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -213,7 +216,13 @@ LOGGING = {
 # Auth user model (custom user account)
 AUTH_USER_MODEL = 'accounts.AerpawUser'
 
-# AERPAW Email 
+# Django running behind Nginx reverse proxy
+USE_X_FORWARDED_HOST = True
+
+# AERPAW Email for development (use only 1 email backend at a time)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# AERPAW Email for production (use only 1 email backend at a time)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_PORT = os.getenv('EMAIL_PORT')
@@ -225,3 +234,5 @@ EMAIL_USE_SSL = False
 
 # account for Django 3.2 (Warning models.W042)
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+AERPAW_MAP_URL = os.getenv('AERPAW_MAP_URL', None)

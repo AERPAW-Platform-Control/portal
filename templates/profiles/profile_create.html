@@ -8,14 +8,22 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>New Experiment Definition</h2>
-            <p style="color:red";>{{ msg }}</p>
-            <form method="POST" class="post-form">
+            <h2>New Experiment Resource Definition</h2>
+            <p style="color:red" ;>{{ msg }}</p>
+            <form id="create-profile" method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input class="btn btn-success mr-2" type="submit" value="Save"/>
-                <button class="btn btn-secondary" onclick="history.back();">Cancel</button>
             </form>
+            <button class="btn btn-success mr-2" type="submit" form="create-profile" value="save">Save</button>
+            {% if project_uuid != 'None' %}
+                <button class="btn btn-secondary mr-2" value="cancel">
+                    <a href="{% url 'project_detail' project_uuid=project_uuid %}" class="unlink">Cancel</a>
+                </button>
+            {% else %}
+                <button class="btn btn-secondary mr-2" value="cancel">
+                    <a href="{% url 'profiles' %}" class="unlink">Cancel</a>
+                </button>
+            {% endif %}
         </div>
     {% else %}
         <div class="container">

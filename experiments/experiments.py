@@ -1,22 +1,24 @@
-import uuid
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings
-
-from .models import Experiment
-from profiles.profiles import *
-from resources.resources import *
-from resources.models import Resource
-import aerpawgw_client
-from aerpawgw_client.rest import ApiException
-from datetime import datetime
+import json
 import logging
 import os
-import json
-from .jenkins_api import deploy_experiment, info_deployment
 import time
+import uuid
+from datetime import datetime
+
+import aerpawgw_client
+from aerpawgw_client.rest import ApiException
+from django.utils import timezone
+
+from accounts.models import AerpawUser
+from profiles.models import Profile
+from profiles.profiles import is_emulab_stage, parse_profile
+from projects.models import Project
+from reservations.models import Reservation
+from resources.models import Resource
+from resources.resources import emulab_location_to_urn
+from usercomms.usercomms import portal_mail, ack_mail
+from .jenkins_api import deploy_experiment, info_deployment
+from .models import Experiment
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,21 @@ def create_new_experiment(request, form, project_id):
     experiment.name = form.data.getlist('name')[0]
     try:
         experiment.description = form.data.getlist('description')[0]
-        experiment.profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
+        profile = Profile.objects.get(id=int(form.data.getlist('profile')[0]))
+        if profile.is_template:
+            profile.pk = None
+            profile.id = None
+            profile.save()
+            profile.uuid = uuid.uuid4()
+            profile.is_template = False
+            profile.name = profile.name + ' (copy)'
+            profile.created_by = request.user
+            profile.modified_by = request.user
+            profile.created_date = timezone.now()
+            profile.modified_date = timezone.now()
+            profile.project = Project.objects.get(id=str(project_id))
+            profile.save()
+        experiment.profile = profile
     except ValueError as e:
         print(e)
         experiment.profile = None
@@ -127,6 +143,11 @@ def update_existing_experiment(request, experiment, form, prev_stage, prev_state
                 experiment.submit()
                 experiment.save()
                 send_request_to_testbed(request, experiment)
+                kwargs = {'experiment_name': str(experiment)}
+                ack_mail(
+                    template='experiment_submit', user_name=request.user.display_name,
+                    user_email=request.user.email, **kwargs
+                )
             elif experiment.stage == 'Idle':
                 # Operator finished testbed testing, change the experiment back to Idle
                 experiment.idle()
@@ -143,29 +164,10 @@ def update_existing_experiment(request, experiment, form, prev_stage, prev_state
     return str(experiment.uuid)
 
 
-def send_email_to_admin(subject, message):
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [settings.EMAIL_ADMIN_USER]
-    operators = list(AerpawUser.objects.filter(groups__name='operator'))
-    for operator in operators:
-        recipient_list.append(operator.email)
-    logger.warning("send_email:\n" + subject)
-    logger.warning(message)
-    send_mail(subject, message, email_from, recipient_list)
-
-
-def send_email_to_user(subject, message, user):
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [user.email]
-    logger.warning("send_email to {}: {}\n".format(user.email, subject))
-    logger.warning(message)
-    send_mail(subject, message, email_from, recipient_list)
-
-
 def send_request_to_testbed(request, experiment):
+    action = None
     if is_emulab_stage(experiment.stage):
         return  # do nothing, this function is not for emulab
-
     if experiment.state == Experiment.STATE_DEPLOYING:
         action = 'START'
     elif experiment.state == Experiment.STATE_IDLE:
@@ -173,7 +175,7 @@ def send_request_to_testbed(request, experiment):
     elif experiment.state == Experiment.STATE_SUBMIT:
         action = 'SUBMIT'
 
-    if action is not None:
+    if action:
         subject = 'Aerpaw Experiment Action Session Request: {} {}:{}'.format(action,
                                                                               str(experiment.uuid),
                                                                               experiment.stage)
@@ -181,10 +183,27 @@ def send_request_to_testbed(request, experiment):
                   + "Experiment Name: {}\n".format(str(experiment)) \
                   + "Project: {}\n".format(experiment.project) \
                   + "User: {}\n\n".format(request.user.username)
+        if action == 'SUBMIT':
+            message += "Testbed Experiment Description: {}\n\n".format(experiment.submit_notes)
         if action == 'START' or action == 'SUBMIT':
             session_req = generate_experiment_session_request(request, experiment)
             message += "Experiment {} Session Request:\n{}\n".format(experiment.stage, session_req)
-        send_email_to_admin(subject, message)
+
+        receivers = []
+        operators = list(AerpawUser.objects.filter(groups__name='operator'))
+        for operator in operators:
+            receivers.append(operator)
+        logger.warning("send_email:\n" + subject)
+        logger.warning(message)
+        portal_mail(subject=subject, body_message=message, sender=request.user,
+                    receivers=receivers,
+                    reference_note=None, reference_url=None)
+        if action == 'START':
+            kwargs = {'experiment_name': str(experiment)}
+            ack_mail(
+                template='experiment_init', user_name=request.user.display_name,
+                user_email=request.user.email, **kwargs
+            )
 
 
 def update_experiment_reservations(experiment, experiment_reservation_id_list):
@@ -228,10 +247,10 @@ def get_experiment_list(request):
     :param request:
     :return:
     """
-    if request.user.is_operator():
+    if request.user.is_operator() or request.user.is_site_admin():
         experiments = Experiment.objects.order_by('name')
     else:
-        experiments = Experiment.objects.filter(experimenter=request.user).order_by('name')
+        experiments = Experiment.objects.filter(experimenter__uuid=request.user.uuid).order_by('name').distinct()
     return experiments
 
 

@@ -1,8 +1,6 @@
-from uuid import UUID
 import os
-from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
+
+from django.shortcuts import render
 
 
 def home(request):

@@ -1,21 +1,41 @@
 from django import forms
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.forms import ModelChoiceField
 
 from accounts.models import AerpawUser
+from profiles.models import Profile
 from projects.models import Project
 from reservations.models import Reservation
-from profiles.models import Profile
 from .models import Experiment, UserStageChoice, StageChoice
+from django.db.models import Q
+
+
+class ExperimentModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        erd_name = None
+        erd_project = 'TEMPLATE'
+        if obj.name:
+            erd_name = obj.name
+        if obj.project:
+            erd_project = obj.project.name
+        return '{0} ({1})'.format(erd_name, erd_project)
 
 
 class ExperimentCreateForm(forms.ModelForm):
-    profile = forms.ModelChoiceField(
-        queryset=Profile.objects.order_by('name'),
-        required=True,
-        widget=forms.Select(),
-        label='Experiment Definition',
-    )
+    def __init__(self, *args, **kwargs):
+        self.project_id = kwargs.pop('project_id', None)
+        super(ExperimentCreateForm, self).__init__(*args, **kwargs)
+        # self.public_projects = list(Project.objects.filter(is_public=True).values_list('id', flat=True))
+        # if self.project_id not in self.public_projects:
+        #     self.public_projects.append(self.project_id)
+        self.profiles = Profile.objects.filter(Q(project_id=int(self.project_id)) |
+                                               Q(is_template=True)).order_by('name').distinct()
+        self.fields['profile'] = ExperimentModelChoiceField(
+            queryset=self.profiles,
+            required=True,
+            widget=forms.Select(),
+            label='Experiment Resource Definition',
+        )
 
     class Meta:
         model = Experiment
@@ -176,7 +196,7 @@ class ExperimentUpdateForm(forms.ModelForm):
         queryset=Profile.objects.order_by('name'),
         required=False,
         widget=forms.Select(),
-        label='Experiment Definition',
+        label='Experiment Resource Definition',
     )
     '''
 
@@ -189,7 +209,6 @@ class ExperimentUpdateForm(forms.ModelForm):
 
 
 class ExperimentUpdateByOpsForm(forms.ModelForm):
-
     stage = forms.ChoiceField(
         choices=StageChoice.choices(),
         required=True,
@@ -227,10 +246,18 @@ class ExperimentSubmitForm(forms.ModelForm):
         label='Submit to',
     )
 
+    submit_notes = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False,
+        label='Testbed Experiment Description\n',
+        # help_text='\nsuch as "The drone will take off at an altitude of 50m and then go west 300m, then return to launch and land."'
+    )
+
     class Meta:
         model = Experiment
         fields = (
             'stage',
+            'submit_notes'
         )
 
 

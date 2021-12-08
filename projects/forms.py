@@ -4,6 +4,11 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from accounts.models import AerpawUser
 from .models import Project
 
+JOIN_CHOICES = (
+        ("1", "Project Member"),
+        ("2", "Project Owner"),
+    )
+
 
 class ProjectCreateForm(forms.ModelForm):
     class Meta:
@@ -11,6 +16,7 @@ class ProjectCreateForm(forms.ModelForm):
         fields = [
             'name',
             'description',
+            'is_public'
         ]
 
 
@@ -19,13 +25,22 @@ class ProjectUpdateForm(forms.ModelForm):
         model = Project
         fields = (
             'name',
-            'description'
+            'description',
+            'is_public'
         )
+
+
+class ProjectJoinForm(forms.Form):
+    member_type = forms.ChoiceField(
+        choices=JOIN_CHOICES,
+        label='Request to be a'
+    )
+    message = forms.CharField(widget=forms.Textarea, required=True)
 
 
 class ProjectUpdateMembersForm(forms.ModelForm):
     project_members = forms.ModelMultipleChoiceField(
-        queryset=AerpawUser.objects.all().exclude(username='admin'),
+        queryset=AerpawUser.objects.all().exclude(username='admin').order_by('display_name'),
         widget=FilteredSelectMultiple("Members", is_stacked=False),
         required=False
     )
@@ -56,11 +71,15 @@ class ProjectUpdateMembersForm(forms.ModelForm):
 
 
 class ProjectUpdateOwnersForm(forms.ModelForm):
-    project_owners = forms.ModelMultipleChoiceField(
-        queryset=AerpawUser.objects.all().exclude(username='admin'),
-        widget=FilteredSelectMultiple("Members", is_stacked=False),
-        required=False
-    )
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop('project', None)
+        super(ProjectUpdateOwnersForm, self).__init__(*args, **kwargs)
+        self.pm = Project.objects.filter(uuid=self.project.uuid).values_list('project_members', flat=True)
+        self.fields['project_owners'] = forms.ModelMultipleChoiceField(
+            queryset=AerpawUser.objects.filter(id__in=list(self.pm)).order_by('display_name'),
+            widget=FilteredSelectMultiple("Owners", is_stacked=False),
+            required=False
+        )
 
     class Media:
         extend = False

@@ -21,12 +21,12 @@ from django.utils import timezone
 
 
 class AerpawUserRoleChoice(Enum):  # A subclass of Enum
-    site_admin = 'is Administrator'
-    operator = 'is Operator'
-    project_manager = 'can Create Projects'
-    resource_manager = 'can Manage Resources'
-    user_manager = 'can Manager User Roles'
-    aerpaw_user = 'is AERPAW User'
+    site_admin = 'Administrator'
+    operator = 'Operator'
+    project_manager = 'Principal Investigator (PI)'
+    resource_manager = 'Resource Manager'
+    user_manager = 'User Role Manager'
+    aerpaw_user = 'AERPAW User'
 
     @classmethod
     def choices(cls):
@@ -95,7 +95,7 @@ class AerpawUser(AbstractUser):
 def is_PI(user):
     print(user)
     print(user.groups.all())
-    return user.groups.filter(name='PI').exists()
+    return user.groups.filter(name='project_manager').exists()
 
 
 def is_project_member(user, project_group):

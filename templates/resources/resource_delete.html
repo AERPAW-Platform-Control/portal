@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_resource_manager %}
         <div class="container">
             <div class="post">
                 <h1 class="text-danger">Are you sure you want to delete "{{ resource.name }}"?</h1>
@@ -53,12 +53,13 @@
                     </tr>
                 </table>
             </div>
-            <form method="POST" class="post-form">
+            <form id="delete-resource" method="POST" class="post-form">
                 {% csrf_token %}
-                <input class="btn btn-danger mr-2" type="submit" value="Delete"/>
-                <a href="{% url 'resource_detail' resource_uuid=resource.uuid %}" class="btn btn-secondary">Back</a>
             </form>
-
+            <button class="btn btn-danger mr-2" type="submit" form="delete-resource" value="delete">Delete</button>
+            <button class="btn btn-secondary mr-2" value="cancel">
+                <a href="{% url 'resource_detail' resource_uuid=resource.uuid %}" class="unlink">Cancel</a>
+            </button>
         </div>
     {% else %}
         <div class="container">

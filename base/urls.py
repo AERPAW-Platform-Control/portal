@@ -30,6 +30,7 @@ urlpatterns = [
     path('reservations/', include('reservations.urls')),
     path('resources/', include('resources.urls')),
     path('profile/', include('profiles.urls')),
-    path('cicd/', include('cicd.urls')),
+    # path('cicd/', include('cicd.urls')), # RM_CICD
     path('manage/', include('user_groups.urls')),
+    path('messages/', include('usercomms.urls')),
 ]
