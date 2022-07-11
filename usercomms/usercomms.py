@@ -57,7 +57,11 @@ def portal_mail(subject, body_message, sender, receivers, reference_note='', ref
     if sender == email_sender:
         sender = AerpawUser.objects.filter(is_superuser=True).first()
     email_uuid = uuid4()
-    email_body = 'FROM: ' + str(sender.display_name) + \
+    if sender.display_name == None:
+        name_from = str(sender.oidc_claim_email)
+    else:
+        name_from = str(sender.display_name)
+    email_body = 'FROM: ' + name_from + \
                  '\r\nREQUEST: ' + str(reference_note) + \
                  '\r\n\r\nURL: ' + str(reference_url) + \
                  '\r\n\r\nMESSAGE: ' + body_message
